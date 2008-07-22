@@ -1,9 +1,9 @@
 #seqdb2 makefile
 
-all: makedb dbread
+all: fqdbm dbread
 
-makedb: src/dbmake.cpp
-	g++ -Wall -g src/dbmake.cpp -o makedb
+fqdbm: src/fqdbm.cpp
+	g++ -Wall -g src/fqdbm.cpp -o fqdbm
 
 dbread: dbread.drv.o dbread.lib.o
 	g++ dbread.drv.o dbread.lib.o -o dbread

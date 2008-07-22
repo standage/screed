@@ -11,7 +11,7 @@ struct Node{
 	short nmsiz, dnsiz, acsiz;
 };
 Node * Head;
-unsigned size;
+long long size;
 
 int main(int argc, char *argv[]){
 	Node *Prev, *Curr;
@@ -19,13 +19,13 @@ int main(int argc, char *argv[]){
 	filebuf *pbuf;
 	string dbnam;
 	int BUFSIZE = 256;
-	unsigned i, j, idxpos;
-	short nmsiz, dnsiz, acsiz;
+	int i, j, nmsiz, dnsiz, acsiz;
+	long long idxpos;
 	char nambuf[BUFSIZE], dnabuf[BUFSIZE], accbuf[BUFSIZE];
 	char a;
 	char * delim = new (nothrow) char;
 	char dbnamch[100];
-
+	
 	*delim = '\n';
 	size = 0;
 	Head = new (nothrow) Node;
@@ -46,9 +46,6 @@ int main(int argc, char *argv[]){
 		if(argv[1][i] == '/'){
 			j = 0;
 			continue;
-		}
-		else if(argv[1][i] == '.'){
-			break;
 		}
 		dbnamch[j] = argv[1][i];
 		j++;
@@ -114,13 +111,13 @@ int main(int argc, char *argv[]){
 			cerr << "\n*** UNABLE TO ALLOCATE MORE MEMORY ***\n";
 			exit(1);
 		}
-		for(i=0;i<unsigned(nmsiz)+1;i++){
+		for(i=0;i<(nmsiz+1);i++){
 			Curr->name[i] = nambuf[i];
 		}
-		for(i=0;i<unsigned(dnsiz)+1;i++){
+		for(i=0;i<(dnsiz+1);i++){
 			Curr->dna[i] = dnabuf[i];
 		}
-		for(i=0;i<unsigned(acsiz)+1;i++){
+		for(i=0;i<(acsiz+1);i++){
 			Curr->accu[i] = accbuf[i];
 		}
 		it.get(a);
@@ -138,12 +135,15 @@ int main(int argc, char *argv[]){
 				dbindx << idxpos << '\n';
 				db.write(Curr->name, Curr->nmsiz);
 				db.write(delim, 1);
-				db.write(Curr->dna, Curr->dnsiz);
+				// Empty space for description
 				db.write(delim, 1);
 				db.write(Curr->accu, Curr->acsiz);
 				db.write(delim, 1);
+				db.write(Curr->dna, Curr->dnsiz);
+				db.write(delim, 1);
+				db << '-' << endl;
 				idxpos = idxpos + Curr->nmsiz + Curr->dnsiz
-					+ Curr->acsiz + 3;
+					+ Curr->acsiz + 6;
 				Prev = Curr;
 				Curr = Curr->Next;
 				delete [] Prev->name;
@@ -163,12 +163,15 @@ int main(int argc, char *argv[]){
 		dbindx << idxpos << '\n';
 		db.write(Curr->name, Curr->nmsiz);
 		db.write(delim, 1);
-		db.write(Curr->dna, Curr->dnsiz);
+		// Empty space for description
 		db.write(delim, 1);
 		db.write(Curr->accu, Curr->acsiz);
 		db.write(delim, 1);
+		db.write(Curr->dna, Curr->dnsiz);
+		db.write(delim, 1);
+		db << '-' << endl;
 		idxpos = idxpos + Curr->nmsiz + Curr->dnsiz
-			+ Curr->acsiz + 3;
+			+ Curr->acsiz + 6;
 		Prev = Curr;
 		Curr = Curr->Next;
 		delete [] Prev->name;
