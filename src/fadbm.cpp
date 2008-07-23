@@ -18,7 +18,6 @@ struct Node{
 	unsigned nmsiz, desiz, dnalen;
 };
 
-
 Node * Head;
 long long size;
 
