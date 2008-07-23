@@ -7,19 +7,18 @@ class dbread{
 			unsigned data;
 			Node * Next;
 		};
-		Node * Head;
-		unsigned size, lastquery;
-		unsigned * index;
+		Node *Head;
+
+		long long size, lastquery, dnalines;
+		long long * index;
 		std::fstream idxFile, dbFile;
 
-		char * name, * dna, * accu;
+		char *name, *desc, *accu, **dna;
 
 	public:
 		dbread();
 
 		~dbread();
 
-		std::string query(unsigned=0, int=0);		
-
-
+		std::string query(long long=0, int=0);		
 };

@@ -16,6 +16,7 @@ struct Node{
 	Dna *dnHead;
 	Node *Next;
 	unsigned nmsiz, desiz, dnalen;
+	long long dnalines;
 };
 
 Node * Head;
@@ -83,6 +84,7 @@ int main(int argc, char *argv[]){
 		Curr->dnHead = new (nothrow) Dna;
 		dnPrev = Curr->dnHead;
 		Curr->dnalen = 0;
+		Curr->dnalines = 0;
 
 		//Skips the > in front of the name
 		streamloc = it.tellg();
@@ -119,6 +121,7 @@ int main(int argc, char *argv[]){
 			dnCurr->dnsiz = dnsiz;
 			Curr->dnalen++;
 			dnareads++;
+			(Curr->dnalines)++;
 			
 			it.get(a);
 			if(a == '>'){
@@ -156,7 +159,7 @@ int main(int argc, char *argv[]){
 
 		//Write the data in memory to disk, deleting nodes along the
 		//way
-		if((size/500000 == 1) || (dnareads >= 1500000)){
+		if((size >= 1500000) || (dnareads >= 2000000)){
 			Prev = Head;
 			Curr = Head->Next;
 			while(Curr != NULL){
@@ -169,12 +172,11 @@ int main(int argc, char *argv[]){
 				db.write(delim, 1);
 				//Empty space for accuracy
 				db.write(delim, 1);
-				idxpos = idxpos + Curr->nmsiz + Curr->desiz+3;
+				db << Curr->dnalines << endl;
 				//Write the dna strand data, line by line
 				while(dnCurr != NULL){
 					db.write(dnCurr->strand,
 							dnCurr->dnsiz-1);
-					idxpos = idxpos + dnCurr->dnsiz;
 					db.write(delim, 1);
 					dnPrev = dnCurr;
 					dnCurr = dnCurr->dnNext;
@@ -182,7 +184,7 @@ int main(int argc, char *argv[]){
 					delete dnPrev;
 				}
 				db << '-' << endl;
-				idxpos = it.tellg();
+				idxpos = db.tellp();
 				Prev = Curr;
 				Curr = Curr->Next;
 				delete [] Prev->name;
@@ -210,11 +212,10 @@ int main(int argc, char *argv[]){
 		db.write(delim, 1);
 		// Empty space for accuracy
 		db.write(delim, 1);
-		idxpos = idxpos + Curr->nmsiz + Curr->desiz + 3;
+		db << Curr->dnalines << endl;
 		// Write the dna strand data, line by line
 		while(dnCurr != NULL){
 			db.write(dnCurr->strand, dnCurr->dnsiz-1);
-			idxpos = idxpos + dnCurr->dnsiz;
 			db.write(delim, 1);
 			dnPrev = dnCurr;
 			dnCurr = dnCurr->dnNext;
@@ -222,6 +223,7 @@ int main(int argc, char *argv[]){
 			delete dnPrev;
 		}
 		db << '-' << endl;
+		idxpos = db.tellp();
 		Prev = Curr;
 		Curr = Curr->Next;
 		delete [] Prev->name;

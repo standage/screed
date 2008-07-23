@@ -1,18 +1,18 @@
 #seqdb2 makefile
 
-all: seqdb2 seqdb2_test
+all: fqdbm dbread fadbm
 
-seqdb2: seqdb2.drv.o seqdb2.lib.o
-	g++ seqdb2.drv.o seqdb2.lib.o -o seqdb2
+fqdbm: src/fqdbm.cpp
+	g++ -Wall -g src/fqdbm.cpp -o fqdbm
 
-seqdb2_test: seqdb2.test.o seqdb2.lib.o
-	g++ seqdb2.test.o seqdb2.lib.o -o seqdb2_test
+fadbm: src/fadbm.cpp
+	g++ -Wall -g src/fadbm.cpp -o fadbm
 
-seqdb2.test.o: src/seqdb2.test.cpp src/lib/seqdb2.h
-	g++ -Wall -g -c src/seqdb2.test.cpp
+dbread: dbread.drv.o dbread.lib.o
+	g++ dbread.drv.o dbread.lib.o -o dbread
 
-seqdb2.drv.o: src/seqdb2.drv.cpp src/lib/seqdb2.h
-	g++ -Wall -g -c src/seqdb2.drv.cpp
+dbread.drv.o: src/dbread.drv.cpp src/dbread.h
+	g++ -Wall -g -c src/dbread.drv.cpp
 
-seqdb2.lib.o: src/lib/seqdb2.lib.cpp src/lib/seqdb2.h
-	g++ -Wall -g -c src/lib/seqdb2.lib.cpp
+dbread.lib.o: src/dbread.lib.cpp src/dbread.h
+	g++ -Wall -g -c src/dbread.lib.cpp

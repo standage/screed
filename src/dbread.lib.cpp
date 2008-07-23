@@ -7,14 +7,14 @@
 using namespace std;
 
 dbread::dbread(){
-	dbread::Node * Curr;
-	dbread::Node * Prev;
+	dbread::Node *Curr;
+	dbread::Node *Prev;
 	string command, dblist, idxlist;
 	fstream dir;
 	unsigned fnamelen = 100;
 	char a, dbname[fnamelen], idxname[fnamelen];
 	int lsize = 1000;
-	int i;
+	int i, j;
 	char line[lsize];
 
 	dblist = "dblist.txt";
@@ -57,11 +57,11 @@ dbread::dbread(){
 	}
 	idxFile.close();
 
-	index = new (nothrow) unsigned[size];
+	index = new (nothrow) long long[size];
 
 	Prev = Head;
 	Curr = Head->Next;
-	for(unsigned i=0;i<size;i++){
+	for(long long i=0;i<size;i++){
 		index[i] = Curr->data;
 		Prev = Curr;
 		Curr = Curr->Next;
@@ -69,31 +69,47 @@ dbread::dbread(){
 	}
 
 	dbFile.open(dbname, fstream::in);
-
+	
 	lastquery = 0;
 	dbFile.seekg(index[lastquery]);
 	dbFile.getline(line, lsize);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	name = new (nothrow) char[i];
-	for(int j=0;j<i;j++){
+	for(j=0;j<i;j++){
 		name[j] = line[j];
 	}
-
+	
 	dbFile.getline(line, lsize);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
-	dna = new (nothrow) char[i];
-	for(int j=0;j<i;j++){
-		dna[j] = line[j];
+	desc = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		desc[j] = line[j];
 	}
 
 	dbFile.getline(line, lsize);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	accu = new (nothrow) char[i];
-	for(int j=0;j<i;j++){
+	for(j=0;j<i;j++){
 		accu[j] = line[j];
+	}
+
+	//Get the number of lines of the DNA strands
+	dbFile >> dnalines;
+	dbFile.ignore(1);
+	dna = new (nothrow) char *[dnalines];
+
+	//The lines of DNA can vary, ergo the loop
+	for(i=0;i<dnalines;i++){
+		dbFile.getline(line, lsize);
+		for(j=0;line[j]!='\0';j++){}
+		j++;
+		dna[i] = new (nothrow) char[j];
+		for(int p=0;p<j;p++){
+			dna[i][p] = line[p];
+		}
 	}
 }
 
@@ -102,65 +118,92 @@ dbread::~dbread(){
 	delete Head;
 	delete [] index;
 	delete [] name;
-	delete [] dna;
+	delete [] desc;
 	delete [] accu;
+	for(int i=0;i<dnalines;i++){
+		delete [] dna[i];
+	}
+	delete [] dna;
 }
 
-string dbread::query(unsigned idx, int type){
+string dbread::query(long long idx, int type){
 	int lsize = 1000;
-	int i;
+	int i, j;
 	char line[lsize];
 
 	if(idx == lastquery){
 		switch(type){
-			case 0:
-				return string(name);
 			case 1:
-				return string(dna);
+				return string(name);
 			case 2:
+				return string(desc);
+			case 3:
 				return string(accu);
+			case 4:
+				return string(dna[0]);
 		}
 	}
 
 	delete [] name;
-	delete [] dna;
+	delete [] desc;
 	delete [] accu;
+	for(i=0;i<dnalines;i++){
+		delete [] dna[i];
+	}
+	delete [] dna;
 
 	dbFile.seekg(index[idx]);
 	dbFile.getline(line, lsize);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	name = new (nothrow) char[i];
-	for(int j=0;j<i;j++){
+	for(j=0;j<i;j++){
 		name[j] = line[j];
 	}
 
 	dbFile.getline(line, lsize);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
-	dna = new (nothrow) char[i];
-	for(int j=0;j<i;j++){
-		dna[j] = line[j];
+	desc = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		desc[j] = line[j];
 	}
 
 	dbFile.getline(line, lsize);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	accu = new (nothrow) char[i];
-	for(int j=0;j<i;j++){
+	for(j=0;j<i;j++){
 		accu[j] = line[j];
+	}
+
+	dbFile >> dnalines;
+	dbFile.ignore(1);
+	dna = new (nothrow) char *[dnalines];
+
+	for(i=0;i<dnalines;i++){
+		dbFile.getline(line, lsize);
+		for(j=0;line[j]!='\0';j++){}
+		j++;
+		dna[i] = new (nothrow) char[j];
+		for(int p=0;p<j;p++){
+			dna[i][p] = line[p];
+		}
 	}
 
 	lastquery = idx;
 
-	if(type == 0){
+	if(type == 1){
 		return string(name);
 	}
-	else if(type == 1){
-		return string(dna);
-	}
 	else if(type == 2){
+		return string(desc);
+	}
+	else if(type == 3){
 		return string(accu);
+	}
+	else if(type == 4){
+		return string(dna[0]);
 	}
 
 	//Gets rid of g++ warning of control reaching end of non-void function.

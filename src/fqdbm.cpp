@@ -139,11 +139,11 @@ int main(int argc, char *argv[]){
 				db.write(delim, 1);
 				db.write(Curr->accu, Curr->acsiz);
 				db.write(delim, 1);
+				db << '1' << endl;
 				db.write(Curr->dna, Curr->dnsiz);
 				db.write(delim, 1);
 				db << '-' << endl;
-				idxpos = idxpos + Curr->nmsiz + Curr->dnsiz
-					+ Curr->acsiz + 6;
+				idxpos = db.tellp();
 				Prev = Curr;
 				Curr = Curr->Next;
 				delete [] Prev->name;
@@ -167,11 +167,11 @@ int main(int argc, char *argv[]){
 		db.write(delim, 1);
 		db.write(Curr->accu, Curr->acsiz);
 		db.write(delim, 1);
+		db << '1' << endl;
 		db.write(Curr->dna, Curr->dnsiz);
 		db.write(delim, 1);
 		db << '-' << endl;
-		idxpos = idxpos + Curr->nmsiz + Curr->dnsiz
-			+ Curr->acsiz + 6;
+		idxpos = db.tellp();
 		Prev = Curr;
 		Curr = Curr->Next;
 		delete [] Prev->name;
