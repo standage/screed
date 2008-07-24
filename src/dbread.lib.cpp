@@ -6,44 +6,31 @@
 
 using namespace std;
 
-dbread::dbread(){
+/*----------------------------------------
+ * Constructor
+ * Takes a string file name and opens
+ * the correct .seqdb2 and .idx files.
+ * Also reads the first record into cache
+----------------------------------------*/
+dbread::dbread(string dbname){
 	dbread::Node *Curr;
 	dbread::Node *Prev;
-	string command, dblist, idxlist;
-	fstream dir;
-	unsigned fnamelen = 100;
-	char a, dbname[fnamelen], idxname[fnamelen];
-	int lsize = 1000;
+	string idxname;
 	int i, j;
-	char line[lsize];
+	char a, line[LSIZE];
 
-	dblist = "dblist.txt";
-	command = "ls *.seqdb2 > ";
-	command.append(dblist);
-	system(command.c_str());
-
-	idxlist = "idxlist.txt";
-	command = "ls *.indx > ";
-	command.append(idxlist);
-	system(command.c_str());
-
-	dir.open(dblist.c_str(), fstream::in);
-	dir.getline(dbname, fnamelen);
-	dir.close();
-	dir.open(idxlist.c_str(), fstream::in);
-	dir.getline(idxname, fnamelen);
-	dir.close();
-
-	command = "rm ";
-	command.append(dblist);
-	command.append(" ");
-	command.append(idxlist);
-	system(command.c_str());
+	idxname = dbname + ".idx";
 
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
 	Prev = Head;
-	idxFile.open(idxname, fstream::in);
+	idxFile.open(idxname.c_str(), fstream::in);
+	if(!idxFile.is_open()){
+		cerr << "ERROR: UNABLE TO OPEN INDEX FILE. BAD FILENAME\n";
+		exit(1);
+	}
+	//Copy the index file completly into memory so results can be retrieved
+	//faster
 	for(size=0;!idxFile.eof();size++){
 		Curr = new (nothrow) Node;
 		Prev->Next = Curr;
@@ -66,13 +53,19 @@ dbread::dbread(){
 		Prev = Curr;
 		Curr = Curr->Next;
 		delete Prev;
+	}// End copying of index file
+
+	dbFile.open(dbname.c_str(), fstream::in);
+	if(!dbFile.is_open()){
+		cerr << "ERROR: UNABLE TO OPEN DATABASE FILE. BAD FILENAME\n";
+		exit(1);
 	}
 
-	dbFile.open(dbname, fstream::in);
-	
+	//Setup the caching of the 0th query. Caching ensures faster results
+	//when the user is querying the same record again and again
 	lastquery = 0;
 	dbFile.seekg(index[lastquery]);
-	dbFile.getline(line, lsize);
+	dbFile.getline(line, LSIZE);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	name = new (nothrow) char[i];
@@ -80,7 +73,7 @@ dbread::dbread(){
 		name[j] = line[j];
 	}
 	
-	dbFile.getline(line, lsize);
+	dbFile.getline(line, LSIZE);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	desc = new (nothrow) char[i];
@@ -88,7 +81,7 @@ dbread::dbread(){
 		desc[j] = line[j];
 	}
 
-	dbFile.getline(line, lsize);
+	dbFile.getline(line, LSIZE);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	accu = new (nothrow) char[i];
@@ -96,23 +89,20 @@ dbread::dbread(){
 		accu[j] = line[j];
 	}
 
-	//Get the number of lines of the DNA strands
-	dbFile >> dnalines;
-	dbFile.ignore(1);
-	dna = new (nothrow) char *[dnalines];
-
-	//The lines of DNA can vary, ergo the loop
-	for(i=0;i<dnalines;i++){
-		dbFile.getline(line, lsize);
-		for(j=0;line[j]!='\0';j++){}
-		j++;
-		dna[i] = new (nothrow) char[j];
-		for(int p=0;p<j;p++){
-			dna[i][p] = line[p];
-		}
+	dbFile.getline(line, LSIZE);
+	for(i=0;line[i]!='\0';i++){}
+	i++;
+	dna = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		dna[j] = line[j];
 	}
 }
 
+/*--------------------------------------
+ * Destructor
+ * Deletes the Head node and all the
+ * character arrays stored in the cache
+--------------------------------------*/
 dbread::~dbread(){
 	dbFile.close();
 	delete Head;
@@ -120,17 +110,24 @@ dbread::~dbread(){
 	delete [] name;
 	delete [] desc;
 	delete [] accu;
-	for(int i=0;i<dnalines;i++){
-		delete [] dna[i];
-	}
 	delete [] dna;
 }
 
+/*----------------------------------------
+ * query
+ * Accepts a long long int as index and
+ * a long integer representing the type
+ * of data to lookup in the record. If
+ * the current query matches the previous
+ * one, the data in the cache is returned.
+ * If not, new data is read in first
+----------------------------------------*/
 string dbread::query(long long idx, int type){
-	int lsize = 1000;
 	int i, j;
-	char line[lsize];
+	char line[LSIZE];
 
+	//If the user queried the same index they did last time, simply return
+	//the cached record
 	if(idx == lastquery){
 		switch(type){
 			case 1:
@@ -140,20 +137,28 @@ string dbread::query(long long idx, int type){
 			case 3:
 				return string(accu);
 			case 4:
-				return string(dna[0]);
+				return string(dna);
+			default:
+				cerr << "ERROR: INVALID QUERY TYPE: " << type
+					<< ". ENTER A QUERY 1-4\n";
+				return "0";
 		}
+	}
+	else if((idx > size) || (idx < 0)){
+		cerr << "ERROR: QUERIED SIZE OF: " << idx << " OUTSIDE OF "<<
+			"RANGE OF DATABASE: 0 - " << size << endl;
+		return "0";
+
 	}
 
 	delete [] name;
 	delete [] desc;
 	delete [] accu;
-	for(i=0;i<dnalines;i++){
-		delete [] dna[i];
-	}
 	delete [] dna;
 
+	//Rebuild the cache to hold a new record from the database
 	dbFile.seekg(index[idx]);
-	dbFile.getline(line, lsize);
+	dbFile.getline(line, LSIZE);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	name = new (nothrow) char[i];
@@ -161,7 +166,7 @@ string dbread::query(long long idx, int type){
 		name[j] = line[j];
 	}
 
-	dbFile.getline(line, lsize);
+	dbFile.getline(line, LSIZE);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	desc = new (nothrow) char[i];
@@ -169,7 +174,7 @@ string dbread::query(long long idx, int type){
 		desc[j] = line[j];
 	}
 
-	dbFile.getline(line, lsize);
+	dbFile.getline(line, LSIZE);
 	for(i=0;line[i]!='\0';i++){}
 	i++;
 	accu = new (nothrow) char[i];
@@ -177,35 +182,30 @@ string dbread::query(long long idx, int type){
 		accu[j] = line[j];
 	}
 
-	dbFile >> dnalines;
-	dbFile.ignore(1);
-	dna = new (nothrow) char *[dnalines];
-
-	for(i=0;i<dnalines;i++){
-		dbFile.getline(line, lsize);
-		for(j=0;line[j]!='\0';j++){}
-		j++;
-		dna[i] = new (nothrow) char[j];
-		for(int p=0;p<j;p++){
-			dna[i][p] = line[p];
-		}
+	dbFile.getline(line, LSIZE);
+	for(i=0;line[i]!='\0';i++){}
+	i++;
+	dna = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		dna[j] = line[j];
 	}
 
 	lastquery = idx;
 
-	if(type == 1){
-		return string(name);
+	switch(type){
+		case 1:
+			return string(name);
+		case 2:
+			return string(desc);
+		case 3:
+			return string(accu);
+		case 4:
+			return string(dna);
+		default:
+			cerr << "ERROR: INVALID QUERY TYPE: " << type
+				<< ". ENTER A QUERY 1-4\n";
+			return "0";
 	}
-	else if(type == 2){
-		return string(desc);
-	}
-	else if(type == 3){
-		return string(accu);
-	}
-	else if(type == 4){
-		return string(dna[0]);
-	}
-
 	//Gets rid of g++ warning of control reaching end of non-void function.
 	//Execution should never reach this line
 	string k;

@@ -4,8 +4,8 @@
 
 using namespace std;
 
-int main(){
-	dbread db;
+int main(int argc, char *argv[]){
+	dbread db(argv[1]);
 	long long index, type;
 	string result;
 

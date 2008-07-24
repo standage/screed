@@ -1,6 +1,8 @@
 #include <string>
 #include <fstream>
 
+const int LSIZE = 1000;
+
 class dbread{
 	private:
 		struct Node{
@@ -13,12 +15,12 @@ class dbread{
 		long long * index;
 		std::fstream idxFile, dbFile;
 
-		char *name, *desc, *accu, **dna;
+		char *name, *desc, *accu, *dna;
 
 	public:
-		dbread();
+		dbread(std::string);
 
 		~dbread();
 
-		std::string query(long long=0, int=0);		
+		std::string query(long long=0, int=1);		
 };
