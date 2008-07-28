@@ -16,6 +16,11 @@ int main(int argc, char *argv[]){
 	long long filepos, dnsiz;
 	int nmsiz, desiz;
 
+
+	if(!db.is_open()){
+		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
+		exit(1);
+	}
 	theFile.open(argv[1], fstream::in);
 	while(!theFile.eof()){
 		nmsiz = 0; // Initialize the sizes of the relevant c-strings to

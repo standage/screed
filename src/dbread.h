@@ -14,6 +14,7 @@ class dbread{
 		long long size, lastquery, dnalines;
 		long long * index;
 		std::fstream idxFile, dbFile;
+		bool open, failbit;
 
 		char *name, *desc, *accu, *dna;
 
@@ -22,5 +23,10 @@ class dbread{
 
 		~dbread();
 
-		std::string query(long long=0, int=1);		
+		std::string query(long long=0, int=1);
+
+		bool is_open() const{return open;}
+		bool fail() const{return failbit;}
+
+		void clear(){failbit = false;}
 };

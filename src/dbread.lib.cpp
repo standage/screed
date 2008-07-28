@@ -1,5 +1,4 @@
 #include "dbread.h"
-#include <iostream>
 #include <fstream>
 #include <new>
 #include <string>
@@ -19,6 +18,8 @@ dbread::dbread(string dbname){
 	int i, j;
 	char a, line[LSIZE];
 
+	open = true;
+	failbit = false;
 	idxname = dbname + ".idx";
 
 	Head = new (nothrow) Node;
@@ -26,9 +27,8 @@ dbread::dbread(string dbname){
 	Prev = Head;
 	idxFile.open(idxname.c_str(), fstream::in);
 	if(!idxFile.is_open()){
-		cerr << "ERROR: UNABLE TO OPEN INDEX FILE. BAD FILENAME\n" <<
-			idxname << endl;
-		exit(0);
+		open = false;
+		return;
 	}
 	//Copy the index file completly into memory so results can be retrieved
 	//faster
@@ -58,8 +58,8 @@ dbread::dbread(string dbname){
 
 	dbFile.open(dbname.c_str(), fstream::in);
 	if(!dbFile.is_open()){
-		cerr << "ERROR: UNABLE TO OPEN DATABASE FILE. BAD FILENAME\n";
-		exit(1);
+		open = false;
+		return;
 	}
 
 	//Setup the caching of the 0th query. Caching ensures faster results
@@ -127,6 +127,10 @@ string dbread::query(long long idx, int type){
 	int i, j;
 	char line[LSIZE];
 
+	if(open == false){
+		return "";
+	}
+
 	//If the user queried the same index they did last time, simply return
 	//the cached record
 	if(idx == lastquery){
@@ -140,16 +144,13 @@ string dbread::query(long long idx, int type){
 			case 4:
 				return string(dna);
 			default:
-				cerr << "ERROR: INVALID QUERY TYPE: " << type
-					<< ". ENTER A QUERY 1-4\n";
-				return "0";
+				failbit = true;
+				return "";
 		}
 	}
 	else if((idx > size) || (idx < 0)){
-		cerr << "ERROR: QUERIED SIZE OF: " << idx << " OUTSIDE OF "<<
-			"RANGE OF DATABASE: 0 - " << size << endl;
-		return "0";
-
+		failbit = true;
+		return "";
 	}
 
 	delete [] name;
@@ -203,9 +204,8 @@ string dbread::query(long long idx, int type){
 		case 4:
 			return string(dna);
 		default:
-			cerr << "ERROR: INVALID QUERY TYPE: " << type
-				<< ". ENTER A QUERY 1-4\n";
-			return "0";
+			failbit = true;
+			return "";
 	}
 	//Gets rid of g++ warning of control reaching end of non-void function.
 	//Execution should never reach this line
