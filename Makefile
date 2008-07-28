@@ -2,7 +2,7 @@
 
 DOB = g++ -Wall -g -c
 
-all: fqdbm dbread fadbm fadb_test fqdb_test
+all: fqdbm dbread fadbm fadb_test fqdb_test shelltest
 
 fqdbm: src/fqdbm.drv.o src/dbwrite.lib.o
 	g++ src/fqdbm.drv.o src/dbwrite.lib.o -o fqdbm
@@ -12,6 +12,9 @@ fadbm: src/dbwrite.lib.o src/fadbm.drv.o
 
 dbread: src/dbread.drv.o src/dbread.lib.o
 	g++ src/dbread.drv.o src/dbread.lib.o -o dbread
+
+shelltest: src/shelltest.cpp src/dbread.lib.o
+	g++ src/shelltest.cpp src/dbread.lib.o -o shelltest
 
 fadb_test: src/fadb_test.o src/dbread.lib.o src/dbwrite.lib.o
 	g++ src/fadb_test.o src/dbread.lib.o src/dbwrite.lib.o -o fadb_test
@@ -44,3 +47,6 @@ test:
 	./fadb_test
 	./fqdb_test
 	rm tests/*.seqdb2*
+
+purge:
+	rm dbread *test *dbm src/*.o tests/*seqdb2*
