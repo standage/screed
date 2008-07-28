@@ -27,7 +27,7 @@ class dbread{
 
 		void getRecord(long long=0);
 
-		std::string extractType(unsigned=1);
+		std::string getType(unsigned=1);
 
 		bool is_open() const{return open;}
 		bool fail() const{return failbit;}

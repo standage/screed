@@ -62,21 +62,25 @@ int main(){
 	filename.append(".seqdb2");
 	dbread thedb(filename);
 
-	assert(thedb.query(0, 1) == "HWI-EAS_4_PE-FC20GCB:1:1:62:922/1");
-	assert(thedb.query(0, 3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD");
-	assert(thedb.query(0, 4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	thedb.getRecord(0);
+	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:62:922/1");
+	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD");
+	assert(thedb.getType(4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
-	assert(thedb.query(12, 1) == "HWI-EAS_4_PE-FC20GCB:1:1:63:978/1");
-	assert(thedb.query(12, 3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAA");
-	assert(thedb.query(12, 4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	thedb.getRecord(12);
+	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:63:978/1");
+	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAA");
+	assert(thedb.getType(4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
-	assert(thedb.query(47, 1) == "HWI-EAS_4_PE-FC20GCB:1:1:899:619/1");
-	assert(thedb.query(47, 3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA<?;>>?8");
-	assert(thedb.query(47, 4) == "TTCAAGATTCGACCCAATACCATTTTAACCAGGAGG");
+	thedb.getRecord(47);
+	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:899:619/1");
+	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA<?;>>?8");
+	assert(thedb.getType(4) == "TTCAAGATTCGACCCAATACCATTTTAACCAGGAGG");
 
-	assert(thedb.query(48, 1) == "HWI-EAS_4_PE-FC20GCB:1:1:57:519/1");
-	assert(thedb.query(48, 3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	assert(thedb.query(48, 4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	thedb.getRecord(48);
+	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:57:519/1");
+	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	assert(thedb.getType(4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	return 0;
 }

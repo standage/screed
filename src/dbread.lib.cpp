@@ -21,6 +21,7 @@ dbread::dbread(string dbname){
 	open = true;
 	failbit = false;
 	idxname = dbname + ".idx";
+	lastquery = 1;
 
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
@@ -38,10 +39,11 @@ dbread::dbread(string dbname){
 		Curr->Next = NULL;
 		Prev = Curr;
 		idxFile >> Curr->data;
-		idxFile >> a;
+		idxFile.peek();
+		/*idxFile >> a;
 		if(!idxFile.eof()){
 			idxFile.putback(a);
-		}
+		}*/
 	}
 	idxFile.close();
 
@@ -62,41 +64,13 @@ dbread::dbread(string dbname){
 		return;
 	}
 
+	name = new (nothrow) char[2];
+	accu = new (nothrow) char[2];
+	desc = new (nothrow) char[2];
+	dna = new (nothrow) char[2];
 	//Setup the caching of the 0th query. Caching ensures faster results
 	//when the user is querying the same record again and again
-	lastquery = 0;
-	dbFile.seekg(index[lastquery]);
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	name = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		name[j] = line[j];
-	}
-	
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	desc = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		desc[j] = line[j];
-	}
-
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	accu = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		accu[j] = line[j];
-	}
-
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	dna = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		dna[j] = line[j];
-	}
+	getRecord(0);
 }
 
 /*--------------------------------------
@@ -235,6 +209,11 @@ void dbread::getRecord(long long idx){
 	char line[LSIZE];
 	int i, j;
 
+	delete [] name;
+	delete [] desc;
+	delete [] accu;
+	delete [] dna;
+
 	//Write the new records for the database into the cache
 	dbFile.seekg(index[idx]);
 	dbFile.getline(line, LSIZE);
@@ -268,16 +247,16 @@ void dbread::getRecord(long long idx){
 	for(j=0;j<i;j++){
 		dna[j] = line[j];
 	}
-
+	
 	lastquery = idx;
 }
 
 /*------------------------------------------
- * extractType
+ * getType
  * Returns referenced cached data. Mode is:
  * 1:Name, 2:description, 3:accuracy, 4:dna
 -------------------------------------------*/
-std::string dbread::extractType(unsigned type){
+std::string dbread::getType(unsigned type){
 	switch(type){
 		case 1:
 			return string(name);

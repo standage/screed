@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
 			cout << endl;
 			break;
 		}
-		cout << endl << db.extractType(type) << endl;
+		cout << endl << db.getType(type) << endl;
 		if(db.fail() == true){
 			cerr << "ERROR: BAD TYPE\n";
 			db.clear();
