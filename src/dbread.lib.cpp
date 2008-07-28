@@ -26,8 +26,9 @@ dbread::dbread(string dbname){
 	Prev = Head;
 	idxFile.open(idxname.c_str(), fstream::in);
 	if(!idxFile.is_open()){
-		cerr << "ERROR: UNABLE TO OPEN INDEX FILE. BAD FILENAME\n";
-		exit(1);
+		cerr << "ERROR: UNABLE TO OPEN INDEX FILE. BAD FILENAME\n" <<
+			idxname << endl;
+		exit(0);
 	}
 	//Copy the index file completly into memory so results can be retrieved
 	//faster

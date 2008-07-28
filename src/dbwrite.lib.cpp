@@ -13,12 +13,16 @@ using namespace std;
  * directory as the filename passed in using the
  * dbFile and idxFile file handles
 -------------------------------------------------*/
-dbwrite::dbwrite(char f[]){
-	string fname(f);
+dbwrite::dbwrite(string fname){
+	open = true;
 	fname.append(".seqdb2");
 	dbFile.open(fname.c_str(), fstream::out);
 	fname.append(".idx");
 	idxFile.open(fname.c_str(), fstream::out);
+
+	if((!dbFile.is_open()) || (!idxFile.is_open())){
+			open = false;
+	}
 }
 
 /*-----------------------------------------------
@@ -36,8 +40,13 @@ dbwrite::~dbwrite(){
  * attributes of the database and writes a single
  * record with them
 -----------------------------------------------*/
-void dbwrite::addrecord(char name[], char desc[], char accu[], char dna[],
+bool dbwrite::addrecord(char name[], char desc[], char accu[], char dna[],
 		int nmsiz, int desiz, int acsiz, long long dnsiz){
+
+	if(open == false){ // One of the database files didn't open
+		return false;
+
+	}
 	
 	idxFile << dbFile.tellp() << endl;	
 
@@ -50,4 +59,15 @@ void dbwrite::addrecord(char name[], char desc[], char accu[], char dna[],
 	dbFile.write(dna, dnsiz-1);
 	dbFile << endl;
 	dbFile << '-' << endl;
+
+	return true;
+}
+
+/*------------------------------------------
+ * Name: close
+ * Explicitly closes the file handles
+------------------------------------------*/
+void dbwrite::close(){
+	dbFile.close();
+	idxFile.close();
 }

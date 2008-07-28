@@ -1,6 +1,8 @@
 #seqdb2 makefile
 
-all: fqdbm dbread fadbm
+DOB = g++ -Wall -g -c
+
+all: fqdbm dbread fadbm fadb_test fqdb_test
 
 fqdbm: src/fqdbm.drv.o src/dbwrite.lib.o
 	g++ src/fqdbm.drv.o src/dbwrite.lib.o -o fqdbm
@@ -8,20 +10,37 @@ fqdbm: src/fqdbm.drv.o src/dbwrite.lib.o
 fadbm: src/dbwrite.lib.o src/fadbm.drv.o
 	g++ src/dbwrite.lib.o src/fadbm.drv.o -o fadbm
 
-dbread: dbread.drv.o dbread.lib.o
-	g++ dbread.drv.o dbread.lib.o -o dbread
+dbread: src/dbread.drv.o src/dbread.lib.o
+	g++ src/dbread.drv.o src/dbread.lib.o -o dbread
+
+fadb_test: src/fadb_test.o src/dbread.lib.o src/dbwrite.lib.o
+	g++ src/fadb_test.o src/dbread.lib.o src/dbwrite.lib.o -o fadb_test
+
+fqdb_test: src/fqdb_test.o src/dbread.lib.o src/dbwrite.lib.o
+	g++ src/fqdb_test.o src/dbread.lib.o src/dbwrite.lib.o -o fqdb_test
+
+fadb_test.o: src/fadb_test.cpp src/dbread.h src/dbwrite.h
+	${DOB} src/fadb_test.cpp
+
+fqdb_test.o: src/fqdb_test.cpp src/dbread.h src/dbwrite.h
+	${DOB} src/fqdb_test.cpp
 
 fqdbm.drv.o: src/fqdmb.drv.cpp src/dbwrite.h
-	g++ -Wall -g -c src/fqdbm.drv.cpp
+	${DOB} src/fqdbm.drv.cpp
 
 fadbm.drv.o: src/fadbm.drv.cpp src/dbwrite.h
-	g++ -Wall -g -c src/fadbm.drv.cpp
+	${DOB} src/fadbm.drv.cpp
 
 dbwrite.lib.o: src/dbwrite.lib.cpp src/dbwrite.h
-	g++ -Wall -g -c src/dbwrite.lib.cpp
+	${DOB} src/dbwrite.lib.cpp
 
 dbread.drv.o: src/dbread.drv.cpp src/dbread.h
-	g++ -Wall -g -c src/dbread.drv.cpp
+	${DOB} src/dbread.drv.cpp
 
 dbread.lib.o: src/dbread.lib.cpp src/dbread.h
-	g++ -Wall -g -c src/dbread.lib.cpp
+	${DOB} src/dbread.lib.cpp
+
+test:
+	./fadb_test
+	./fqdb_test
+	rm tests/*.seqdb2*
