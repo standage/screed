@@ -212,3 +212,84 @@ string dbread::query(long long idx, int type){
 	string k;
 	return k;
 }
+
+/*-------------------------------------------------
+ * getRecord
+ * Loads the record indexed by the long long
+ * variable 'index' into memory from the database
+-------------------------------------------------*/
+void dbread::getRecord(long long idx){
+
+	if(open == false){
+		failbit = true;
+		return;
+	}
+	if((idx > size) || (idx < 0)){
+		failbit = true;
+		return;
+	}
+	else if(idx == lastquery){
+		return;
+	}
+
+	char line[LSIZE];
+	int i, j;
+
+	//Write the new records for the database into the cache
+	dbFile.seekg(index[idx]);
+	dbFile.getline(line, LSIZE);
+	for(i=0;line[i]!='\0';i++){}
+	i++;
+	name = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		name[j] = line[j];
+	}
+
+	dbFile.getline(line, LSIZE);
+	for(i=0;line[i]!='\0';i++){}
+	i++;
+	desc = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		desc[j] = line[j];
+	}
+
+	dbFile.getline(line, LSIZE);
+	for(i=0;line[i]!='\0';i++){}
+	i++;
+	accu = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		accu[j] = line[j];
+	}
+
+	dbFile.getline(line, LSIZE);
+	for(i=0;line[i]!='\0';i++){}
+	i++;
+	dna = new (nothrow) char[i];
+	for(j=0;j<i;j++){
+		dna[j] = line[j];
+	}
+
+	lastquery = idx;
+}
+
+/*------------------------------------------
+ * extractType
+ * Returns referenced cached data. Mode is:
+ * 1:Name, 2:description, 3:accuracy, 4:dna
+-------------------------------------------*/
+std::string dbread::extractType(unsigned type){
+	switch(type){
+		case 1:
+			return string(name);
+		case 2:
+			return string(desc);
+		case 3:
+			return string(accu);
+		case 4:
+			return string(dna);
+	}
+
+	//If execution gets to here, the user typed an invalid type
+	failbit = true;
+	return "";
+}

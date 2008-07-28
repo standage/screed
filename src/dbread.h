@@ -25,6 +25,10 @@ class dbread{
 
 		std::string query(long long=0, int=1);
 
+		void getRecord(long long=0);
+
+		std::string extractType(unsigned=1);
+
 		bool is_open() const{return open;}
 		bool fail() const{return failbit;}
 
