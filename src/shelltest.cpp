@@ -14,11 +14,8 @@ int main(int argc, char *argv[]){
 	index = atoi(argv[2]);
 	type = atoi(argv[3]);
 
-	cout << index << endl;
-	cout << type << endl;
-	cout << testcase << endl;
-
-	assert(db.query(index, type) == testcase);
+	db.getRecord(index);
+	assert(db.getType(type) == testcase);
 
 	return 0;
 }
