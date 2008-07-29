@@ -15,7 +15,6 @@ class dbread{
 		long long * index;
 		std::fstream idxFile, dbFile;
 		bool open, failbit;
-
 	public:
 		char *name, *desc, *accu, *dna;
 
@@ -25,7 +24,7 @@ class dbread{
 
 		void getRecord(long long=0);
 
-		char* getType(unsigned=1);
+		char* getType(unsigned=1) const;
 
 		bool is_open() const{return open;}
 		bool fail() const{return failbit;}

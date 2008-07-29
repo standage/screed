@@ -157,7 +157,7 @@ void dbread::getRecord(long long idx){
  * Returns referenced cached data. Mode is:
  * 1:Name, 2:description, 3:accuracy, 4:dna
 -------------------------------------------*/
-char* dbread::getType(unsigned type){
+char* dbread::getType(unsigned type) const{
 	switch(type){
 		case 1:
 			return name;
