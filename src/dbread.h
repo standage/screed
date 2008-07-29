@@ -23,8 +23,6 @@ class dbread{
 
 		~dbread();
 
-		std::string query(long long=0, int=1);
-
 		void getRecord(long long=0);
 
 		std::string getType(unsigned=1);
