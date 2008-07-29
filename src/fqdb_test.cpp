@@ -63,24 +63,36 @@ int main(){
 	dbread thedb(filename);
 
 	thedb.getRecord(0);
-	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:62:922/1");
-	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD");
-	assert(thedb.getType(4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	assert(string(thedb.getType(1)) ==
+			"HWI-EAS_4_PE-FC20GCB:1:1:62:922/1");
+	assert(string(thedb.getType(3)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD");
+	assert(string(thedb.getType(4)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	thedb.getRecord(12);
-	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:63:978/1");
-	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAA");
-	assert(thedb.getType(4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	assert(string(thedb.getType(1)) ==
+			"HWI-EAS_4_PE-FC20GCB:1:1:63:978/1");
+	assert(string(thedb.getType(3)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAA");
+	assert(string(thedb.getType(4)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	thedb.getRecord(47);
-	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:899:619/1");
-	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA<?;>>?8");
-	assert(thedb.getType(4) == "TTCAAGATTCGACCCAATACCATTTTAACCAGGAGG");
+	assert(string(thedb.getType(1)) ==
+			"HWI-EAS_4_PE-FC20GCB:1:1:899:619/1");
+	assert(string(thedb.getType(3)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAA<?;>>?8");
+	assert(string(thedb.getType(4)) ==
+			"TTCAAGATTCGACCCAATACCATTTTAACCAGGAGG");
 
 	thedb.getRecord(48);
-	assert(thedb.getType(1) == "HWI-EAS_4_PE-FC20GCB:1:1:57:519/1");
-	assert(thedb.getType(3) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	assert(thedb.getType(4) == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	assert(string(thedb.getType(1)) ==
+			"HWI-EAS_4_PE-FC20GCB:1:1:57:519/1");
+	assert(string(thedb.getType(3)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+	assert(string(thedb.getType(4)) ==
+			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	return 0;
 }

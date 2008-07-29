@@ -1,9 +1,9 @@
 cdef extern from "dbread.h":
-#    ctypedef char * (*getType)(unsigned)
+    ctypedef char * (*getType)(unsigned)
     ctypedef void (*getRecord)(long long)
     ctypedef void (*clear)()
     ctypedef struct c_dbread "dbread":
-#        getType getType
+        getType getType
         getRecord getRecord
         clear clear
 
@@ -23,8 +23,8 @@ cdef class dbread:
         self.thisptr.getRecord(idx)
         return
     
-#    def getType(self, type):
-#        return self.thisptr.getType(type)
+    def getType(self, type):
+        return self.thisptr.getType(type)
 
     def clear(self):
         self.thisptr.clear()

@@ -16,16 +16,16 @@ class dbread{
 		std::fstream idxFile, dbFile;
 		bool open, failbit;
 
+	public:
 		char *name, *desc, *accu, *dna;
 
-	public:
 		dbread(std::string);
 
 		~dbread();
 
 		void getRecord(long long=0);
 
-		std::string getType(unsigned=1);
+		char* getType(unsigned=1);
 
 		bool is_open() const{return open;}
 		bool fail() const{return failbit;}

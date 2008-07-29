@@ -157,19 +157,19 @@ void dbread::getRecord(long long idx){
  * Returns referenced cached data. Mode is:
  * 1:Name, 2:description, 3:accuracy, 4:dna
 -------------------------------------------*/
-std::string dbread::getType(unsigned type){
+char* dbread::getType(unsigned type){
 	switch(type){
 		case 1:
-			return string(name);
+			return name;
 		case 2:
-			return string(desc);
+			return desc;
 		case 3:
-			return string(accu);
+			return accu;
 		case 4:
-			return string(dna);
+			return dna;
 	}
 
 	//If execution gets to here, the user typed an invalid type
-	failbit = true;
-	return "";
+	//failbit = true;
+	//return "";
 }
