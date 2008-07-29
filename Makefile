@@ -46,7 +46,7 @@ dbread.lib.o: src/dbread.lib.cpp src/dbread.h
 test:
 	./fadb_test
 	./fqdb_test
-	rm tests/*.seqdb2*
+	rm -f tests/*.seqdb2*
 
 purge:
-	rm dbread *test *dbm src/*.o tests/*seqdb2*
+	rm -f dbread *test *dbm src/*.o tests/*seqdb2*
