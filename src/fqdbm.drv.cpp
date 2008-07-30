@@ -45,8 +45,11 @@ int main(int argc, char *argv[]){
 		acsiz = i;
 
 		endck = theFile.peek();
-
-		db.addrecord(name, desc, accu, dna, nmsiz, 1, acsiz, dnsiz);
+		db.writeFirst();
+		db.writeLine(name, nmsiz);
+		db.writeLine(accu, acsiz);
+		db.writeLine(dna, dnsiz);
+		db.writeDelim();
 	}
 
 	cout << "Database saved in " << argv[1] << ".seqdb2\n";

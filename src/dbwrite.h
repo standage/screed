@@ -2,6 +2,7 @@
 #include <string>
 
 const unsigned LINESIZE = 1000;
+const char delim = '-';
 
 class dbwrite{
 	private:
@@ -14,8 +15,11 @@ class dbwrite{
 
 		~dbwrite();
 
-		bool addrecord(char[], char[], char[], char[], int, int,
-				int, long long);
+		bool writeFirst();
+
+		bool writeLine(char[], unsigned);
+
+		bool writeDelim();
 
 		bool is_open() const {return open;}
 

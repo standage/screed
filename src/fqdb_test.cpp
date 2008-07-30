@@ -13,7 +13,7 @@ int main(){
 	string filename = "tests/test.fastq";
 	dbwrite db(filename);
 	unsigned i, j;
-	char endck, desc[] = "";
+	char endck;
 	char name[LINESIZE], dna[LINESIZE], accu[LINESIZE];
 	long long filepos, dnsiz;
 	int nmsiz, acsiz;
@@ -50,7 +50,11 @@ int main(){
 
 		endck = theFile.peek();
 
-		db.addrecord(name, desc, accu, dna, nmsiz, 1, acsiz, dnsiz);
+		db.writeFirst();
+		db.writeLine(name, nmsiz);
+		db.writeLine(accu, acsiz);
+		db.writeLine(dna, dnsiz);
+		db.writeDelim();
 	}
 
 	//Close the open file handles
@@ -63,35 +67,35 @@ int main(){
 	dbread thedb(filename);
 
 	thedb.getRecord(0);
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(0)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:62:922/1");
-	assert(string(thedb.getType(3)) ==
+	assert(string(thedb.getType(1)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD");
-	assert(string(thedb.getType(4)) ==
+	assert(string(thedb.getType(2)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	thedb.getRecord(12);
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(0)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:63:978/1");
-	assert(string(thedb.getType(3)) ==
+	assert(string(thedb.getType(1)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAA");
-	assert(string(thedb.getType(4)) ==
+	assert(string(thedb.getType(2)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	thedb.getRecord(47);
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(0)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:899:619/1");
-	assert(string(thedb.getType(3)) ==
+	assert(string(thedb.getType(1)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAA<?;>>?8");
-	assert(string(thedb.getType(4)) ==
+	assert(string(thedb.getType(2)) ==
 			"TTCAAGATTCGACCCAATACCATTTTAACCAGGAGG");
 
 	thedb.getRecord(48);
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(0)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:57:519/1");
-	assert(string(thedb.getType(3)) ==
+	assert(string(thedb.getType(1)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	assert(string(thedb.getType(4)) ==
+	assert(string(thedb.getType(2)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	return 0;

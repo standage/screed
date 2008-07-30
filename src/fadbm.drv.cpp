@@ -10,12 +10,10 @@ int main(int argc, char *argv[]){
 	dbwrite db(argv[1]);
 	string dna;
 	unsigned i, j;
-	char accu[] = "";
 	char line[LINESIZE], endck;
 	char name[LINESIZE], desc[LINESIZE];
 	long long filepos, dnsiz;
 	int nmsiz, desiz;
-
 
 	if(!db.is_open()){
 		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
@@ -57,8 +55,11 @@ int main(int argc, char *argv[]){
 		}
 		chdna[i] = '\0';
 
-		db.addrecord(name, desc, accu, chdna, nmsiz, desiz, 1,
-				dnsiz);
+		db.writeFirst();
+		db.writeLine(name, nmsiz);
+		db.writeLine(desc, desiz);
+		db.writeLine(chdna, dnsiz);
+		db.writeDelim();
 	}
 	cout << "Database saved in " << argv[1] << ".seqdb2\n";
 	cout << "Index saved in " << argv[1] << ".seqdb2.idx\n";

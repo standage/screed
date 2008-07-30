@@ -16,7 +16,8 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 	while(1){
-		cout << "Enter an index location to retrieve: ";
+		cout << "Enter an index location to retrieve (0-" <<
+			(db.getSize()-1) << "): ";
 		cin >> index;
 		if(cin.eof()){
 			cout << endl;
@@ -28,13 +29,14 @@ int main(int argc, char *argv[]){
 			db.clear();
 			continue;
 		}
-		cout << "Enter a type, 1-4, to retrieve: ";
+		cout << "Enter a type, 0-" << (db.getTypesize()-1) <<
+			" , to retrieve: ";
 		cin >> type;
 		if(cin.eof()){
 			cout << endl;
 			break;
 		}
-		cout << endl << db.getType(type) << endl;
+		cout << db.getType(type) << endl;
 		if(db.fail() == true){
 			cerr << "ERROR: BAD TYPE\n";
 			db.clear();
