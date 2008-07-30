@@ -29,5 +29,7 @@ class dbread{
 		bool is_open() const{return open;}
 		bool fail() const{return failbit;}
 
-		void clear(){failbit = false;}
+		void clear();
+
+		long long getSize() const{return size;}
 };

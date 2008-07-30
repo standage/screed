@@ -99,7 +99,7 @@ void dbread::getRecord(long long idx){
 		failbit = true;
 		return;
 	}
-	if((idx > size) || (idx < 0)){
+	if((idx >= size) || (idx < 0)){
 		failbit = true;
 		return;
 	}
@@ -172,4 +172,10 @@ char* dbread::getType(unsigned type) const{
 	//If execution gets to here, the user typed an invalid type
 	//failbit = true;
 	//return "";
+}
+
+void dbread::clear(){
+	failbit = false;
+	idxFile.clear();
+	dbFile.clear();
 }
