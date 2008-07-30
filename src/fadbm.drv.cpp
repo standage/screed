@@ -60,6 +60,8 @@ int main(int argc, char *argv[]){
 		db.addrecord(name, desc, accu, chdna, nmsiz, desiz, 1,
 				dnsiz);
 	}
+	cout << "Database saved in " << argv[1] << ".seqdb2\n";
+	cout << "Index saved in " << argv[1] << ".seqdb2.idx\n";
 
 	theFile.close();
 	return 0;
