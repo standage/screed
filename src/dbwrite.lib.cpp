@@ -53,12 +53,24 @@ bool dbwrite::writeFirst(){
 	return !(idxFile.fail());
 }
 
+/*--------------------------------------
+ * writeLine
+ * the constant version of writeLine
+--------------------------------------*/
+bool dbwrite::writeLine(const char theLine[], long long linelen){
+	dbFile << linelen << ' ';
+	dbFile.write(theLine, linelen-1);
+	dbFile << endl;
+	return !(dbFile.fail());
+}
+
 /*---------------------------------------
  * writeLine
  * Writes the given line to the database
  * file
 ---------------------------------------*/
-bool dbwrite::writeLine(char theLine[], unsigned linelen){
+bool dbwrite::writeLine(char theLine[], long long linelen){
+	dbFile << linelen << ' ';
 	dbFile.write(theLine, linelen-1);
 	dbFile << endl;
 	return !(dbFile.fail());

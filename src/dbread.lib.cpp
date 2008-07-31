@@ -65,7 +65,12 @@ dbread::dbread(string dbname){
 
 	//Determine the amount of individual types per record
 	for(Typesize=0;a!=deliminator;Typesize++){
-		dbFile.getline(line, LSIZE);
+		while(1){
+			dbFile.get(a);
+			if(a == '\n'){ // Each type is newline seperated
+				break;
+			}
+		}
 		a = dbFile.peek();
 	}
 	dbFile.seekg(0);
@@ -117,6 +122,7 @@ void dbread::getRecord(long long idx){
 
 	char line[LSIZE], a;
 	unsigned i, j, k;
+	long long linelen;
 
 	for(i=0;i<Typesize;i++){
 		delete [] Types[i];
@@ -127,16 +133,12 @@ void dbread::getRecord(long long idx){
 	a = '0';
 	for(i=0;a!=deliminator;i++){
 		if(i == Typesize){
-			cerr << "ERROR, I EQUALS TYPSIZE\n";
-			exit(1);
+			failbit = true;
+			return;
 		}
-		dbFile.getline(line, LSIZE);
-		for(j=0;line[j]!='\0';j++){}
-		j++;
-		Types[i] = new (nothrow) char[j];
-		for(k=0;k<j;k++){
-			Types[i][k] = line[k];
-		}
+		dbFile >> linelen >> ws;
+		Types[i] = new (nothrow) char[linelen];
+		dbFile.getline(Types[i], linelen);
 		a = dbFile.peek();
 	}
 	if(i != Typesize){ // i must equal Typesize when the loop exits

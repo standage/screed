@@ -17,7 +17,9 @@ class dbwrite{
 
 		bool writeFirst();
 
-		bool writeLine(char[], unsigned);
+		bool writeLine(char[], long long);
+
+		bool writeLine(const char[], long long);
 
 		bool writeDelim();
 

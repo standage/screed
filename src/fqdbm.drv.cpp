@@ -11,8 +11,7 @@ int main(int argc, char *argv[]){
 	unsigned i, j;
 	char endck, desc[] = "";
 	char name[LINESIZE], dna[LINESIZE], accu[LINESIZE];
-	long long filepos, dnsiz;
-	int nmsiz, acsiz;
+	long long filepos, nmsiz, acsiz, dnsiz;
 
 	if(!db.is_open()){
 		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";

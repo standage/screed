@@ -1,7 +1,7 @@
 #include <string>
 #include <fstream>
 
-const int LSIZE = 1000;
+const int LSIZE = 2000;
 const char deliminator = '-';
 
 class dbread{
