@@ -1,5 +1,6 @@
-#seqdb2 makefile
+# seqdb2 makefile
 
+CPPFLAGS=-Wall -g
 DOB = g++ -Wall -g -c
 
 all: fqdbm dbread fadbm fadb_test fqdb_test shelltest
@@ -22,38 +23,32 @@ fadb_test: src/fadb_test.o src/dbread.lib.o src/dbwrite.lib.o
 fqdb_test: src/fqdb_test.o src/dbread.lib.o src/dbwrite.lib.o
 	g++ src/fqdb_test.o src/dbread.lib.o src/dbwrite.lib.o -o fqdb_test
 
-fadb_test.o: src/fadb_test.cpp src/dbread.h src/dbwrite.h
-	${DOB} src/fadb_test.cpp
+src/fadb_test.o: src/fadb_test.cpp src/dbread.h src/dbwrite.h
 
-fqdb_test.o: src/fqdb_test.cpp src/dbread.h src/dbwrite.h
-	${DOB} src/fqdb_test.cpp
+src/fqdb_test.o: src/fqdb_test.cpp src/dbread.h src/dbwrite.h
 
-fqdbm.drv.o: src/fqdmb.drv.cpp src/dbwrite.h
-	${DOB} src/fqdbm.drv.cpp
+src/fqdbm.drv.o: src/fqdbm.drv.cpp src/dbwrite.h
 
-fadbm.drv.o: src/fadbm.drv.cpp src/dbwrite.h
-	${DOB} src/fadbm.drv.cpp
+src/fadbm.drv.o: src/fadbm.drv.cpp src/dbwrite.h
 
-dbwrite.lib.o: src/dbwrite.lib.cpp src/dbwrite.h
-	${DOB} src/dbwrite.lib.cpp
+src/dbwrite.lib.o: src/dbwrite.lib.cpp src/dbwrite.h
 
-dbread.drv.o: src/dbread.drv.cpp src/dbread.h
-	${DOB} src/dbread.drv.cpp
+src/dbread.drv.o: src/dbread.drv.cpp src/dbread.h
 
-dbread.lib.o: src/dbread.lib.cpp src/dbread.h
-	${DOB} src/dbread.lib.cpp
+src/dbread.lib.o: src/dbread.lib.cpp src/dbread.h
 
 test:
 	./fadb_test
 	./fqdb_test
 	rm -f tests/*.seqdb2*
 
-purge:
+clean:
 	rm -f dbread *test *dbm src/*.o tests/*seqdb2*
 	rm -f src/_seqdb2.c src/_seqdb2.cpp src/_seqdb2.so
 
-pymodul:
+pymodule:
 	pyrexc -+ src/_seqdb2.pyx
 	g++ -pthread -fno-strict-aliasing -DNDEBUG -g -O3 -Wall -fPIC -I/usr/include/python2.5 -c src/_seqdb2.cpp -o src/_seqdb2.o
 	g++ -pthread -shared src/_seqdb2.o src/dbread.lib.o -o src/_seqdb2.so
+	./fadbm tests/test.fa
 	cd src && python tst.py
