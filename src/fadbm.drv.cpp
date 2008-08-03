@@ -10,12 +10,9 @@ int main(int argc, char *argv[]){
 	dbwrite db(argv[1]);
 	string dna;
 	unsigned i, j;
-	char accu[] = "";
 	char line[LINESIZE], endck;
 	char name[LINESIZE], desc[LINESIZE];
-	long long filepos, dnsiz;
-	int nmsiz, desiz;
-
+	long long filepos, nmsiz, desiz;
 
 	if(!db.is_open()){
 		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
@@ -25,7 +22,6 @@ int main(int argc, char *argv[]){
 	while(!theFile.eof()){
 		nmsiz = 0; // Initialize the sizes of the relevant c-strings to
 		desiz = 0; // 0
-		dnsiz = 0;
 
 		//Increment the file position one to skip the '>' in front of
 		//the name
@@ -48,18 +44,15 @@ int main(int argc, char *argv[]){
 				dna.append(line);
 				endck = theFile.peek();
 		}
-		dnsiz = dna.size();
-		dnsiz++;
 
-		char chdna[dnsiz];
-		for(i=0;i<dnsiz-1;i++){
-			chdna[i] = dna[i];
-		}
-		chdna[i] = '\0';
-
-		db.addrecord(name, desc, accu, chdna, nmsiz, desiz, 1,
-				dnsiz);
+		db.writeFirst();
+		db.writeLine(name, nmsiz);
+		db.writeLine(desc, desiz);
+		db.writeLine(dna.c_str(), (dna.size()+1));
+		db.writeDelim();
 	}
+	cout << "Database saved in " << argv[1] << ".seqdb2\n";
+	cout << "Index saved in " << argv[1] << ".seqdb2.idx\n";
 
 	theFile.close();
 	return 0;

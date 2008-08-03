@@ -1,7 +1,8 @@
 #include <string>
 #include <fstream>
 
-const int LSIZE = 1000;
+const int LSIZE = 2000;
+const char deliminator = '-';
 
 class dbread{
 	private:
@@ -11,26 +12,30 @@ class dbread{
 		};
 		Node *Head;
 
+		char empty;
 		long long size, lastquery, dnalines;
 		long long * index;
+		unsigned Typesize;
 		std::fstream idxFile, dbFile;
 		bool open, failbit;
-
-		char *name, *desc, *accu, *dna;
-
 	public:
+		char **Types;
+
 		dbread(std::string);
 
 		~dbread();
 
-		std::string query(long long=0, int=1);
-
 		void getRecord(long long=0);
 
-		std::string getType(unsigned=1);
+		char* getType(unsigned=1);
 
 		bool is_open() const{return open;}
+
 		bool fail() const{return failbit;}
 
-		void clear(){failbit = false;}
+		void clear();
+
+		long long getSize() const{return size;}
+
+		unsigned getTypesize() const{return Typesize;}
 };

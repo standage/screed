@@ -2,6 +2,7 @@
 #include <fstream>
 #include <new>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -15,13 +16,14 @@ dbread::dbread(string dbname){
 	dbread::Node *Curr;
 	dbread::Node *Prev;
 	string idxname;
-	int i, j;
 	char a, line[LSIZE];
+	unsigned i;
 
 	open = true;
 	failbit = false;
 	idxname = dbname + ".idx";
 	lastquery = 1;
+	empty = ' ';
 
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
@@ -39,11 +41,8 @@ dbread::dbread(string dbname){
 		Curr->Next = NULL;
 		Prev = Curr;
 		idxFile >> Curr->data;
+		idxFile.ignore(1); // Ignores the newline character
 		idxFile.peek();
-		/*idxFile >> a;
-		if(!idxFile.eof()){
-			idxFile.putback(a);
-		}*/
 	}
 	idxFile.close();
 
@@ -51,8 +50,8 @@ dbread::dbread(string dbname){
 
 	Prev = Head;
 	Curr = Head->Next;
-	for(long long i=0;i<size;i++){
-		index[i] = Curr->data;
+	for(long long li=0;li<size;li++){
+		index[li] = Curr->data;
 		Prev = Curr;
 		Curr = Curr->Next;
 		delete Prev;
@@ -64,10 +63,24 @@ dbread::dbread(string dbname){
 		return;
 	}
 
-	name = new (nothrow) char[2];
-	accu = new (nothrow) char[2];
-	desc = new (nothrow) char[2];
-	dna = new (nothrow) char[2];
+	//Determine the amount of individual types per record
+	for(Typesize=0;a!=deliminator;Typesize++){
+		while(1){
+			dbFile.get(a);
+			if(a == '\n'){ // Each type is newline seperated
+				break;
+			}
+		}
+		a = dbFile.peek();
+	}
+	dbFile.seekg(0);
+
+	//Create the Types object
+	Types = new (nothrow) char *[Typesize];
+	for(i=0;i<Typesize;i++){
+		Types[i] = new (nothrow) char[2];
+	}
+
 	//Setup the caching of the 0th query. Caching ensures faster results
 	//when the user is querying the same record again and again
 	getRecord(0);
@@ -82,10 +95,10 @@ dbread::~dbread(){
 	dbFile.close();
 	delete Head;
 	delete [] index;
-	delete [] name;
-	delete [] desc;
-	delete [] accu;
-	delete [] dna;
+	for(unsigned i=0;i<Typesize;i++){
+		delete [] Types[i];
+	}
+	delete [] Types;
 }
 
 /*-------------------------------------------------
@@ -99,7 +112,7 @@ void dbread::getRecord(long long idx){
 		failbit = true;
 		return;
 	}
-	if((idx > size) || (idx < 0)){
+	if((idx >= size) || (idx < 0)){
 		failbit = true;
 		return;
 	}
@@ -107,69 +120,52 @@ void dbread::getRecord(long long idx){
 		return;
 	}
 
-	char line[LSIZE];
-	int i, j;
+	char line[LSIZE], a;
+	unsigned i, j, k;
+	long long linelen;
 
-	delete [] name;
-	delete [] desc;
-	delete [] accu;
-	delete [] dna;
+	for(i=0;i<Typesize;i++){
+		delete [] Types[i];
+	}
 
-	//Write the new records for the database into the cache
 	dbFile.seekg(index[idx]);
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	name = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		name[j] = line[j];
+	//Read new records into the Types array
+	a = '0';
+	for(i=0;a!=deliminator;i++){
+		if(i == Typesize){
+			failbit = true;
+			return;
+		}
+		dbFile >> linelen >> ws;
+		Types[i] = new (nothrow) char[linelen];
+		dbFile.getline(Types[i], linelen);
+		a = dbFile.peek();
 	}
-
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	desc = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		desc[j] = line[j];
+	if(i != Typesize){ // i must equal Typesize when the loop exits
+		failbit = true;
 	}
-
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	accu = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		accu[j] = line[j];
-	}
-
-	dbFile.getline(line, LSIZE);
-	for(i=0;line[i]!='\0';i++){}
-	i++;
-	dna = new (nothrow) char[i];
-	for(j=0;j<i;j++){
-		dna[j] = line[j];
-	}
-	
 	lastquery = idx;
 }
 
 /*------------------------------------------
  * getType
- * Returns referenced cached data. Mode is:
- * 1:Name, 2:description, 3:accuracy, 4:dna
+ * Returns referenced cached data
 -------------------------------------------*/
-std::string dbread::getType(unsigned type){
-	switch(type){
-		case 1:
-			return string(name);
-		case 2:
-			return string(desc);
-		case 3:
-			return string(accu);
-		case 4:
-			return string(dna);
+char* dbread::getType(unsigned wanted){
+	if((wanted < 0) || (wanted >= Typesize)){
+		failbit = true;
+		return &(empty);
 	}
+	return Types[wanted];
+}
 
-	//If execution gets to here, the user typed an invalid type
-	failbit = true;
-	return "";
+/*------------------------------------
+ * clear
+ * Clears the database error flag and
+ * the database file error flags
+------------------------------------*/
+void dbread::clear(){
+	failbit = false;
+	idxFile.clear();
+	dbFile.clear();
 }

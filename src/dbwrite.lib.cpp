@@ -34,35 +34,6 @@ dbwrite::~dbwrite(){
 	idxFile.close();
 }
 
-/*-----------------------------------------------
- * addrecord
- * Takes the character arrays and lengths of all
- * attributes of the database and writes a single
- * record with them
------------------------------------------------*/
-bool dbwrite::addrecord(char name[], char desc[], char accu[], char dna[],
-		int nmsiz, int desiz, int acsiz, long long dnsiz){
-
-	if(open == false){ // One of the database files didn't open
-		return false;
-
-	}
-	
-	idxFile << dbFile.tellp() << endl;	
-
-	dbFile.write(name, nmsiz-1);
-	dbFile << endl;
-	dbFile.write(desc, desiz-1);
-	dbFile << endl;
-	dbFile.write(accu, acsiz-1);
-	dbFile << endl;
-	dbFile.write(dna, dnsiz-1);
-	dbFile << endl;
-	dbFile << '-' << endl;
-
-	return true;
-}
-
 /*------------------------------------------
  * Name: close
  * Explicitly closes the file handles
@@ -70,4 +41,47 @@ bool dbwrite::addrecord(char name[], char desc[], char accu[], char dna[],
 void dbwrite::close(){
 	dbFile.close();
 	idxFile.close();
+}
+
+/*-----------------------------------------
+ * writeFirst
+ * Write the put pointer's location to the
+ * index file
+----------------------------------------*/
+bool dbwrite::writeFirst(){
+	idxFile << dbFile.tellp() << endl;
+	return !(idxFile.fail());
+}
+
+/*--------------------------------------
+ * writeLine
+ * the constant version of writeLine
+--------------------------------------*/
+bool dbwrite::writeLine(const char theLine[], long long linelen){
+	dbFile << linelen << ' ';
+	dbFile.write(theLine, linelen-1);
+	dbFile << endl;
+	return !(dbFile.fail());
+}
+
+/*---------------------------------------
+ * writeLine
+ * Writes the given line to the database
+ * file
+---------------------------------------*/
+bool dbwrite::writeLine(char theLine[], long long linelen){
+	dbFile << linelen << ' ';
+	dbFile.write(theLine, linelen-1);
+	dbFile << endl;
+	return !(dbFile.fail());
+}
+
+/*-------------------------------------
+ * writeDelim
+ * Write the record deliminator to the
+ * database file
+-------------------------------------*/
+bool dbwrite::writeDelim(){
+	dbFile << delim << endl;
+	return !(dbFile.fail());	
 }

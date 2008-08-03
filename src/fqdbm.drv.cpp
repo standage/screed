@@ -11,8 +11,7 @@ int main(int argc, char *argv[]){
 	unsigned i, j;
 	char endck, desc[] = "";
 	char name[LINESIZE], dna[LINESIZE], accu[LINESIZE];
-	long long filepos, dnsiz;
-	int nmsiz, acsiz;
+	long long filepos, nmsiz, acsiz, dnsiz;
 
 	if(!db.is_open()){
 		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
@@ -45,9 +44,15 @@ int main(int argc, char *argv[]){
 		acsiz = i;
 
 		endck = theFile.peek();
-
-		db.addrecord(name, desc, accu, dna, nmsiz, 1, acsiz, dnsiz);
+		db.writeFirst();
+		db.writeLine(name, nmsiz);
+		db.writeLine(accu, acsiz);
+		db.writeLine(dna, dnsiz);
+		db.writeDelim();
 	}
+
+	cout << "Database saved in " << argv[1] << ".seqdb2\n";
+	cout << "Index saved in " << argv[1] << ".seqdb2.idx\n";
 
 	theFile.close();
 	return 0;

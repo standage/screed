@@ -50,3 +50,10 @@ test:
 
 purge:
 	rm -f dbread *test *dbm src/*.o tests/*seqdb2*
+	rm -f src/_seqdb2.c src/_seqdb2.cpp src/_seqdb2.so
+
+pymodul:
+	pyrexc -+ src/_seqdb2.pyx
+	g++ -pthread -fno-strict-aliasing -DNDEBUG -g -O3 -Wall -fPIC -I/usr/include/python2.5 -c src/_seqdb2.cpp -o src/_seqdb2.o
+	g++ -pthread -shared src/_seqdb2.o src/dbread.lib.o -o src/_seqdb2.so
+	cd src && python tst.py
