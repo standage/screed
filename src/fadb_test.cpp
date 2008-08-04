@@ -4,18 +4,16 @@
 #include <fstream>
 #include <assert.h>
 #include <string>
+#include <stdlib.h>
 
 using namespace std;
 
 int main(){
 	fstream theFile;
-	string dna;
-	unsigned i;
-	char line[LINESIZE], endck;
-	char name[LINESIZE], desc[LINESIZE];
+	char endck, a;
 	string filename = "tests/test.fa";
-	long long filepos, dnsiz;
-	int nmsiz, desiz;
+	string line, name, desc, dna; 
+	long long filepos;
 	dbwrite db(filename);
 
 	if(!db.is_open()){
@@ -24,44 +22,33 @@ int main(){
 	}
 	theFile.open(filename.c_str(), fstream::in);
 	while(!theFile.eof()){
-		nmsiz = 0; // Initialize the sizes of the relevant c-strings to
-		desiz = 0; // 0
-		dnsiz = 0;
 
 		//Increment the file position one to skip the '>' in front of
 		//the name
 		filepos = theFile.tellg();
 		theFile.seekg(filepos+1);
 		theFile >> name >> ws; // Pull in the line and skip whitespace
-		for(i=0;name[i]!='\0';i++){}
-		i++;
-		nmsiz = i;
 
-		theFile.getline(desc, LINESIZE);
-		for(i=0;desc[i]!='\0';i++){}
-		i++;
-		desiz = i;
+		theFile >> desc;
+		theFile.get(a);
+		while(a != '\n'){
+			desc.push_back(a);
+			theFile.get(a);
+		}
 
 		dna.clear();
 		endck = '0';
 		while((endck != '>') && (!theFile.eof())){
-				theFile.getline(line, LINESIZE);
-				dna.append(line);
-				endck = theFile.peek();
+			a = '0';
+			theFile >> line >> ws;
+			dna.append(line);
+			endck = theFile.peek();
 		}
-		dnsiz = dna.size();
-		dnsiz++;
-
-		char chdna[dnsiz];
-		for(i=0;i<dnsiz-1;i++){
-			chdna[i] = dna[i];
-		}
-		chdna[i] = '\0';
 
 		db.writeFirst();
-		db.writeLine(name, nmsiz);
-		db.writeLine(desc, desiz);
-		db.writeLine(chdna, dnsiz);
+		db.writeLine(name);
+		db.writeLine(desc);
+		db.writeLine(dna);
 		db.writeDelim();
 	}
 

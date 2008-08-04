@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
 	type = atoi(argv[3]);
 
 	db.getRecord(index);
-	assert(db.getType(type) == testcase);
+	assert(string(db.getType(type)) == testcase);
 
 	return 0;
 }

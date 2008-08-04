@@ -1,7 +1,6 @@
 #include <string>
 #include <fstream>
 
-const int LSIZE = 2000;
 const char delimiter = '-';
 
 class dbread{

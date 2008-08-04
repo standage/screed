@@ -1,7 +1,6 @@
 #include <fstream>
 #include <string>
 
-const unsigned LINESIZE = 1000;
 const char delim = '-';
 
 class dbwrite{
@@ -17,9 +16,7 @@ class dbwrite{
 
 		bool writeFirst();
 
-		bool writeLine(char[], long long);
-
-		bool writeLine(const char[], long long);
+		bool writeLine(std::string);
 
 		bool writeDelim();
 
