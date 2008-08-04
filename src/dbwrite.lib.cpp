@@ -16,9 +16,9 @@ using namespace std;
 dbwrite::dbwrite(string fname){
 	open = true;
 	fname.append(".seqdb2");
-	dbFile.open(fname.c_str(), fstream::out);
+	dbFile.open(fname.c_str(), ios::out);
 	fname.append(".idx");
-	idxFile.open(fname.c_str(), fstream::out);
+	idxFile.open(fname.c_str(), ios::out | ios::binary);
 
 	if((!dbFile.is_open()) || (!idxFile.is_open())){
 			open = false;
@@ -49,7 +49,8 @@ void dbwrite::close(){
  * index file
 ----------------------------------------*/
 bool dbwrite::writeFirst(){
-	idxFile << dbFile.tellp() << endl;
+	idxFile.write((char*)&dbFile.tellp(), sizeof(dbFile.tellp()));
+	idxFile.write(&newline, 1);
 	return !(idxFile.fail());
 }
 

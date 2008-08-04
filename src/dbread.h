@@ -6,7 +6,7 @@ const char delimiter = '-';
 class dbread{
 	private:
 		struct Node{
-			unsigned data;
+			long long data;
 			Node * Next;
 		};
 		Node *Head;
@@ -15,7 +15,7 @@ class dbread{
 		long long size, lastquery, dnalines;
 		long long * index;
 		unsigned Typesize;
-		std::fstream idxFile, dbFile;
+		std::ifstream idxFile, dbFile;
 		bool open, failbit;
 	public:
 		char **Types;

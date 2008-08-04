@@ -28,7 +28,7 @@ dbread::dbread(string dbname){
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
 	Prev = Head;
-	idxFile.open(idxname.c_str(), fstream::in);
+	idxFile.open(idxname.c_str(), ios::in | ios::binary);
 	if(!idxFile.is_open()){
 		open = false;
 		return;
@@ -40,8 +40,11 @@ dbread::dbread(string dbname){
 		Prev->Next = Curr;
 		Curr->Next = NULL;
 		Prev = Curr;
-		idxFile >> Curr->data;
-		idxFile.ignore(1); // Ignores the newline character
+		idxFile.read((char*)&(Curr->data), sizeof(Curr->data));
+		a = idxFile.peek();
+		while(a != '\n'){ // Removes the newline character
+			idxFile.get(a);
+		}
 		idxFile.peek();
 	}
 	idxFile.close();
@@ -57,7 +60,7 @@ dbread::dbread(string dbname){
 		delete Prev;
 	}// End copying of index file
 
-	dbFile.open(dbname.c_str(), fstream::in);
+	dbFile.open(dbname.c_str(), ios::in);
 	if(!dbFile.is_open()){
 		open = false;
 		return;

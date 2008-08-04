@@ -1,11 +1,12 @@
 #include <fstream>
 #include <string>
 
+const char newline = '\n';
 const char delim = '-';
 
 class dbwrite{
 	private:
-		std::fstream dbFile, idxFile;
+		std::ofstream dbFile, idxFile;
 
 		bool open;
 	
