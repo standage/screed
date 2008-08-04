@@ -8,8 +8,8 @@ using namespace std;
 int main(int argc, char *argv[]){
 	fstream theFile;
 	dbwrite db(argv[1]);
-	unsigned i, j;
-	char endck, desc[] = "";
+	unsigned i;
+	char endck;
 	char name[LINESIZE], dna[LINESIZE], accu[LINESIZE];
 	long long filepos, nmsiz, acsiz, dnsiz;
 

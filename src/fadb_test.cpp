@@ -10,7 +10,7 @@ using namespace std;
 int main(){
 	fstream theFile;
 	string dna;
-	unsigned i, j;
+	unsigned i;
 	char line[LINESIZE], endck;
 	char name[LINESIZE], desc[LINESIZE];
 	string filename = "tests/test.fa";

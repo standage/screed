@@ -16,7 +16,7 @@ dbread::dbread(string dbname){
 	dbread::Node *Curr;
 	dbread::Node *Prev;
 	string idxname;
-	char a, line[LSIZE];
+	char a;
 	unsigned i;
 
 	open = true;
@@ -64,7 +64,7 @@ dbread::dbread(string dbname){
 	}
 
 	//Determine the amount of individual types per record
-	for(Typesize=0;a!=deliminator;Typesize++){
+	for(Typesize=0;a!=delimiter;Typesize++){
 		while(1){
 			dbFile.get(a);
 			if(a == '\n'){ // Each type is newline seperated
@@ -120,8 +120,8 @@ void dbread::getRecord(long long idx){
 		return;
 	}
 
-	char line[LSIZE], a;
-	unsigned i, j, k;
+	char a;
+	unsigned i;
 	long long linelen;
 
 	for(i=0;i<Typesize;i++){
@@ -131,7 +131,7 @@ void dbread::getRecord(long long idx){
 	dbFile.seekg(index[idx]);
 	//Read new records into the Types array
 	a = '0';
-	for(i=0;a!=deliminator;i++){
+	for(i=0;a!=delimiter;i++){
 		if(i == Typesize){
 			failbit = true;
 			return;

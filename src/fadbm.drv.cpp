@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 	fstream theFile;
 	dbwrite db(argv[1]);
 	string dna;
-	unsigned i, j;
+	unsigned i;
 	char line[LINESIZE], endck;
 	char name[LINESIZE], desc[LINESIZE];
 	long long filepos, nmsiz, desiz;

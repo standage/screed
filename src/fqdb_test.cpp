@@ -12,7 +12,7 @@ int main(){
 	fstream theFile;
 	string filename = "tests/test.fastq";
 	dbwrite db(filename);
-	unsigned i, j;
+	unsigned i;
 	char endck;
 	char name[LINESIZE], dna[LINESIZE], accu[LINESIZE];
 	long long filepos, dnsiz;
