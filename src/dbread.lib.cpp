@@ -60,7 +60,7 @@ dbread::dbread(string dbname){
 		delete Prev;
 	}// End copying of index file
 
-	dbFile.open(dbname.c_str(), ios::in);
+	dbFile.open(dbname.c_str(), ios::in | ios::binary);
 	if(!dbFile.is_open()){
 		open = false;
 		return;
@@ -139,10 +139,14 @@ void dbread::getRecord(long long idx){
 			failbit = true;
 			return;
 		}
-		dbFile >> linelen >> ws;
+		//Read the linelength integer in
+		dbFile.read((char*)&linelen, sizeof(linelen));
+		dbFile.ignore(1, ' '); // Ignore the space character
 		Types[i] = new (nothrow) char[linelen];
-		dbFile.getline(Types[i], linelen);
-		a = dbFile.peek();
+		dbFile.read(Types[i], (linelen-1)); // Read in the line data
+		Types[i][linelen-1] = '\0'; // Set the NULL character at end
+		dbFile.ignore(1, '\n'); // Ignore the newline character
+		a = dbFile.peek(); // Checks for delimiter character
 	}
 	if(i != Typesize){ // i must equal Typesize when the loop exits
 		failbit = true;

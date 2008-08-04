@@ -3,6 +3,7 @@
 
 const char newline = '\n';
 const char delim = '-';
+const char space = ' ';
 
 class dbwrite{
 	private:
