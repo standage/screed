@@ -9,10 +9,12 @@ class dbwrite{
 	private:
 		std::ofstream dbFile, idxFile;
 
+		void writeTop(char);
+
 		bool open;
 	
 	public:
-		dbwrite(std::string);
+		dbwrite(std::string, char);
 
 		~dbwrite();
 

@@ -1,5 +1,6 @@
 #include <string>
 #include <fstream>
+#include <map>
 
 const char delimiter = '-';
 
@@ -10,7 +11,11 @@ class dbread{
 			Node * Next;
 		};
 		Node *Head;
+		char **Typekeys;
+		char **Types;
 
+		typedef std::map<std::string, unsigned> maptype;
+		maptype Typeassc;
 		char empty;
 		long long size, lastquery, dnalines;
 		long long * index;
@@ -18,15 +23,13 @@ class dbread{
 		std::ifstream idxFile, dbFile;
 		bool open, failbit;
 	public:
-		char **Types;
-
 		dbread(std::string);
 
 		~dbread();
 
 		void getRecord(long long=0);
 
-		char* getType(unsigned=1);
+		char* getType(char[]);
 
 		bool is_open() const{return open;}
 
@@ -37,4 +40,6 @@ class dbread{
 		long long getSize() const{return size;}
 
 		unsigned getTypesize() const{return Typesize;}
+
+		char * getTypekey(unsigned i) const {return Typekeys[i];};
 };

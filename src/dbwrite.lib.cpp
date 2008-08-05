@@ -13,16 +13,17 @@ using namespace std;
  * directory as the filename passed in using the
  * dbFile and idxFile file handles
 -------------------------------------------------*/
-dbwrite::dbwrite(string fname){
+dbwrite::dbwrite(string fname, char type){
 	open = true;
-	fname.append(".seqdb2");
+	fname.append("_seqdb2");
 	dbFile.open(fname.c_str(), ios::out | ios::binary);
-	fname.append(".idx");
+	fname.append("_idx");
 	idxFile.open(fname.c_str(), ios::out | ios::binary);
 
 	if((!dbFile.is_open()) || (!idxFile.is_open())){
 			open = false;
 	}
+	writeTop(type);
 }
 
 /*-----------------------------------------------
@@ -78,4 +79,30 @@ bool dbwrite::writeLine(string theLine){
 bool dbwrite::writeDelim(){
 	dbFile.write(&delim, 1);
 	return !(dbFile.fail());	
+}
+
+/*---------------------------------------
+ * writeTop
+ * Writes the types of fields in a small
+ * section at the top of the db file
+---------------------------------------*/
+void dbwrite::writeTop(char a){
+	string name, sequence, middle;
+	name = "name";
+	sequence = "sequence";
+	if(a == 'a'){ // sequence is a fasta file
+		middle = "description";
+	}
+	else if(a == 'q'){ // sequence is a fastq file
+		middle = "accuracy";
+	}
+
+	dbFile.write(name.c_str(), name.size());
+	dbFile.write(&newline, 1);
+	dbFile.write(middle.c_str(), middle.size());
+	dbFile.write(&newline, 1);
+	dbFile.write(sequence.c_str(), sequence.size());
+	dbFile.write(&newline, 1);
+	dbFile.write(&delim, 1);
+	dbFile.write(&newline, 1);
 }

@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 	fstream theFile;
-	dbwrite db(argv[1]);
+	dbwrite db(argv[1], 'a');
 	char endck, a;
 	string line, name, desc, dna;
 	long long filepos;
@@ -48,8 +48,8 @@ int main(int argc, char *argv[]){
 		db.writeLine(dna);
 		db.writeDelim();
 	}
-	cout << "Database saved in " << argv[1] << ".seqdb2\n";
-	cout << "Index saved in " << argv[1] << ".seqdb2.idx\n";
+	cout << "Database saved in " << argv[1] << "_seqdb2\n";
+	cout << "Index saved in " << argv[1] << "_seqdb2_idx\n";
 
 	theFile.close();
 	return 0;

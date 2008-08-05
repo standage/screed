@@ -7,8 +7,8 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 	dbread db(argv[1]);
-	long long index;
-	unsigned type;
+	long long index, i;
+	char type[100];
 	string result;
 
 	if(db.is_open() == false){
@@ -29,8 +29,11 @@ int main(int argc, char *argv[]){
 			db.clear();
 			continue;
 		}
-		cout << "Enter a type, 0-" << (db.getTypesize()-1) <<
-			" , to retrieve: ";
+		cout << "Possible types are:\n";
+		for(i=0;i<db.getTypesize();i++){
+			cout << db.getTypekey(i) << endl;
+		}
+		cout << "Enter one to retrieve: ";
 		cin >> type;
 		if(cin.eof()){
 			cout << endl;

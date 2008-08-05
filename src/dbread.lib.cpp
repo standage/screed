@@ -9,21 +9,24 @@ using namespace std;
 /*----------------------------------------
  * Constructor
  * Takes a string file name and opens
- * the correct .seqdb2 and .idx files.
+ * the correct _seqdb2 and _idx files.
  * Also reads the first record into cache
 ----------------------------------------*/
 dbread::dbread(string dbname){
 	dbread::Node *Curr;
 	dbread::Node *Prev;
 	string idxname;
+	unsigned i, j;
+	unsigned fieldsize = 100;
+	char fieldname[fieldsize];
 	char a;
-	unsigned i;
 
 	open = true;
 	failbit = false;
-	idxname = dbname + ".idx";
-	lastquery = 1;
+	idxname = dbname + "_idx";
+	lastquery = -19;
 	empty = ' ';
+	Typesize = 0;
 
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
@@ -66,17 +69,25 @@ dbread::dbread(string dbname){
 		return;
 	}
 
-	//Determine the amount of individual types per record
-	for(Typesize=0;a!=delimiter;Typesize++){
-		while(1){
-			dbFile.get(a);
-			if(a == '\n'){ // Each type is newline seperated
-				break;
-			}
-		}
+	//Determine the amount and names of individual types per record
+	for(a='0';a!=delimiter;Typesize++){
+		dbFile.getline(fieldname, fieldsize);
+		Typeassc[string(fieldname)] = (Typesize+1);
 		a = dbFile.peek();
 	}
-	dbFile.seekg(0);
+
+	//Create the publically-accessable Typekeys object for the user to
+	//view the keys of the map with
+	Typekeys = new (nothrow) char*[Typesize];
+	i = 0;
+	for(maptype::iterator it=Typeassc.begin();it!=Typeassc.end();it++){
+		Typekeys[i] = new (nothrow) char[(it->first).size()+1];
+		for(j=0;j<(it->first).size();j++){
+			Typekeys[i][j] = (it->first).at(j);
+		}
+		Typekeys[i][j] = '\0';
+		i++;
+	}
 
 	//Create the Types object
 	Types = new (nothrow) char *[Typesize];
@@ -84,9 +95,6 @@ dbread::dbread(string dbname){
 		Types[i] = new (nothrow) char[2];
 	}
 
-	//Setup the caching of the 0th query. Caching ensures faster results
-	//when the user is querying the same record again and again
-	getRecord(0);
 }
 
 /*--------------------------------------
@@ -95,12 +103,15 @@ dbread::dbread(string dbname){
  * character arrays stored in the cache
 --------------------------------------*/
 dbread::~dbread(){
+	unsigned i;
 	dbFile.close();
 	delete Head;
 	delete [] index;
-	for(unsigned i=0;i<Typesize;i++){
+	for(i=0;i<Typesize;i++){
 		delete [] Types[i];
+		delete [] Typekeys[i];
 	}
+	delete [] Typekeys;
 	delete [] Types;
 }
 
@@ -158,12 +169,14 @@ void dbread::getRecord(long long idx){
  * getType
  * Returns referenced cached data
 -------------------------------------------*/
-char* dbread::getType(unsigned wanted){
-	if((wanted < 0) || (wanted >= Typesize)){
+char* dbread::getType(char wanted[]){
+	unsigned i;
+	i = Typeassc[string(wanted)];
+	if(i == 0){
 		failbit = true;
 		return &(empty);
 	}
-	return Types[wanted];
+	return Types[i-1];
 }
 
 /*------------------------------------

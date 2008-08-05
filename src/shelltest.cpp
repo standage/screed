@@ -12,10 +12,9 @@ int main(int argc, char *argv[]){
 	int index, type;
 
 	index = atoi(argv[2]);
-	type = atoi(argv[3]);
 
 	db.getRecord(index);
-	assert(string(db.getType(type)) == testcase);
+	assert(string(db.getType(argv[3])) == testcase);
 
 	return 0;
 }

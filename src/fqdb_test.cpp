@@ -12,8 +12,11 @@ int main(){
 	fstream theFile;
 	string filename = "tests/test.fastq";
 	string name, dna, accu;
-	dbwrite db(filename);
+	dbwrite db(filename, 'q');
 	char endck;
+	char nam[] = "name";
+	char acc[] = "accuracy";
+	char seq[] = "sequence";
 	long long filepos;
 
 	if(!db.is_open()){
@@ -49,39 +52,39 @@ int main(){
 
 	//Open the newly created database and make sure everything was created
 	//properly
-	filename.append(".seqdb2");
+	filename.append("_seqdb2");
 	dbread thedb(filename);
 
 	thedb.getRecord(0);
-	assert(string(thedb.getType(0)) ==
+	assert(string(thedb.getType(nam)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:62:922/1");
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(acc)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD");
-	assert(string(thedb.getType(2)) ==
+	assert(string(thedb.getType(seq)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	thedb.getRecord(12);
-	assert(string(thedb.getType(0)) ==
+	assert(string(thedb.getType(nam)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:63:978/1");
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(acc)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAA");
-	assert(string(thedb.getType(2)) ==
+	assert(string(thedb.getType(seq)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	thedb.getRecord(47);
-	assert(string(thedb.getType(0)) ==
+	assert(string(thedb.getType(nam)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:899:619/1");
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(acc)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAA<?;>>?8");
-	assert(string(thedb.getType(2)) ==
+	assert(string(thedb.getType(seq)) ==
 			"TTCAAGATTCGACCCAATACCATTTTAACCAGGAGG");
 
 	thedb.getRecord(48);
-	assert(string(thedb.getType(0)) ==
+	assert(string(thedb.getType(nam)) ==
 			"HWI-EAS_4_PE-FC20GCB:1:1:57:519/1");
-	assert(string(thedb.getType(1)) ==
+	assert(string(thedb.getType(acc)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-	assert(string(thedb.getType(2)) ==
+	assert(string(thedb.getType(seq)) ==
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
 	return 0;
