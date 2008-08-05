@@ -1,15 +1,17 @@
 cdef extern from "dbread.h":
-    ctypedef char * (*getType)(unsigned)
+    ctypedef char * (*getType)(char*)
     ctypedef void (*getRecord)(long long)
     ctypedef void (*clear)()
     ctypedef long long (*getSize)()
     ctypedef unsigned (*getTypesize)()
+    ctypedef char * (*getTypekey)(unsigned)
     ctypedef struct c_dbread "dbread":
         getType getType
         getRecord getRecord
         clear clear
         getSize getSize
         getTypesize getTypesize
+        getTypekey getTypekey
 
     c_dbread *new_dbread "new dbread" (char * filename)
     void del_dbread "delete" (c_dbread *db)
@@ -39,3 +41,6 @@ cdef class dbread:
 
     def getTypesize(self):
         return self.thisptr.getTypesize()
+
+    def getTypekey(self, idx):
+        return self.thisptr.getTypekey(idx)
