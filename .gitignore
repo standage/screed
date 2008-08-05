@@ -10,3 +10,5 @@ shelltest
 *.idx
 *.so
 src/_seqdb2.cpp
+src/*.o
+src/.*.swp
