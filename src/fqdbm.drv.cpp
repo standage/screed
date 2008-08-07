@@ -25,6 +25,7 @@ int main(int argc, char *argv[]){
 		filepos = theFile.tellg();
 		theFile.seekg(filepos+1);
 
+		theFile >> ws;
 		// A file integrity checker
 		if(!theFile.good()){
 			cerr << "ERROR: There is something wrong with the " <<
