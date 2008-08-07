@@ -1,7 +1,6 @@
 # seqdb2 makefile
 
 CPPFLAGS=-Wall -g
-DOB = g++ -Wall -g -c
 
 all: fqdbm dbread fadbm fadb_test fqdb_test shelltest
 
