@@ -14,6 +14,7 @@ using namespace std;
 -------------------------------------------------*/
 dbwrite::dbwrite(string fname, char type){
 	open = true;
+	failbit = false;
 	fname.append("_seqdb2");
 	dbFile.open(fname.c_str(), ios::out | ios::binary);
 	fname.append("_idx");
@@ -51,6 +52,9 @@ void dbwrite::close(){
 bool dbwrite::writeFirst(){
 	idxFile.write((char*)&dbFile.tellp(), sizeof(dbFile.tellp()));
 	idxFile.write(&newline, 1);
+	if(!idxFile.good()){
+		failbit = true;
+	}
 	return !(idxFile.fail());
 }
 
@@ -67,6 +71,9 @@ bool dbwrite::writeLine(string theLine){
 	dbFile.write(&space, 1);
 	dbFile.write(theLine.c_str(), theLine.size());
 	dbFile.write(&newline, 1);
+	if(!dbFile.good()){
+		failbit = true;
+	}
 	return !(dbFile.fail());
 }
 
@@ -77,6 +84,9 @@ bool dbwrite::writeLine(string theLine){
 -------------------------------------*/
 bool dbwrite::writeDelim(){
 	dbFile.write(&delim, 1);
+	if(!dbFile.good()){
+		failbit = true;
+	}
 	return !(dbFile.fail());	
 }
 
@@ -104,4 +114,7 @@ void dbwrite::writeTop(char a){
 	dbFile.write(&newline, 1);
 	dbFile.write(&delim, 1);
 	dbFile.write(&newline, 1);
+	if(!dbFile.good()){
+		failbit = true;
+	}
 }

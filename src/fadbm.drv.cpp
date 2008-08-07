@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[]){
 	fstream theFile;
 	dbwrite db(argv[1], 'a');
-	char endck, a;
+	char a;
 	string line, name, desc, dna;
 	long long filepos;
 
@@ -31,15 +31,35 @@ int main(int argc, char *argv[]){
 		while(a != '\n'){ // Appends the rest of description
 			desc.push_back(a);
 			theFile.get(a);
+
+			//This makes sure that the file being read in is still
+			//valid
+			if(!theFile.good()){
+				cerr << "ERROR: The stream is corrupt. " <<
+					"Did you open the correct file?\n" <<
+					"Check to make sure the file isn't " <<
+					"empty or an invalid fasta file\n";
+				db.close();
+				exit(1);
+			}
 		}
 
 		dna.clear();
-		endck = '0';
-		while((endck != '>') && (!theFile.eof())){
-			a = '0';
+		a = '0';
+		while((a != '>') && (!theFile.eof())){
+			// Another file-validity check
+			if(!theFile.good()){
+				cerr << "ERROR: The stream is corrupt. " <<
+					"Did you open the correct file?\n" <<
+					"Check to make sure the file isn't " <<
+					"empty or an invalid fasta file\n";
+				db.close();
+				exit(1);
+			}
 			theFile >> line >> ws;
 			dna.append(line);
-			endck = theFile.peek();
+
+			a = theFile.peek();
 		}
 
 		db.writeFirst();
@@ -47,6 +67,12 @@ int main(int argc, char *argv[]){
 		db.writeLine(desc);
 		db.writeLine(dna);
 		db.writeDelim();
+		if(db.fail() == true){
+			cerr << "ERROR: One of the database file streams is "<<
+				"corrupt. Do you have enough diskspace?\n";
+			db.close();
+			exit(1);
+		}
 	}
 	cout << "Database saved in " << argv[1] << "_seqdb2\n";
 	cout << "Index saved in " << argv[1] << "_seqdb2_idx\n";

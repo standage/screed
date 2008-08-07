@@ -25,6 +25,14 @@ int main(int argc, char *argv[]){
 		filepos = theFile.tellg();
 		theFile.seekg(filepos+1);
 
+		// A file integrity checker
+		if(!theFile.good()){
+			cerr << "ERROR: There is something wrong with the " <<
+				"source file stream\n";
+			db.close();
+			exit(1);
+		}
+
 		theFile >> name >> ws;
 		theFile >> dna >> ws;
 		theFile.ignore(2); // Ignores the +\n characters
@@ -36,6 +44,14 @@ int main(int argc, char *argv[]){
 		db.writeLine(accu);
 		db.writeLine(dna);
 		db.writeDelim();
+
+		// Make sure nothing went wrong when writing to the database
+		if(db.fail() == true){
+			cerr << "ERROR: Something went wrong while writing the "
+				<< "database.\nHave you run out of space?\n";
+			db.close();
+			exit(1);
+		}
 	}
 
 	cout << "Database saved in " << argv[1] << "_seqdb2\n";

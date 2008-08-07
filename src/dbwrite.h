@@ -11,7 +11,7 @@ class dbwrite{
 
 		void writeTop(char);
 
-		bool open;
+		bool open, failbit;
 	
 	public:
 		dbwrite(std::string, char);
@@ -25,6 +25,8 @@ class dbwrite{
 		bool writeDelim();
 
 		bool is_open() const {return open;}
+
+		bool fail() const {return failbit;}
 
 		void close();
 };
