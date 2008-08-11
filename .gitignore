@@ -1,14 +1,6 @@
-dbread
-fadb_test
-fadbm
-fqdb_test
-fqdbm
-shelltest
-*.o
-*~
-*.seqdb2
-*.idx
-*.so
 src/_seqdb2.cpp
 src/*.o
 src/.*.swp
+CMakeFiles/*
+Testing/*
+*.swp
