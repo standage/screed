@@ -1,6 +1,11 @@
 # Declare the name of the project to be built
 PROJECT(seqdb2)
 
+# Create the bin/ subdirectory if it doesn't already exist
+IF(NOT EXISTS bin )
+	FILE(MAKE_DIRECTORY bin)
+ENDIF(NOT EXISTS bin )
+
 ENABLE_TESTING() # Allows easy testing of the binary files later
 set(SEQDB2_SRC_DIR ./src)
 set(SEQDB2_BIN_DIR ./bin) # Set the binary directory
