@@ -6,6 +6,9 @@ IF(NOT EXISTS bin )
 	FILE(MAKE_DIRECTORY bin)
 ENDIF(NOT EXISTS bin )
 
+# Setup the CPP flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
+
 ENABLE_TESTING() # Allows testing of the binary files later
 set(SEQDB2_SRC_DIR ./src)
 set(SEQDB2_BIN_DIR ./bin) # Set the binary directory
@@ -50,13 +53,12 @@ TARGET_LINK_LIBRARIES (${FQDB_TEST_DIR} DBREAD DBWRITE)
 # Compile the pyrex module
 ADD_CUSTOM_TARGET(pymodule
 	COMMAND pyrexc -+ src/_seqdb2.pyx &&
-       		g++ -pthread -fno-strict-aliasing -DNDEBUG -g -03 -Wall -fPIC -I/usr/include/python2.5 -c src/_seqdb2.cpp -o src/_seqdb2.o &&
+       		g++ -pthread -fno-strict-aliasing -DNDEBUG -g -Wall -fPIC -I/usr/include/python2.5 -c src/_seqdb2.cpp -o src/_seqdb2.o &&
 		g++ -pthread -shared src/_seqdb2.o CMakeFiles/DBREAD.dir/src/dbread.lib.o -o bin/_seqdb2.so &&
 		bin/fadbm tests/test.fa &&
 		cp src/tst.py bin/
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
-
 
 # Run the specified tests
 ADD_TEST(FA_TEST ${FADB_TEST_DIR})
@@ -64,5 +66,5 @@ ADD_TEST(FQ_TEST ${FQDB_TEST_DIR})
 ADD_TEST(PY_TEST python ${PY_TEST_DIR})
 
 # Add files to be removed by the 'make clean' command
-LIST(APPEND temps ${CMAKE_SOURCE_DIR}/CMakeCache.txt ${CMAKE_SOURCE_DIR}/DartTestfile.txt ${CMAKE_SOURCE_DIR}/cmake_install.cmake ${CMAKE_SOURCE_DIR}/CMakeFiles ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2 ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_idx ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2 ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2_idx ${CMAKE_SOURCE_DIR}/Makefile ${CMAKE_SOURCE_DIR}/Testing/ ${CMAKE_SOURCE_DIR}/CMakeFiles ${SEQDB2_SRC_DIR}/_seqdb2.so ${SEQDB2_SRC_DIR}/_seqdb2.cpp ${SEQDB2_SRC_DIR}/_seqdb2.o ${SEQDB2_BIN_DIR}/_seqdb2.so ${SEQDB2_BIN_DIR}/tst.py)
+LIST(APPEND temps ${CMAKE_SOURCE_DIR}/CMakeCache.txt ${CMAKE_SOURCE_DIR}/DartTestfile.txt ${CMAKE_SOURCE_DIR}/cmake_install.cmake ${CMAKE_SOURCE_DIR}/CMakeFiles ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2 ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_idx ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2 ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2_idx ${CMAKE_SOURCE_DIR}/Makefile ${CMAKE_SOURCE_DIR}/Testing/ ${CMAKE_SOURCE_DIR}/CMakeFiles ${SEQDB2_SRC_DIR}/_seqdb2.cpp ${SEQDB2_SRC_DIR}/_seqdb2.o ${SEQDB2_BIN_DIR}/_seqdb2.so ${SEQDB2_BIN_DIR}/tst.py)
 SET_DIRECTORY_PROPERTIES(${CMAKE_SOURCE_DIR} ADDITIONAL_MAKE_CLEAN_FILES "${temps}")
