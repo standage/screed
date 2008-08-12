@@ -10,8 +10,8 @@ ENDIF(NOT EXISTS bin )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
 
 ENABLE_TESTING() # Allows testing of the binary files later
-set(SEQDB2_SRC_DIR ./src)
-set(SEQDB2_BIN_DIR ./bin) # Set the binary directory
+set(SEQDB2_SRC_DIR ./src) # Set the source and binary directories
+set(SEQDB2_BIN_DIR ./bin)
 
 # Declare c++ libraries
 ADD_LIBRARY(DBWRITE ${SEQDB2_SRC_DIR}/dbwrite.h ${SEQDB2_SRC_DIR}/dbwrite.lib.cpp)
