@@ -1,6 +1,7 @@
 src/_seqdb2.cpp
 src/*.o
 src/.*.swp
+src/build/*
 CMakeFiles/*
 Testing/*
 *.swp
