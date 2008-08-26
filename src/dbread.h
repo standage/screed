@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <exception>
 
 const char delimiter = '-';
 
@@ -42,4 +43,20 @@ class dbread{
 		unsigned getTypesize() const{return Typesize;}
 
 		char * getTypekey(unsigned i) const {return Typekeys[i];};
+};
+
+class dbread_exception: public std::exception {
+ public:
+  virtual const char * what() const throw()
+    {
+      return "dbread exception";
+    }
+};
+
+class dbread_index_exception: public dbread_exception {
+ public:
+    virtual const char * what() const throw()
+    {
+      return "index out of range";
+    }
 };
