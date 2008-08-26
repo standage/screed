@@ -26,11 +26,12 @@ IF(PYTHONINTERP_FOUND)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
 
 	ENABLE_TESTING() # Allows testing of the binary files later
-	set(SEQDB2_SRC_DIR ./src) # Set the source and binary directories
+	set(SEQDB2_SRC_DIR ./src) # Set the source, binary, and python directories
 	set(SEQDB2_BIN_DIR ./bin)
+    set(SEQDB2_PY_DIR ./python)
 
 	# Copy tst.py file to bin dir to facilitate _seqdb2 testing later
-	CONFIGURE_FILE(${SEQDB2_SRC_DIR}/tst.py ${SEQDB2_BIN_DIR}/tst.py)
+    #	CONFIGURE_FILE(${SEQDB2_SRC_DIR}/tst.py ${SEQDB2_BIN_DIR}/tst.py)
 
 	# Declare c++ libraries
 	ADD_LIBRARY(DBWRITE ${SEQDB2_SRC_DIR}/dbwrite.h ${SEQDB2_SRC_DIR}/dbwrite.lib.cpp)
@@ -54,17 +55,23 @@ IF(PYTHONINTERP_FOUND)
 
 	# Compile the pyrex module
 	ADD_CUSTOM_TARGET(pymodule ALL
-		COMMAND ${PYTHON_EXECUTABLE} setup.py build_ext
-		-b ${CMAKE_SOURCE_DIR}/bin
-		WORKING_DIRECTORY ${SEQDB2_SRC_DIR}
+		COMMAND ${PYTHON_EXECUTABLE} setup.py build_ext -i
+		WORKING_DIRECTORY ${SEQDB2_PY_DIR}
 		)
 
-	# Run the specified tests
-	ADD_TEST(FA_TEST ${SEQDB2_BIN_DIR}/fadb_test)
-	ADD_TEST(FQ_TEST ${SEQDB2_BIN_DIR}/fqdb_test)
-	ADD_TEST(PY_TEST ${PYTHON_EXECUTABLE} ${SEQDB2_BIN_DIR}/tst.py)
-
 	# Add files to be removed by the 'make clean' command
-	LIST(APPEND temps ${CMAKE_SOURCE_DIR}/CMakeCache.txt ${CMAKE_SOURCE_DIR}/DartTestfile.txt ${CMAKE_SOURCE_DIR}/cmake_install.cmake ${CMAKE_SOURCE_DIR}/CMakeFiles ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2 ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_idx ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2 ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2_idx ${CMAKE_SOURCE_DIR}/Makefile ${CMAKE_SOURCE_DIR}/Testing/ ${CMAKE_SOURCE_DIR}/CMakeFiles ${SEQDB2_SRC_DIR}/_seqdb2.cpp ${SEQDB2_SRC_DIR}/_seqdb2.o ${SEQDB2_BIN_DIR}/_seqdb2.so ${SEQDB2_BIN_DIR}/tst.py)
-	SET_DIRECTORY_PROPERTIES(${CMAKE_SOURCE_DIR} ADDITIONAL_MAKE_CLEAN_FILES "${temps}")
+	LIST(APPEND temps ${CMAKE_SOURCE_DIR}/CMakeCache.txt
+        ${CMAKE_SOURCE_DIR}/DartTestfile.txt
+        ${CMAKE_SOURCE_DIR}/cmake_install.cmake ${CMAKE_SOURCE_DIR}/CMakeFiles
+        ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2
+        ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_idx
+        ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2
+        ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2_idx
+        ${CMAKE_SOURCE_DIR}/Makefile ${CMAKE_SOURCE_DIR}/Testing/
+        ${CMAKE_SOURCE_DIR}/CMakeFiles ${CMAKE_SOURCE_DIR}/tests/__init__.pyc
+        ${CMAKE_SOURCE_DIR}/smoketests.pyc ${SEQDB2_PY_DIR}/_seqdb2.cpp
+        ${SEQDB2_PY_DIR}/_seqdb2.o ${SEQDB2_PY_DIR}/_seqdb2.so
+        ${SEQDB2_PY_DIR}/seqdb2.pyc)
+	SET_DIRECTORY_PROPERTIES(${CMAKE_SOURCE_DIR} ADDITIONAL_MAKE_CLEAN_FILES
+        "${temps}")
 ENDIF(PYTHONINTERP_FOUND)

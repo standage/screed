@@ -23,24 +23,20 @@ cdef class dbread:
         self.thisptr = new_dbread(filename)
         
     def __dealloc__(self):
-        del_dbread(self.thisptr)
+        pass
+#        del_dbread(self.thisptr)
 
-    def getRecord(self, idx):
+    def loadRecord(self, idx):
         self.thisptr.getRecord(idx)
-        return
     
-    def getType(self, typ):
-        return self.thisptr.getType(typ)
+    def getFieldValue(self, name):
+        return self.thisptr.getType(name)
 
-    def clear(self):
-        self.thisptr.clear()
-        return
-
-    def getSize(self):
+    def getNumRecords(self):
         return self.thisptr.getSize()
 
-    def getTypesize(self):
+    def getNumFields(self):
         return self.thisptr.getTypesize()
 
-    def getTypekey(self, idx):
+    def getFieldName(self, idx):
         return self.thisptr.getTypekey(idx)
