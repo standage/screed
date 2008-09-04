@@ -127,7 +127,7 @@ void dbread::getRecord(long long idx){
 		return;
 	}
 	if((idx >= size) || (idx < 0)){
-  	        throw dbread_index_exception();
+        throw dbread_index_exception();
 	}
 	else if(idx == lastquery){
 		return;

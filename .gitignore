@@ -16,3 +16,4 @@ libDBWRITE.a
 *_seqdb2
 *_seqdb2_idx
 python/build/
+python/_seqdb2.cpp

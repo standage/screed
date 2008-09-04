@@ -34,13 +34,15 @@ IF(PYTHONINTERP_FOUND)
     #	CONFIGURE_FILE(${SEQDB2_SRC_DIR}/tst.py ${SEQDB2_BIN_DIR}/tst.py)
 
 	# Declare c++ libraries
-	ADD_LIBRARY(DBWRITE ${SEQDB2_SRC_DIR}/dbwrite.h ${SEQDB2_SRC_DIR}/dbwrite.lib.cpp)
-	ADD_LIBRARY(DBREAD ${SEQDB2_SRC_DIR}/dbread.h ${SEQDB2_SRC_DIR}/dbread.lib.cpp)
+	ADD_LIBRARY(DBWRITE ${SEQDB2_SRC_DIR}/dbwrite.h
+        ${SEQDB2_SRC_DIR}/dbwrite_lib.cpp)
+	ADD_LIBRARY(DBREAD ${SEQDB2_SRC_DIR}/dbread.h
+        ${SEQDB2_SRC_DIR}/dbread_lib.cpp)
 
 	# Setup the binary files to build
-	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fadbm ${SEQDB2_SRC_DIR}/fadbm.drv.cpp)
-	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fqdbm ${SEQDB2_SRC_DIR}/fqdbm.drv.cpp)
-	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/dbread ${SEQDB2_SRC_DIR}/dbread.drv.cpp)
+	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fadbm ${SEQDB2_SRC_DIR}/fadbm_drv.cpp)
+	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fqdbm ${SEQDB2_SRC_DIR}/fqdbm_drv.cpp)
+	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/dbread ${SEQDB2_SRC_DIR}/dbread_drv.cpp)
 	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/shelltest ${SEQDB2_SRC_DIR}/shelltest.cpp)
 	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fadb_test ${SEQDB2_SRC_DIR}/fadb_test.cpp)
 	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fqdb_test ${SEQDB2_SRC_DIR}/fqdb_test.cpp)
