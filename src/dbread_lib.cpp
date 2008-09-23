@@ -27,6 +27,7 @@ dbread::dbread(string dbname){
 	lastquery = -19;
 	empty = ' ';
 	Typesize = 0;
+    errmsg = "";
 
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
@@ -34,6 +35,7 @@ dbread::dbread(string dbname){
 	idxFile.open(idxname.c_str(), ios::in | ios::binary);
 	if(!idxFile.is_open()){
 		open = false;
+        errmsg = "Invalid database filename";
 		return;
 	}
 	//Copy the index file completly into memory so results can be retrieved
@@ -123,11 +125,14 @@ dbread::~dbread(){
 void dbread::getRecord(long long idx){
 
 	if(open == false){
+        errmsg = "Database files not open";
 		failbit = true;
 		return;
 	}
 	if((idx >= size) || (idx < 0)){
-        throw dbread_index_exception();
+        errmsg = "Invalid query";
+        failbit = true;
+        return;
 	}
 	else if(idx == lastquery){
 		return;
@@ -146,6 +151,7 @@ void dbread::getRecord(long long idx){
 	a = '0';
 	for(i=0;a!=delimiter;i++){
 		if(i == Typesize){
+            errmsg = "Database files corrupted";
 			failbit = true;
 			return;
 		}
@@ -159,6 +165,7 @@ void dbread::getRecord(long long idx){
 		a = dbFile.peek(); // Checks for delimiter character
 	}
 	if(i != Typesize){ // i must equal Typesize when the loop exits
+        errmsg = "Database files corrupted";
 		failbit = true;
 	}
 	lastquery = idx;
@@ -172,6 +179,7 @@ char* dbread::getType(char wanted[]){
 	unsigned i;
 	i = Typeassc[string(wanted)];
 	if(i == 0){
+        errmsg = "Invalid typename query";
 		failbit = true;
 		return &(empty);
 	}
@@ -184,6 +192,7 @@ char* dbread::getType(char wanted[]){
  * the database file error flags
 ------------------------------------*/
 void dbread::clear(){
+    errmsg = "";
 	failbit = false;
 	idxFile.clear();
 	dbFile.clear();

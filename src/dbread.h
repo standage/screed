@@ -23,6 +23,7 @@ class dbread{
 		unsigned Typesize;
 		std::ifstream idxFile, dbFile;
 		bool open, failbit;
+        std::string errmsg;
 	public:
 		dbread(std::string);
 
@@ -42,21 +43,7 @@ class dbread{
 
 		unsigned getTypesize() const{return Typesize;}
 
-		char * getTypekey(unsigned i) const {return Typekeys[i];};
-};
+		char * getTypekey(unsigned i) const {return Typekeys[i];}
 
-class dbread_exception: public std::exception {
- public:
-  virtual const char * what() const throw()
-    {
-      return "dbread exception";
-    }
-};
-
-class dbread_index_exception: public dbread_exception {
- public:
-    virtual const char * what() const throw()
-    {
-      return "index out of range";
-    }
+        const char * theError() const {return errmsg.c_str();}
 };
