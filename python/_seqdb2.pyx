@@ -23,8 +23,8 @@ cdef extern from "dbread.h":
     void del_dbread "delete" (c_dbread *db)
 
 class DbException(Exception):
-    def __init__(self):
-        self.value = self.thisptr.theError()
+    def __init__(self, value):
+        self.value = value
     def __str__(self):
         return repr(self.value)
 
@@ -34,7 +34,7 @@ cdef class dbread:
     def __cinit__(self, filename):
         self.thisptr = new_dbread(filename)
         if self.thisptr.is_open() == 0:
-            raise DbException
+            raise DbException(self.thisptr.theError())
         
     def __dealloc__(self):
         pass
@@ -43,33 +43,32 @@ cdef class dbread:
     def loadRecord(self, idx):
         self.thisptr.getRecord(idx)
         if self.thisptr.fail() == 1:
-            self.thisptr.clear()
-            raise DbException
+            raise DbException(self.thisptr.theError())
     
     def getFieldValue(self, name):
         result = self.thisptr.getType(name)
         if self.thisptr.fail() == 1:
-            self.thisptr.clear()
-            raise DbException
+            raise DbException(self.thisptr.theError())
         return result
 
     def getNumRecords(self):
         result = self.thisptr.getSize()
         if self.thisptr.fail() == 1:
-            self.thisptr.clear()
-            raise DbException
+            raise DbException(self.thisptr.theError())
         return result
 
     def getNumFields(self):
         result = self.thisptr.getTypesize()
         if self.thisptr.fail() == 1:
-            self.thisptr.clear()
-            raise DbException
+            raise DbException(self.thisptr.theError())
         return result
 
     def getFieldName(self, idx):
         result = self.thisptr.getTypekey(idx)
         if self.thisptr.fail() == 1:
-            self.thisptr.clear()
-            raise DbException
+            raise DbException(self.thisptr.theError())
         return result
+
+    def clear(self):
+        self.thisptr.clear()
+        return

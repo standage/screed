@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
 		}
 		db.getRecord(index);
 		if(db.fail() == true){
-			cerr << "ERROR: BAD INDEX\n";
+			cout << db.theError() << endl;
 			db.clear();
 			continue;
 		}
@@ -45,6 +45,14 @@ int main(int argc, char *argv[]){
 			db.clear();
 			continue;
 		}
+        cout << "Enter a typekey index to retrieve: ";
+        cin >> i;
+        cout << db.getTypekey(i) << endl;
+        if(db.fail() == true){
+            cout << db.theError() << endl;
+            db.clear();
+        }
+        continue;
 
 	}
 

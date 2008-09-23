@@ -43,7 +43,7 @@ class dbread{
 
 		unsigned getTypesize() const{return Typesize;}
 
-		char * getTypekey(unsigned i) const {return Typekeys[i];}
+		char * getTypekey(unsigned);
 
         const char * theError() const {return errmsg.c_str();}
 };

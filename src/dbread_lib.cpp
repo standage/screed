@@ -123,7 +123,6 @@ dbread::~dbread(){
  * variable 'index' into memory from the database
 -------------------------------------------------*/
 void dbread::getRecord(long long idx){
-
 	if(open == false){
         errmsg = "Database files not open";
 		failbit = true;
@@ -196,4 +195,20 @@ void dbread::clear(){
 	failbit = false;
 	idxFile.clear();
 	dbFile.clear();
+}
+
+/*---------------------------------------------
+ * getTypekey
+ * Returns the c-string stored the in the
+ * double-pointer varialbe Typekeys. First
+ * though, it checks to make sure tha the 
+ * reference index is a valid one.
+---------------------------------------------*/
+char * dbread::getTypekey(unsigned idx){
+    if((idx >= Typesize) || (idx < 0)){
+        failbit = true;
+        errmsg = "Bad typekey request";
+        return &(empty);
+    }
+    return Typekeys[idx];
 }
