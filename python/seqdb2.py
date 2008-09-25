@@ -26,6 +26,10 @@ class SeqDB2(object):
         field_values = [ self._db.getFieldValue(n) for n in self.fields ]
         
         return SeqDB2Record(self._db, i, self.fields, field_values)
+
+    def clear(self):
+        self._db.clear()
+        return
     
 class SeqDB2Record(object):
     def __init__(self, _db, _num, fields, values):
