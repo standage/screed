@@ -14,6 +14,48 @@ def setup():
     subprocess.check_call(thisdir + '/../bin/fqdbm tests/test.fastq',
                           shell=True, stdout=subprocess.PIPE)
 
+class Test_pyx_err:
+    def setup(self):
+        self.db = _seqdb2.dbread('tests/test.fa_seqdb2')
+
+    def teardown(self):
+        self.db.clear()
+
+    def test_open(self):
+        try:
+            foo = _seqdb2.dbread('foobar')
+        except _seqdb2.DbException, e:
+            assert e.value == 'Invalid database filename'
+
+    def test_loadrecord(self): 
+        try:
+            self.db.loadRecord(-1)
+        except _seqdb2.DbException, e:
+            assert e.value == 'Invalid query'
+
+    def test_clear(self):
+        try:
+            self.db.loadRecord(-1) # makes sure the error is raised
+        except _seqdb2.DbException:
+            pass
+
+        try: # doesn't clear the last error so should raise another exception
+            self.db.getFieldValue('name')
+        except _seqdb2.DbException, e:
+            assert e.value == 'Invalid query'
+
+    def test_typename(self):
+        try:
+            print self.db.getFieldValue('FOOBAR')
+        except _seqdb2.DbException, e:
+            assert e.value == 'Invalid typename query'
+
+    def test_typekey(self):
+        try:
+            self.db.getFieldName(10)
+        except _seqdb2.DbException, e:
+            assert e.value == 'Bad typekey request'
+
 class Test_pyx_Fasta:
     def setup(self):
         self.db = _seqdb2.dbread(thisdir + '/test.fa_seqdb2')
@@ -63,9 +105,13 @@ class Test_pyx_FastQ:
 class Test_FastQ:
     def setup(self):
         self.db = seqdb2.SeqDB2(thisdir + '/test.fastq_seqdb2')
+    
+    def tearDown(self):
+        self.db.clear()
 
     def test_simple(self):
         assert len(self.db) == 49
+        assert self.db.fields == ['accuracy','name','sequence']
 
         record = self.db[0]
         assert record.accuracy == 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD'
@@ -78,6 +124,7 @@ class Test_Fasta:
 
     def test_simple(self):
         assert len(self.db) == 22
+        assert self.db.fields == ['description','name','sequence']
 
         record = self.db[0]
         assert record.description.startswith('cdna:pseudogene ')
