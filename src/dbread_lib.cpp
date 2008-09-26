@@ -191,7 +191,6 @@ char* dbread::getType(char wanted[]){
  * the database file error flags
 ------------------------------------*/
 void dbread::clear(){
-    errmsg = "";
 	failbit = false;
 	idxFile.clear();
 	dbFile.clear();

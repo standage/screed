@@ -43,30 +43,35 @@ cdef class dbread:
     def loadRecord(self, idx):
         self.thisptr.getRecord(idx)
         if self.thisptr.fail() == 1:
+            self.thisptr.clear()
             raise DbException(self.thisptr.theError())
     
     def getFieldValue(self, name):
         result = self.thisptr.getType(name)
         if self.thisptr.fail() == 1:
-            raise DbException(self.thisptr.theError())
+           self.thisptr.clear()
+           raise DbException(self.thisptr.theError())
         return result
 
     def getNumRecords(self):
         result = self.thisptr.getSize()
         if self.thisptr.fail() == 1:
-            raise DbException(self.thisptr.theError())
+           self.thisptr.clear()
+           raise DbException(self.thisptr.theError())
         return result
 
     def getNumFields(self):
         result = self.thisptr.getTypesize()
         if self.thisptr.fail() == 1:
-            raise DbException(self.thisptr.theError())
+           self.thisptr.clear()
+           raise DbException(self.thisptr.theError())
         return result
 
     def getFieldName(self, idx):
         result = self.thisptr.getTypekey(idx)
         if self.thisptr.fail() == 1:
-            raise DbException(self.thisptr.theError())
+           self.thisptr.clear()
+           raise DbException(self.thisptr.theError())
         return result
 
     def clear(self):
