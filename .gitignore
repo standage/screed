@@ -1,4 +1,3 @@
-src/_seqdb2.cpp
 *.o
 CMakeFiles/*
 Testing/*
@@ -16,4 +15,4 @@ libDBWRITE.a
 *_seqdb2
 *_seqdb2_idx
 python/build/
-python/_seqdb2.cpp
+python/seqdb2.cpp
