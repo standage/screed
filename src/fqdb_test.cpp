@@ -39,7 +39,7 @@ int main(){
 
 		endck = theFile.peek();
 
-		db.writeFirst();
+		db.writeFirst(name);
 		db.writeLine(name);
 		db.writeLine(accu);
 		db.writeLine(dna);

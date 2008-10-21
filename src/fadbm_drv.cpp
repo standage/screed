@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 			a = theFile.peek();
 		}
 
-		db.writeFirst();
+		db.writeFirst(name);
 		db.writeLine(name);
 		db.writeLine(desc);
 		db.writeLine(dna);
@@ -74,9 +74,11 @@ int main(int argc, char *argv[]){
 			exit(1);
 		}
 	}
+	theFile.close();
+    db.hash2Disk();
 	cout << "Database saved in " << argv[1] << "_seqdb2\n";
 	cout << "Index saved in " << argv[1] << "_seqdb2_idx\n";
+	cout << "Hash saved in " << argv[1] << "_seqdb2_hash\n";
 
-	theFile.close();
 	return 0;
 }

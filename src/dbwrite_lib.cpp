@@ -1,4 +1,5 @@
 #include "dbwrite.h"
+#include "hashFunc.h"
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -15,15 +16,24 @@ using namespace std;
 dbwrite::dbwrite(string fname, char type){
 	open = true;
 	failbit = false;
-	fname.append("_seqdb2");
-	dbFile.open(fname.c_str(), ios::out | ios::binary);
-	fname.append("_idx");
-	idxFile.open(fname.c_str(), ios::out | ios::binary);
+    Records = 0;
+    string dbName, hashName;
+    dbName = fname;
+	dbName.append("_seqdb2");
+	dbFile.open(dbName.c_str(), ios::out | ios::binary);
+    hashName = dbName;
+	dbName.append("_idx");
+	idxFile.open(dbName.c_str(), ios::out | ios::binary);
+    hashName.append("_hash");
+    hashFile.open(hashName.c_str(), ios::out | ios::in | ios::binary |
+            ios::trunc);
+    cout << hashName << endl;
 
-	if((!dbFile.is_open()) || (!idxFile.is_open())){
-			open = false;
+
+	if((!dbFile.is_open()) || (!idxFile.is_open()) || (!hashFile.is_open())){
+        open = false;
 	}
-	writeTop(type);
+    writeTop(type);
 }
 
 /*-----------------------------------------------
@@ -33,6 +43,7 @@ dbwrite::dbwrite(string fname, char type){
 dbwrite::~dbwrite(){
 	dbFile.close();
 	idxFile.close();
+    hashFile.close();
 }
 
 /*------------------------------------------
@@ -42,15 +53,21 @@ dbwrite::~dbwrite(){
 void dbwrite::close(){
 	dbFile.close();
 	idxFile.close();
+    hashFile.close();
 }
 
 /*-----------------------------------------
  * writeFirst
  * Write the put pointer's location to the
  * index file
+ * Also push the name and location onto
+ * a growing list of 2-entry lists
 ----------------------------------------*/
-bool dbwrite::writeFirst(){
+bool dbwrite::writeFirst(string name){
 	idxFile.write((char*)&dbFile.tellp(), sizeof(dbFile.tellp()));
+    Names4Hash.push(name);
+    StreamPos4Hash.push(dbFile.tellp());
+    Records++;
 	idxFile.write(&newline, 1);
 	if(!idxFile.good()){
 		failbit = true;
@@ -79,7 +96,7 @@ bool dbwrite::writeLine(string theLine){
 
 /*-------------------------------------
  * writeDelim
- * Write the record deliminator to the
+ * Write the record delimitor to the
  * database file
 -------------------------------------*/
 bool dbwrite::writeDelim(){
@@ -117,4 +134,43 @@ void dbwrite::writeTop(char a){
 	if(!dbFile.good()){
 		failbit = true;
 	}
+}
+
+bool dbwrite::hash2Disk(){
+    std::string RecordName;
+    bool result;
+    long long hashdResult, streamPos, testBlock, fileEnd;
+    result = true;
+    fileEnd = 0;
+    for(long long i=0;i<Records;i++){
+        RecordName = Names4Hash.front();
+        streamPos = StreamPos4Hash.front();
+        hashdResult = hashFunct(RecordName, (2*Records));
+        hashdResult = hashdResult * 16; // Go by blocks of 8 bytes
+        // Find an empty block to write to
+        while(1){
+            hashFile.seekg(hashdResult);
+            hashFile.read((char*)&(testBlock), 8);
+            if(!hashFile.good()){ // Block area was beyond file, no problem
+                hashFile.clear();
+                break;
+            }
+            else if(testBlock == 0){ // Block is empty and is good for data
+                break;
+            }
+            hashdResult = hashdResult + 8; // Block was occupied, go to next
+        }
+        hashFile.seekp(hashdResult);
+        hashFile.write((char*)&(streamPos), 8);
+        if(hashFile.tellp() > fileEnd){
+            fileEnd = hashFile.tellp();
+        }
+        hashFile.flush();
+        Names4Hash.pop();
+        StreamPos4Hash.pop();
+    }
+    // Write extra data to end so eof isn't encountered when reading last entry
+    hashFile.write((char*)&(streamPos), 8);
+    
+    return result;
 }
