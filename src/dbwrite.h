@@ -11,14 +11,15 @@ const char space = ' ';
 class dbwrite{
 	private:
         std::queue<std::string, std::list<std::string> > Names4Hash;
-        std::queue<long long, std::list<long long> > StreamPos4Hash;
 		std::ofstream dbFile, idxFile;
         std::fstream hashFile;
-        long long Records; // The number of records read in
+        long long Recordlen; // The number of records read in
 
 		void writeTop(char);
 
 		bool open, failbit;
+
+        long long hashFunct(std::string, long long);
 
 	public:
 		dbwrite(std::string, char);

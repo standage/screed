@@ -1,5 +1,4 @@
 #include "dbwrite.h"
-#include "hashFunc.h"
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -16,7 +15,7 @@ using namespace std;
 dbwrite::dbwrite(string fname, char type){
 	open = true;
 	failbit = false;
-    Records = 0;
+    Recordlen = 0;
     string dbName, hashName;
     dbName = fname;
 	dbName.append("_seqdb2");
@@ -27,8 +26,6 @@ dbwrite::dbwrite(string fname, char type){
     hashName.append("_hash");
     hashFile.open(hashName.c_str(), ios::out | ios::in | ios::binary |
             ios::trunc);
-    cout << hashName << endl;
-
 
 	if((!dbFile.is_open()) || (!idxFile.is_open()) || (!hashFile.is_open())){
         open = false;
@@ -66,8 +63,7 @@ void dbwrite::close(){
 bool dbwrite::writeFirst(string name){
 	idxFile.write((char*)&dbFile.tellp(), sizeof(dbFile.tellp()));
     Names4Hash.push(name);
-    StreamPos4Hash.push(dbFile.tellp());
-    Records++;
+    Recordlen++;
 	idxFile.write(&newline, 1);
 	if(!idxFile.good()){
 		failbit = true;
@@ -136,17 +132,23 @@ void dbwrite::writeTop(char a){
 	}
 }
 
+/*--------------------------------------------------
+ * hash2Disk
+ * Pop entries off the FIFO queue Names4Hash and
+ * store their index number (0, 1, 2, etc...) at the
+ * file stream position in hashFile determinded by
+ * the hash function
+--------------------------------------------------*/
 bool dbwrite::hash2Disk(){
     std::string RecordName;
     bool result;
-    long long hashdResult, streamPos, testBlock, fileEnd;
+    long long hashdResult, testBlock, fileEnd;
     result = true;
     fileEnd = 0;
-    for(long long i=0;i<Records;i++){
+    for(long long streamPos=1;streamPos<=Recordlen;streamPos++){
         RecordName = Names4Hash.front();
-        streamPos = StreamPos4Hash.front();
-        hashdResult = hashFunct(RecordName, (2*Records));
-        hashdResult = hashdResult * 16; // Go by blocks of 8 bytes
+        hashdResult = hashFunct(RecordName, (2*Recordlen));
+        hashdResult = hashdResult * 8; // Go by blocks of 8 bytes
         // Find an empty block to write to
         while(1){
             hashFile.seekg(hashdResult);
@@ -167,10 +169,31 @@ bool dbwrite::hash2Disk(){
         }
         hashFile.flush();
         Names4Hash.pop();
-        StreamPos4Hash.pop();
     }
     // Write extra data to end so eof isn't encountered when reading last entry
-    hashFile.write((char*)&(streamPos), 8);
+    hashFile.write((char*)&(fileEnd), 8);
     
+    return result;
+}
+
+/*-----------------------------------------
+ * hashFunct
+ * Takes in a std::string type and a
+ * long long type as arguments and computes
+ * a long long hash value
+-----------------------------------------*/
+long long dbwrite::hashFunct(std::string toHash, long long hashSize){
+    long long result;
+    unsigned j;
+    result = 0;
+    for(unsigned i=0;i<(toHash.size()-2);i++){
+        result += int(toHash[i]) * int(toHash[i+1]) * int(toHash[i+2]);
+    }
+    j = toHash.size()-1;
+    for(unsigned i=0;i<j;i++){
+        result += int(toHash[i]) * int(toHash[j]);
+        j--;
+    }
+    result = result % hashSize;
     return result;
 }

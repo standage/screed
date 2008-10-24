@@ -15,7 +15,7 @@ using namespace std;
 dbread::dbread(string dbname){
 	dbread::Node *Curr;
 	dbread::Node *Prev;
-	string idxname;
+	string idxname, hashname;
 	unsigned i, j;
 	unsigned fieldsize = 100;
 	char fieldname[fieldsize];
@@ -24,6 +24,7 @@ dbread::dbread(string dbname){
 	open = true;
 	failbit = false;
 	idxname = dbname + "_idx";
+    hashname = dbname + "_hash";
 	lastquery = -19;
 	empty = ' ';
 	Typesize = 0;
@@ -33,7 +34,8 @@ dbread::dbread(string dbname){
 	Head->Next = NULL;
 	Prev = Head;
 	idxFile.open(idxname.c_str(), ios::in | ios::binary);
-	if(!idxFile.is_open()){
+    hashFile.open(hashname.c_str(), ios::in | ios::binary);
+	if(!idxFile.is_open() || !hashFile.is_open()){
 		open = false;
         errmsg = "Invalid database filename";
 		return;
@@ -96,7 +98,6 @@ dbread::dbread(string dbname){
 	for(i=0;i<Typesize;i++){
 		Types[i] = new (nothrow) char[2];
 	}
-
 }
 
 /*--------------------------------------
@@ -107,6 +108,7 @@ dbread::dbread(string dbname){
 dbread::~dbread(){
 	unsigned i;
 	dbFile.close();
+    hashFile.close();
 	delete Head;
 	delete [] index;
 	for(i=0;i<Typesize;i++){
@@ -194,6 +196,7 @@ void dbread::clear(){
 	failbit = false;
 	idxFile.clear();
 	dbFile.clear();
+    hashFile.clear();
 }
 
 /*---------------------------------------------
@@ -210,4 +213,66 @@ char * dbread::getTypekey(unsigned idx){
         return &(empty);
     }
     return Typekeys[idx];
+}
+
+/*------------------------------------------
+ * getHashRecord
+ * Takes in the name of the record as a
+ * string, uses hashFunct to turn the string
+ * into an integer and then uses getRecord
+ * to load the record into memory
+------------------------------------------*/
+void dbread::getHashRecord(std::string RecordName){
+    long long hashdResult, rcrdIdx;
+    unsigned nameTypeint;
+    nameTypeint = Typeassc["name"]-1;
+    std::string test;
+    hashdResult = hashFunct(RecordName, size*2);
+    hashdResult = hashdResult * 8;
+    hashFile.seekg(hashdResult); // Go to the possible stream location
+    
+    while(1){
+        // Get pointer is automatically incremented on each get
+        hashFile.read((char*)&(rcrdIdx), 8);
+        if(hashFile.eof()){
+            failbit = true;
+            errmsg = "No named record in database";
+            return;
+        }
+        else if(hashFile.fail()){
+            failbit = true;
+            errmsg = "Corrupted hash file";
+            return;
+        }
+        // Re-Correction for db writer necessary offset
+        rcrdIdx = rcrdIdx - 1;
+        getRecord(rcrdIdx);
+        test = Types[nameTypeint];
+        if(RecordName == test){ // Compare the retrieved name to the input one
+            return;
+        }
+    }
+    return;
+}
+
+/*-----------------------------------------
+ * hashFunct
+ * Takes in a std::string type and a
+ * long long type as arguments and computes
+ * a long long hash value
+-----------------------------------------*/
+long long dbread::hashFunct(std::string toHash, long long hashSize){
+    long long result;
+    unsigned j;
+    result = 0;
+    for(unsigned i=0;i<(toHash.size()-2);i++){
+        result += int(toHash[i]) * int(toHash[i+1]) * int(toHash[i+2]);
+    }
+    j = toHash.size()-1;
+    for(unsigned i=0;i<j;i++){
+        result += int(toHash[i]) * int(toHash[j]);
+        j--;
+    }
+    result = result % hashSize;
+    return result;
 }

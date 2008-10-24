@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char *argv[]){
 	dbread db(argv[1]);
 	string testcase(argv[4]);
-	int index, type;
+	int index;
 
 	index = atoi(argv[2]);
 

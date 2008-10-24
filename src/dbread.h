@@ -21,13 +21,17 @@ class dbread{
 		long long size, lastquery, dnalines;
 		long long * index;
 		unsigned Typesize;
-		std::ifstream idxFile, dbFile;
+		std::ifstream idxFile, dbFile, hashFile;
 		bool open, failbit;
         std::string errmsg;
+
+        long long hashFunct(std::string, long long);
 	public:
 		dbread(std::string);
 
 		~dbread();
+
+        void getHashRecord(std::string);
 
 		void getRecord(long long=0);
 
