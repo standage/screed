@@ -148,6 +148,12 @@ void dbread::getRecord(long long idx){
 	}
 
 	dbFile.seekg(index[idx]);
+    if(dbFile.fail()){
+        errmsg = "database does not extend to stream position " +
+            string((char*)&(index[idx]));
+        failbit = true;
+        return;
+    }
 	//Read new records into the Types array
 	a = '0';
 	for(i=0;a!=delimiter;i++){
@@ -162,6 +168,10 @@ void dbread::getRecord(long long idx){
 		Types[i] = new (nothrow) char[linelen];
 		dbFile.read(Types[i], (linelen-1)); // Read in the line data
 		Types[i][linelen-1] = '\0'; // Set the NULL character at end
+        if(idx == 496 or idx == 495){
+            cout << "linelen is: " << linelen << endl;
+            cout << "data is: " << string(Types[i]) << endl;
+        }
 		dbFile.ignore(1, '\n'); // Ignore the newline character
 		a = dbFile.peek(); // Checks for delimiter character
 	}

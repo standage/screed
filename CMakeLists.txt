@@ -65,6 +65,8 @@ IF(PYTHONINTERP_FOUND)
         ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_idx
         ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2
         ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2_idx
+        ${CMAKE_SOURCE_DIR}/tests/test.fastq_seqdb2_hash
+        ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_hash
         ${CMAKE_SOURCE_DIR}/Makefile ${CMAKE_SOURCE_DIR}/Testing/
         ${CMAKE_SOURCE_DIR}/CMakeFiles ${CMAKE_SOURCE_DIR}/tests/__init__.pyc
         ${CMAKE_SOURCE_DIR}/smoketests.pyc ${SEQDB2_PY_DIR}/_seqdb2.cpp

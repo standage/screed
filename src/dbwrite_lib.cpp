@@ -78,6 +78,9 @@ bool dbwrite::writeFirst(string name){
  * line and then the line itself
 ---------------------------------------*/
 bool dbwrite::writeLine(string theLine){
+    if(Recordlen == 497){
+        cout << "line is:\n" << theLine << endl;
+    }
 	long long lsize;
 	lsize = theLine.size() + 1;
 	dbFile.write((char*)&(lsize), sizeof(lsize));
@@ -171,6 +174,7 @@ bool dbwrite::hash2Disk(){
         Names4Hash.pop();
     }
     // Write extra data to end so eof isn't encountered when reading last entry
+    hashFile.seekp(fileEnd);
     hashFile.write((char*)&(fileEnd), 8);
     
     return result;

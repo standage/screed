@@ -129,3 +129,25 @@ class Test_Fasta:
         assert record.description.startswith('cdna:pseudogene ')
         assert record.name == 'ENSMICT00000012722'
         assert record.sequence.startswith('TGCAGAAAATATCAAGAGTCA')
+
+class Test_Hashing_fastq:
+    def setup(self):
+        self.db = seqdb2.SeqDB2(thisdir + '/test.fastq_seqdb2')
+        self.names = []
+        for record in self.db:
+            self.names.append(record.name)
+
+    def test_simple(self):
+        for name in self.names:
+            assert name == self.db[name].name
+
+class Test_Hashing_fa:
+    def setup(self):
+        self.db = seqdb2.SeqDB2(thisdir + '/test.fa_seqdb2')
+        self.names = []
+        for record in self.db:
+            self.names.append(record.name)
+
+    def test_simple(self):
+        for name in self.names:
+            assert name == self.db[name].name
