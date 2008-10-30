@@ -5,8 +5,6 @@
 #include <fstream>
 
 const char newline = '\n';
-const char delim = '-';
-const char space = ' ';
 
 class dbwrite{
 	private:
@@ -33,8 +31,6 @@ class dbwrite{
         bool hash2Disk();
 
 		bool is_open() const {return open;}
-
-		bool writeDelim();
 
 		bool writeFirst(std::string);
 

@@ -27,7 +27,7 @@ dbread::dbread(string dbname){
     hashname = dbname + "_hash";
 	lastquery = -19;
 	empty = ' ';
-	Typesize = 0;
+	Typesize = 1;
     errmsg = "";
 
 	Head = new (nothrow) Node;
@@ -48,16 +48,11 @@ dbread::dbread(string dbname){
 		Curr->Next = NULL;
 		Prev = Curr;
 		idxFile.read((char*)&(Curr->data), sizeof(Curr->data));
-		a = idxFile.peek();
-		while(a != '\n'){ // Removes the newline character
-			idxFile.get(a);
-		}
 		idxFile.peek();
 	}
 	idxFile.close();
 
 	index = new (nothrow) long long[size];
-
 	Prev = Head;
 	Curr = Head->Next;
 	for(long long li=0;li<size;li++){
@@ -74,11 +69,13 @@ dbread::dbread(string dbname){
 	}
 
 	//Determine the amount and names of individual types per record
-	for(a='0';a!=delimiter;Typesize++){
+	for(a='0';a!='\n';Typesize++){
 		dbFile.getline(fieldname, fieldsize);
-		Typeassc[string(fieldname)] = (Typesize+1);
+		Typeassc[string(fieldname)] = Typesize;
 		a = dbFile.peek();
 	}
+    dbFile.ignore(1); // Ignore the \n char seperating the sections
+    Typesize--;
 
 	//Create the publically-accessable Typekeys object for the user to
 	//view the keys of the map with
@@ -154,26 +151,14 @@ void dbread::getRecord(long long idx){
         failbit = true;
         return;
     }
-	//Read new records into the Types array
+	// Read new records into the Types array
 	a = '0';
-	for(i=0;a!=delimiter;i++){
-		if(i == Typesize){
-            errmsg = "Database files corrupted";
-			failbit = true;
-			return;
-		}
+	for(i=0;i<Typesize;i++){
 		//Read the linelength integer in
 		dbFile.read((char*)&linelen, sizeof(linelen));
-		dbFile.ignore(1, ' '); // Ignore the space character
-		Types[i] = new (nothrow) char[linelen];
-		dbFile.read(Types[i], (linelen-1)); // Read in the line data
-		Types[i][linelen-1] = '\0'; // Set the NULL character at end
-        if(idx == 496 or idx == 495){
-            cout << "linelen is: " << linelen << endl;
-            cout << "data is: " << string(Types[i]) << endl;
-        }
-		dbFile.ignore(1, '\n'); // Ignore the newline character
-		a = dbFile.peek(); // Checks for delimiter character
+		Types[i] = new (nothrow) char[linelen+1];
+		dbFile.read(Types[i], linelen); // Read in the line data
+		Types[i][linelen] = '\0'; // Set the NULL character at end
 	}
 	if(i != Typesize){ // i must equal Typesize when the loop exits
         errmsg = "Database files corrupted";
@@ -182,10 +167,13 @@ void dbread::getRecord(long long idx){
 	lastquery = idx;
 }
 
-/*------------------------------------------
+/*-----------------------------------------------------
  * getType
- * Returns referenced cached data
--------------------------------------------*/
+ * Returns integer reprensentation of data in the map
+ * object Typeassc. Typeassc is set in the constructor
+ * and provides the types which are accessable in the
+ * database
+-----------------------------------------------------*/
 char* dbread::getType(char wanted[]){
 	unsigned i;
 	i = Typeassc[string(wanted)];
@@ -195,6 +183,24 @@ char* dbread::getType(char wanted[]){
 		return &(empty);
 	}
 	return Types[i-1];
+}
+
+/*---------------------------------------------
+ * getTypekey
+ * Returns the c-string stored the in the
+ * double-pointer variable Typekeys. First
+ * though, it checks to make sure that the 
+ * referenced index is a valid one. This
+ * function can be thought of as the inverse
+ * of getType
+---------------------------------------------*/
+char * dbread::getTypekey(unsigned idx){
+    if((idx >= Typesize) || (idx < 0)){
+        failbit = true;
+        errmsg = "Bad typekey request";
+        return &(empty);
+    }
+    return Typekeys[idx];
 }
 
 /*------------------------------------
@@ -207,22 +213,6 @@ void dbread::clear(){
 	idxFile.clear();
 	dbFile.clear();
     hashFile.clear();
-}
-
-/*---------------------------------------------
- * getTypekey
- * Returns the c-string stored the in the
- * double-pointer varialbe Typekeys. First
- * though, it checks to make sure tha the 
- * reference index is a valid one.
----------------------------------------------*/
-char * dbread::getTypekey(unsigned idx){
-    if((idx >= Typesize) || (idx < 0)){
-        failbit = true;
-        errmsg = "Bad typekey request";
-        return &(empty);
-    }
-    return Typekeys[idx];
 }
 
 /*------------------------------------------

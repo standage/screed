@@ -66,7 +66,6 @@ int main(int argc, char *argv[]){
 		db.writeLine(name);
 		db.writeLine(desc);
 		db.writeLine(dna);
-		db.writeDelim();
 		if(db.fail() == true){
 			cerr << "ERROR: One of the database file streams is "<<
 				"corrupt. Do you have enough diskspace?\n";

@@ -61,10 +61,11 @@ void dbwrite::close(){
  * a growing list of 2-entry lists
 ----------------------------------------*/
 bool dbwrite::writeFirst(string name){
-	idxFile.write((char*)&dbFile.tellp(), sizeof(dbFile.tellp()));
+    long long pLoc;
+    pLoc = dbFile.tellp();
+	idxFile.write((char*)&(pLoc), sizeof(pLoc));
     Names4Hash.push(name);
     Recordlen++;
-	idxFile.write(&newline, 1);
 	if(!idxFile.good()){
 		failbit = true;
 	}
@@ -78,32 +79,14 @@ bool dbwrite::writeFirst(string name){
  * line and then the line itself
 ---------------------------------------*/
 bool dbwrite::writeLine(string theLine){
-    if(Recordlen == 497){
-        cout << "line is:\n" << theLine << endl;
-    }
 	long long lsize;
-	lsize = theLine.size() + 1;
+	lsize = theLine.size();
 	dbFile.write((char*)&(lsize), sizeof(lsize));
-	dbFile.write(&space, 1);
-	dbFile.write(theLine.c_str(), theLine.size());
-	dbFile.write(&newline, 1);
+	dbFile.write(theLine.c_str(), lsize);
 	if(!dbFile.good()){
 		failbit = true;
 	}
 	return !(dbFile.fail());
-}
-
-/*-------------------------------------
- * writeDelim
- * Write the record delimitor to the
- * database file
--------------------------------------*/
-bool dbwrite::writeDelim(){
-	dbFile.write(&delim, 1);
-	if(!dbFile.good()){
-		failbit = true;
-	}
-	return !(dbFile.fail());	
 }
 
 /*---------------------------------------
@@ -128,7 +111,6 @@ void dbwrite::writeTop(char a){
 	dbFile.write(&newline, 1);
 	dbFile.write(sequence.c_str(), sequence.size());
 	dbFile.write(&newline, 1);
-	dbFile.write(&delim, 1);
 	dbFile.write(&newline, 1);
 	if(!dbFile.good()){
 		failbit = true;

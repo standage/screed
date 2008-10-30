@@ -44,7 +44,6 @@ int main(int argc, char *argv[]){
 		db.writeLine(name);
 		db.writeLine(accu);
 		db.writeLine(dna);
-		db.writeDelim();
 
 		// Make sure nothing went wrong when writing to the database
 		if(db.fail() == true){

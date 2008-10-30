@@ -69,8 +69,8 @@ IF(PYTHONINTERP_FOUND)
         ${CMAKE_SOURCE_DIR}/tests/test.fa_seqdb2_hash
         ${CMAKE_SOURCE_DIR}/Makefile ${CMAKE_SOURCE_DIR}/Testing/
         ${CMAKE_SOURCE_DIR}/CMakeFiles ${CMAKE_SOURCE_DIR}/tests/__init__.pyc
-        ${CMAKE_SOURCE_DIR}/smoketests.pyc ${SEQDB2_PY_DIR}/_seqdb2.cpp
-        ${SEQDB2_PY_DIR}/_seqdb2.o ${SEQDB2_PY_DIR}/_seqdb2.so
+        ${CMAKE_SOURCE_DIR}/smoketests.pyc ${SEQDB2_PY_DIR}/seqdb2.cpp
+        ${SEQDB2_PY_DIR}/seqdb2.o ${SEQDB2_PY_DIR}/seqdb2.so
         ${SEQDB2_PY_DIR}/seqdb2.pyc)
 	SET_DIRECTORY_PROPERTIES(${CMAKE_SOURCE_DIR} ADDITIONAL_MAKE_CLEAN_FILES
         "${temps}")
