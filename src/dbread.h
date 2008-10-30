@@ -3,8 +3,6 @@
 #include <map>
 #include <exception>
 
-const char delimiter = '-';
-
 class dbread{
 	private:
 		struct Node{
