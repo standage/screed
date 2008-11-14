@@ -35,6 +35,7 @@ class Test_pyx_err:
     def test_clear(self):
         try:
             self.db.loadRecord(-1) # makes sure the error is raised
+            assert 1 == 0, "Not raising an exception with loading bad record"
         except seqdb2.DbException:
             pass
 
@@ -89,17 +90,17 @@ class Test_pyx_FastQ:
         fields.sort()
         assert fields == ['accuracy', 'name', 'sequence']
 
-        assert db.getNumRecords() == 49
+        assert db.getNumRecords() == 125
 
         db.loadRecord(0)
         for field in fields:
             print db.getFieldValue(field)
 
         assert db.getFieldValue('accuracy') == \
-               'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD'
-        assert db.getFieldValue('name') == 'HWI-EAS_4_PE-FC20GCB:1:1:62:922/1'
+               'AA7AAA3+AAAAAA.AAA.;7;AA;;;;*;<1;<<<'
+        assert db.getFieldValue('name') == 'HWI-EAS_4_PE-FC20GCB:2:1:492:573/2'
         assert db.getFieldValue('sequence') == \
-               'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+               'ACAGCAAAATTGTGATTGAGGATGAAGAACTGCTGT'
 
 class Test_FastQ:
     def setup(self):
@@ -109,13 +110,13 @@ class Test_FastQ:
         self.db.clear()
 
     def test_simple(self):
-        assert len(self.db) == 49
+        assert len(self.db) == 125
         assert self.db.fields == ['accuracy','name','sequence']
 
         record = self.db[0]
-        assert record.accuracy == 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDDAAD'
-        assert record.name == 'HWI-EAS_4_PE-FC20GCB:1:1:62:922/1'
-        assert record.sequence == 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+        assert record.accuracy == 'AA7AAA3+AAAAAA.AAA.;7;AA;;;;*;<1;<<<'
+        assert record.name == 'HWI-EAS_4_PE-FC20GCB:2:1:492:573/2'
+        assert record.sequence == 'ACAGCAAAATTGTGATTGAGGATGAAGAACTGCTGT'
         
 class Test_Fasta:
     def setup(self):
@@ -133,21 +134,15 @@ class Test_Fasta:
 class Test_Hashing_fastq:
     def setup(self):
         self.db = seqdb2.SeqDB2(thisdir + '/test.fastq_seqdb2')
-        self.names = []
-        for record in self.db:
-            self.names.append(record.name)
 
     def test_simple(self):
-        for name in self.names:
-            assert name == self.db[name].name
+        for record in self.db:
+            assert record.name == self.db[record.name].name
 
 class Test_Hashing_fa:
     def setup(self):
         self.db = seqdb2.SeqDB2(thisdir + '/test.fa_seqdb2')
-        self.names = []
-        for record in self.db:
-            self.names.append(record.name)
 
     def test_simple(self):
-        for name in self.names:
-            assert name == self.db[name].name
+        for record in self.db:
+            assert record.name == self.db[record.name].name

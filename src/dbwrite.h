@@ -12,15 +12,17 @@ class dbwrite{
 		std::ofstream dbFile, idxFile;
         std::fstream hashFile;
         long long Recordlen; // The number of records read in
+        unsigned hashMultiplier; // Defaults to 2X
 
 		void writeTop(char);
 
 		bool open, failbit;
 
         long long hashFunct(std::string, long long);
+        long long quadProb(long long);
 
 	public:
-		dbwrite(std::string, char);
+		dbwrite(std::string, char, unsigned = 2);
 
 		~dbwrite();
 

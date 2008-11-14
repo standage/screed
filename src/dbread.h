@@ -19,13 +19,14 @@ class dbread{
 		long long size, lastquery, dnalines;
 		long long * index;
 		unsigned Typesize;
+        unsigned hashMultiplier; // Defaults to 2
 		std::ifstream idxFile, dbFile, hashFile;
 		bool open, failbit;
         std::string errmsg;
 
         long long hashFunct(std::string, long long);
 	public:
-		dbread(std::string);
+		dbread(std::string, unsigned=2);
 
 		~dbread();
 

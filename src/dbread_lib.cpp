@@ -12,7 +12,8 @@ using namespace std;
  * the correct _seqdb2 and _idx files.
  * Also reads the first record into cache
 ----------------------------------------*/
-dbread::dbread(string dbname){
+dbread::dbread(string dbname, unsigned multi){
+    hashMultiplier = multi;
 	dbread::Node *Curr;
 	dbread::Node *Prev;
 	string idxname, hashname;
@@ -227,10 +228,10 @@ void dbread::getHashRecord(std::string RecordName){
     unsigned nameTypeint;
     nameTypeint = Typeassc["name"]-1;
     std::string test;
-    hashdResult = hashFunct(RecordName, size*2);
+    hashdResult = hashFunct(RecordName, size*hashMultiplier);
     hashdResult = hashdResult * 8;
     hashFile.seekg(hashdResult); // Go to the possible stream location
-    
+
     while(1){
         // Get pointer is automatically incremented on each get
         hashFile.read((char*)&(rcrdIdx), 8);
@@ -262,16 +263,13 @@ void dbread::getHashRecord(std::string RecordName){
  * a long long hash value
 -----------------------------------------*/
 long long dbread::hashFunct(std::string toHash, long long hashSize){
-    long long result;
-    unsigned j;
+    unsigned long long result, a, b;
     result = 0;
-    for(unsigned i=0;i<(toHash.size()-2);i++){
-        result += int(toHash[i]) * int(toHash[i+1]) * int(toHash[i+2]);
-    }
-    j = toHash.size()-1;
-    for(unsigned i=0;i<j;i++){
-        result += int(toHash[i]) * int(toHash[j]);
-        j--;
+    a = 63689;
+    b = 378551;
+    for(unsigned i=0;i<toHash.size();i++){
+        result = result*a + int(toHash[i]);
+        a = a * b;
     }
     result = result % hashSize;
     return result;
