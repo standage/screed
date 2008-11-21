@@ -3,6 +3,7 @@
 #include <new>
 #include <string>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -12,8 +13,7 @@ using namespace std;
  * the correct _seqdb2 and _idx files.
  * Also reads the first record into cache
 ----------------------------------------*/
-dbread::dbread(string dbname, unsigned multi){
-    hashMultiplier = multi;
+dbread::dbread(string dbname){
 	dbread::Node *Curr;
 	dbread::Node *Prev;
 	string idxname, hashname;
@@ -69,6 +69,8 @@ dbread::dbread(string dbname, unsigned multi){
 		return;
 	}
 
+    //Gets the hashMultiplier
+	dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
 	//Determine the amount and names of individual types per record
 	for(a='0';a!='\n';Typesize++){
 		dbFile.getline(fieldname, fieldsize);
@@ -225,15 +227,15 @@ void dbread::clear(){
 ------------------------------------------*/
 void dbread::getHashRecord(std::string RecordName){
     long long hashdResult, rcrdIdx;
-    unsigned nameTypeint;
+    unsigned nameTypeint, collisions;
     nameTypeint = Typeassc["name"]-1;
     std::string test;
     hashdResult = hashFunct(RecordName, size*hashMultiplier);
     hashdResult = hashdResult * 8;
-    hashFile.seekg(hashdResult); // Go to the possible stream location
+    collisions = 0;
 
     while(1){
-        // Get pointer is automatically incremented on each get
+        hashFile.seekg(hashdResult); // Go to the possible stream location
         hashFile.read((char*)&(rcrdIdx), 8);
         if(hashFile.eof()){
             failbit = true;
@@ -252,6 +254,8 @@ void dbread::getHashRecord(std::string RecordName){
         if(RecordName == test){ // Compare the retrieved name to the input one
             return;
         }
+        collisions++;
+        hashdResult = hashdResult + 8*(pow(2, collisions)-1);
     }
     return;
 }

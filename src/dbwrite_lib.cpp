@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
+#include <math.h>
 
 using namespace std;
 
@@ -12,8 +13,7 @@ using namespace std;
  * directory as the filename passed in using the
  * dbFile and idxFile file handles
 -------------------------------------------------*/
-dbwrite::dbwrite(string fname, char type, unsigned multi){
-    hashMultiplier = multi;
+dbwrite::dbwrite(string fname, char type, int multi){
 	open = true;
 	failbit = false;
     Recordlen = 0;
@@ -25,8 +25,8 @@ dbwrite::dbwrite(string fname, char type, unsigned multi){
 	dbName.append("_idx");
 	idxFile.open(dbName.c_str(), ios::out | ios::binary);
     hashName.append("_hash");
-    hashFile.open(hashName.c_str(), ios::out | ios::in | ios::binary |
-            ios::trunc);
+    hashFile.open(hashName.c_str(), ios::out | ios::binary);
+    hashMultiplier = multi;
 
 	if((!dbFile.is_open()) || (!idxFile.is_open()) || (!hashFile.is_open())){
         open = false;
@@ -92,8 +92,10 @@ bool dbwrite::writeLine(string theLine){
 
 /*---------------------------------------
  * writeTop
- * Writes the types of fields in a small
- * section at the top of the db file
+ * Writes the multiplier used on the hash
+ * file. Also writes the types of fields
+ * in a small section at the top of the
+ * db file.
 ---------------------------------------*/
 void dbwrite::writeTop(char a){
 	string name, sequence, middle;
@@ -105,7 +107,8 @@ void dbwrite::writeTop(char a){
 	else if(a == 'q'){ // sequence is a fastq file
 		middle = "accuracy";
 	}
-
+    
+    dbFile.write((char*)&(hashMultiplier), sizeof(hashMultiplier));
 	dbFile.write(name.c_str(), name.size());
 	dbFile.write(&newline, 1);
 	dbFile.write(middle.c_str(), middle.size());
@@ -128,55 +131,43 @@ void dbwrite::writeTop(char a){
 bool dbwrite::hash2Disk(){
     std::string RecordName;
     bool result;
-    long long hashdResult, testBlock, fileEnd;
-    long long collisions;
+    long long hashdResult, collisions, totalCollisions;
+    map<long long, long long> Nums4Hash;
+    map<long long, long long>::iterator it;
     result = true;
-    fileEnd = 0;
-    collisions = 0;
+    totalCollisions = 0;
+    // Build the in-memory hash
     for(long long streamPos=1;streamPos<=Recordlen;streamPos++){
         RecordName = Names4Hash.front();
         hashdResult = hashFunct(RecordName, Recordlen*hashMultiplier);
         hashdResult = hashdResult * 8; // Go by blocks of 8 bytes
+        collisions = 0;
         // Find an empty block to write to
         while(1){
-            hashFile.seekg(hashdResult);
-            hashFile.read((char*)&(testBlock), 8);
-
-            if(!hashFile.good()){ // Block area was beyond file, no problem
-                hashFile.clear();
+            if(Nums4Hash[hashdResult] == 0){
                 break;
             }
-            else if(testBlock == 0){ // Block is empty and is good for data
-                break;
-            }
-            hashdResult = hashdResult + 8;
             collisions++;
-                //quadProb(hashdResult);// Block was occupied, go to next
+            totalCollisions++;
+            // Block was occupied. Do a quadratic probe for next area
+            hashdResult = hashdResult + 8*(pow(2, collisions)-1);
         }
-        hashFile.seekp(hashdResult);
-        hashFile.write((char*)&(streamPos), 8);
-        /*cout << "WROTE record: " << RecordName << endl;
-        cout << "WROTE number: " << streamPos << endl;
-        cout << "AT POSITION: " << hashdResult << endl << endl;
-        */
-        if(hashFile.tellp() > fileEnd){
-            fileEnd = hashFile.tellp();
-        }
-        hashFile.flush();
+        Nums4Hash[hashdResult] = streamPos;
         Names4Hash.pop();
-
-        //!!!DEBUGGING CODE!!!
-        if(streamPos % 1000 == 0){
-            cout << streamPos << ":\n";
-            cout << collisions << " collisions with average = " <<
-                static_cast<double>(collisions)/1000 <<
-                " collisions per write\n\n";
-            collisions = 0;
-        }
+    }
+    // Write the in-memory hash to disk
+    for(it=Nums4Hash.begin(); it != Nums4Hash.end(); it++){
+        hashFile.seekp((*it).first);
+        hashFile.write((char*)&((*it).second), 8);
     }
     // Write extra data to end so eof isn't encountered when reading last entry
-    hashFile.seekp(fileEnd);
-    hashFile.write((char*)&(fileEnd), 8);
+    hashFile.seekp(0, ios_base::end);
+    hashFile.write((char*)&(collisions), 8);
+
+    //!!!DEBUGGING CODE!!!
+    cout << totalCollisions << " collisions with average = " <<
+        static_cast<double>(totalCollisions)/Recordlen <<
+        " collisions per write\n" << Recordlen << " records total\n\n";
     
     return result;
 }
@@ -198,18 +189,4 @@ long long dbwrite::hashFunct(std::string toHash, long long hashSize){
     }
     result = result % hashSize;
     return result;
-}
-
-/*----------------------------------------
- * quadProb
- * Quadratic Probing, does some arithmetic
- * and returns the next hash location to
- * use. Meant to reduce blocks of
- * collisions in files
-----------------------------------------*/
-long long dbwrite::quadProb(long long location){
-
-
-
-    return location+8;
 }

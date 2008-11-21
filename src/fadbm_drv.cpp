@@ -8,11 +8,20 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 	fstream theFile;
-	dbwrite db(argv[1], 'a');
 	char a;
 	string line, name, desc, dna;
 	long long filepos;
+    int multiplier;
 
+    multiplier = 2; // Determines how many big hash file will be to index file
+    if(argc == 3){
+        multiplier = atol(argv[2]);
+        if(multiplier <= 0){
+            cerr << "ERROR: CAN'T CREATE DB OF 0 OR NEGATIVE HASH LENGTH\n";
+            exit(1);
+        }
+    }
+	dbwrite db(argv[1], 'a', multiplier);
 	if(!db.is_open()){
 		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
 		exit(1);

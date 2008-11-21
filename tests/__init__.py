@@ -146,3 +146,28 @@ class Test_Hashing_fa:
     def test_simple(self):
         for record in self.db:
             assert record.name == self.db[record.name].name
+
+class Test_Hashing_nondefault_1:
+    def setup(self):
+        # Setup non-default database with length=1
+        subprocess.check_call(thisdir + '/../bin/fqdbm tests/test.fastq 1',
+                shell=True, stdout=subprocess.PIPE)
+        subprocess.check_call(thisdir + '/../bin/fadbm tests/test.fa 1',
+                shell=True, stdout=subprocess.PIPE)
+        self.fqdb = seqdb2.SeqDB2(thisdir + '/test.fastq_seqdb2')
+        self.fadb = seqdb2.SeqDB2(thisdir + '/test.fa_seqdb2')
+
+    def tearDown(self):
+         # remake the normal database
+        subprocess.check_call(thisdir + '/../bin/fadbm tests/test.fa',
+                shell=True, stdout=subprocess.PIPE)
+        subprocess.check_call(thisdir + '/../bin/fqdbm tests/test.fastq',
+                shell=True, stdout=subprocess.PIPE)
+
+    def test_fastq_simple(self):
+        for record in self.fqdb:
+            assert record.name == self.fqdb[record.name].name
+
+    def test_fasta_simple(self):
+        for record in self.fadb:
+            assert record.name == self.fadb[record.name].name

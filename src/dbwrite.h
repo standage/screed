@@ -3,6 +3,7 @@
 #include <queue>
 #include <list>
 #include <fstream>
+#include <map>
 
 const char newline = '\n';
 
@@ -12,17 +13,16 @@ class dbwrite{
 		std::ofstream dbFile, idxFile;
         std::fstream hashFile;
         long long Recordlen; // The number of records read in
-        unsigned hashMultiplier; // Defaults to 2X
+        int hashMultiplier; // Defaults to 2X
 
 		void writeTop(char);
 
 		bool open, failbit;
 
         long long hashFunct(std::string, long long);
-        long long quadProb(long long);
 
 	public:
-		dbwrite(std::string, char, unsigned = 2);
+		dbwrite(std::string, char, int = 2);
 
 		~dbwrite();
 
