@@ -35,6 +35,7 @@ class dbread{
 		void getRecord(long long=0);
 
 		char* getType(char[]);
+		char* getTypeByIndex(unsigned);
 
 		bool is_open() const{return open;}
 

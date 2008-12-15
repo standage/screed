@@ -1,10 +1,11 @@
-import types
+import UserDict
 
 cdef extern from "dbread.h":
     ctypedef int (*fail)()
     ctypedef int (*is_open)()
     ctypedef char * (*theError)()
     ctypedef char * (*getType)(char*)
+    ctypedef char * (*getTypeByIndex)(unsigned)
     ctypedef void (*getRecord)(long long)
     ctypedef void (*clear)()
     ctypedef long long (*getSize)()
@@ -16,6 +17,7 @@ cdef extern from "dbread.h":
         fail fail
         theError theError
         getType getType
+        getTypeByIndex getTypeByIndex
         getRecord getRecord
         clear clear
         getSize getSize
@@ -32,100 +34,172 @@ class DbException(Exception):
     def __str__(self):
         return repr(self.value)
 
+class _dbread_record(UserDict.DictMixin):
+    """
+    Simple dict-like record interface with bag behavior.
+    """
+    def __init__(self, *args, **kwargs):
+        self.d = dict(*args, **kwargs)
+        
+    def __getitem__(self, name):
+        return self.d[name]
+    
+    def __getattr__(self, name):
+        try:
+            return self.d[name]
+        except KeyError:
+            raise AttributeError, name
+
+    def keys(self):
+        return self.d.keys()
+
+cdef class _dbread_record_iter:
+    """
+    Iterator over dbread database, returning records.
+    """
+    cdef int i, n
+    cdef object db
+    
+    def __init__(self, db):
+        self.db = db
+        self.i = 0
+        self.n = len(db)
+
+    def __iter__(self):
+        return self
+        
+    def __next__(self):
+        if self.i >= self.n:
+            raise StopIteration
+        
+        record = self.db.loadRecordByIndex(self.i)
+        self.i = self.i + 1
+
+        return record
+
+cdef class _dbread_name_iter(_dbread_record_iter):
+    """
+    Iterator over dbread database, returning keys.
+    """
+    def __next__(self):
+        record = _dbread_record_iter.next(self)
+        return record.name
+
+cdef class _dbread_name_record_iter(_dbread_record_iter):
+    """
+    Iterator over dbread database, returning items.
+    """
+    def __next__(self):
+        record = _dbread_record_iter.next(self)
+        return record.name, record
+
 cdef class dbread:
     cdef c_dbread *thisptr              # wrapped C++ instance
+    cdef readonly list fields           # list of fields in each entry
 
     def __cinit__(self, filename):
+        cdef int n_fields
         self.thisptr = new_dbread(filename)
         if self.thisptr.is_open() == 0:
             raise DbException(self.thisptr.theError())
-        
-    def __dealloc__(self):
-        pass
-#        del_dbread(self.thisptr)
 
-    def loadRecord(self, idx):
+        n_fields = self.thisptr.getTypesize()
+        fields = list()
+
+        self.thisptr.getRecord(0)
+        
+        for i in range(n_fields):
+            name = self.thisptr.getTypekey(i)
+            fields.append(name)
+        self.fields = fields
+
+    def __iter__(self):
+        return _dbread_name_iter(self)
+
+    def __dealloc__(self):
+        del_dbread(self.thisptr)
+        self.thisptr = NULL
+
+    def _buildRecord(self):
+        x = []
+        for i, name in enumerate(self.fields):
+            value = self.thisptr.getTypeByIndex(i)
+            print i, name, value
+            x.append((name, value))
+
+        return _dbread_record(x)
+
+    def loadRecordByIndex(self, idx):
         self.thisptr.getRecord(idx)
-        if self.thisptr.fail() == 1:
+        if self.thisptr.fail() == 1:    # IndexError? @CTB
             self.thisptr.clear()
             raise DbException(self.thisptr.theError())
 
-    def loadHashRecord(self, name):
+        return self._buildRecord()
+
+    def loadRecordByName(self, name):
         self.thisptr.getHashRecord(name)
         if self.thisptr.fail() == 1:
             self.thisptr.clear()
             raise DbException(self.thisptr.theError())
+
+        return self._buildRecord()
+
+    def __getitem__(self, key):
+        try:
+            return self.loadRecordByName(key)
+        except DbException:
+            raise KeyError
     
-    def getFieldValue(self, name):
-        result = self.thisptr.getType(name)
-        if self.thisptr.fail() == 1:
-           self.thisptr.clear()
-           raise DbException(self.thisptr.theError())
-        return result
-
-    def getNumRecords(self):
-        result = self.thisptr.getSize()
-        if self.thisptr.fail() == 1:
-           self.thisptr.clear()
-           raise DbException(self.thisptr.theError())
-        return result
-
-    def getNumFields(self):
-        result = self.thisptr.getTypesize()
-        if self.thisptr.fail() == 1:
-           self.thisptr.clear()
-           raise DbException(self.thisptr.theError())
-        return result
-
-    def getFieldName(self, idx):
-        result = self.thisptr.getTypekey(idx)
-        if self.thisptr.fail() == 1:
-           self.thisptr.clear()
-           raise DbException(self.thisptr.theError())
-        return result
-
-    def clear(self):
-        self.thisptr.clear()
-        return
-
-class SeqDB2(object):
-    """
-    Wrapper for Pyrex dbread class
-    """
-
-    def __init__(self, dbfilename):
-        self.dbfilename = dbfilename
-        self._db = dbread(dbfilename)
-
-        fields = []
-        for k in range(self._db.getNumFields()):
-            name = self._db.getFieldName(k)
-            fields.append(name)
-        self.fields = fields
-
     def __len__(self):
-        return self._db.getNumRecords()
+        """
+        Return number of entries in database.
+        """
+        return self.thisptr.getSize()
 
-    def __getitem__(self, i):
-        if type(i) == types.IntType:
-            if i < 0 or i >= len(self):
-                raise IndexError, i
-            self._db.loadRecord(i)
-        elif type(i) == types.StringType:
-            self._db.loadHashRecord(i)
+    def clearErrorFlag(self):
+        self.thisptr.clear()
 
-        field_values = []
-        for n in self.fields:
-            field_values.append(self._db.getFieldValue(n))
-#        field_values = [ self._db.getFieldValue(n) for n in self.fields ]
+    def keys(self):
+        return list(self.iterkeys())
+
+    def values(self):
+        return list(self.itervalues())
+
+    def items(self):
+        return list(self.iteritems())
+
+    def iterkeys(self):
+        return _dbread_name_iter(self)
+
+    def itervalues(self):
+        return _dbread_record_iter(self)
+
+    def iteritems(self):
+        return _dbread_name_record_iter(self)
+
+    def __contains__(self, name):
+        if self.has_key(name):
+            return True
+        return False
+
+    def has_key(self, key):
+        try:
+            if self.loadRecordByName(key):
+                return True
+        except DbException:
+            pass
         
-        return SeqDB2Record(self.fields, field_values)
+        return False
 
-    def clear(self):
-        self._db.clear()
-        return
-    
-class SeqDB2Record(object):
-    def __init__(self, fields, values):
-        for field, value in zip(fields, values):
-            setattr(self, field, value)
+    def get(self, key, default=None):
+        try:
+            return self.loadRecordByName(key)
+        except DbException:
+            return default
+
+    def copy(self):
+        return self
+
+    # CTB: no clear(), setdefault(), , pop(), popitem(), copy(), and update();
+    # this is a read-only dict interface.

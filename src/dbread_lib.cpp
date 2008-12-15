@@ -22,25 +22,30 @@ dbread::dbread(string dbname){
 	char fieldname[fieldsize];
 	char a;
 
+	Head = NULL;
+
 	open = true;
 	failbit = false;
 	idxname = dbname + "_idx";
-    hashname = dbname + "_hash";
+	hashname = dbname + "_hash";
 	lastquery = -19;
 	empty = ' ';
 	Typesize = 1;
-    errmsg = "";
+	errmsg = "";
+
+	idxFile.open(idxname.c_str(), ios::in | ios::binary);
+	hashFile.open(hashname.c_str(), ios::in | ios::binary);
+
+	if(!idxFile.is_open() || !hashFile.is_open()){
+		open = false;
+		errmsg = "Invalid database filename";
+		return;
+	}
 
 	Head = new (nothrow) Node;
 	Head->Next = NULL;
 	Prev = Head;
-	idxFile.open(idxname.c_str(), ios::in | ios::binary);
-    hashFile.open(hashname.c_str(), ios::in | ios::binary);
-	if(!idxFile.is_open() || !hashFile.is_open()){
-		open = false;
-        errmsg = "Invalid database filename";
-		return;
-	}
+
 	//Copy the index file completly into memory so results can be retrieved
 	//faster
 	for(size=0;!idxFile.eof();size++){
@@ -53,6 +58,14 @@ dbread::dbread(string dbname){
 	}
 	idxFile.close();
 
+	dbFile.open(dbname.c_str(), ios::in | ios::binary);
+	if(!dbFile.is_open()){
+	        // @CTB remember to dealloc linked list.
+	          
+		open = false;
+		return;
+	}
+
 	index = new (nothrow) long long[size];
 	Prev = Head;
 	Curr = Head->Next;
@@ -63,13 +76,7 @@ dbread::dbread(string dbname){
 		delete Prev;
 	}// End copying of index file
 
-	dbFile.open(dbname.c_str(), ios::in | ios::binary);
-	if(!dbFile.is_open()){
-		open = false;
-		return;
-	}
-
-    //Gets the hashMultiplier
+	// Gets the hashMultiplier
 	dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
 	//Determine the amount and names of individual types per record
 	for(a='0';a!='\n';Typesize++){
@@ -77,8 +84,8 @@ dbread::dbread(string dbname){
 		Typeassc[string(fieldname)] = Typesize;
 		a = dbFile.peek();
 	}
-    dbFile.ignore(1); // Ignore the \n char seperating the sections
-    Typesize--;
+	dbFile.ignore(1); // Ignore the \n char seperating the sections
+	Typesize--;
 
 	//Create the publically-accessable Typekeys object for the user to
 	//view the keys of the map with
@@ -106,10 +113,15 @@ dbread::dbread(string dbname){
  * character arrays stored in the cache
 --------------------------------------*/
 dbread::~dbread(){
+        if (Head == NULL ) {	// failure in opening or some such.
+                return;
+        }
+
 	unsigned i;
 	dbFile.close();
-    hashFile.close();
-	delete Head;
+	hashFile.close();
+
+	delete Head;		// @CTB do we need to delete linked list too?
 	delete [] index;
 	for(i=0;i<Typesize;i++){
 		delete [] Types[i];
@@ -172,10 +184,11 @@ void dbread::getRecord(long long idx){
 
 /*-----------------------------------------------------
  * getType
- * Returns integer reprensentation of data in the map
+ * Returns integer representation of data in the map
  * object Typeassc. Typeassc is set in the constructor
  * and provides the types which are accessable in the
  * database
+ * @CTB this description seems incorrect...?
 -----------------------------------------------------*/
 char* dbread::getType(char wanted[]){
 	unsigned i;
@@ -186,6 +199,15 @@ char* dbread::getType(char wanted[]){
 		return &(empty);
 	}
 	return Types[i-1];
+}
+
+/*-----------------------------------------------------
+ * getTypeByIndex
+ * Returns data from Types by direct indexing rather
+ * by name as in getType.
+-----------------------------------------------------*/
+char* dbread::getTypeByIndex(unsigned idx){
+        return getType(getTypekey(idx));
 }
 
 /*---------------------------------------------
