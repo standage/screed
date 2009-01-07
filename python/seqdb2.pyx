@@ -12,6 +12,7 @@ cdef extern from "dbread.h":
     ctypedef unsigned (*getTypesize)()
     ctypedef char * (*getTypekey)(unsigned)
     ctypedef void (*getHashRecord)(char*)
+    ctypedef void (*close)()
     ctypedef struct c_dbread "dbread":
         is_open is_open
         fail fail
@@ -24,6 +25,7 @@ cdef extern from "dbread.h":
         getTypesize getTypesize
         getTypekey getTypekey
         getHashRecord getHashRecord
+        close close
 
     c_dbread *new_dbread "new dbread" (char * filename)
     void del_dbread "delete" (c_dbread *db)
@@ -114,6 +116,7 @@ cdef class dbread:
         self.fields = fields
 
     def __iter__(self):
+        self.checkopen()
         return _dbread_name_iter(self)
 
     def __dealloc__(self):
@@ -121,15 +124,17 @@ cdef class dbread:
         self.thisptr = NULL
 
     def _buildRecord(self):
+        self.checkopen()
         x = []
         for i, name in enumerate(self.fields):
             value = self.thisptr.getTypeByIndex(i)
-            print i, name, value
+            #print i, name, value
             x.append((name, value))
 
         return _dbread_record(x)
 
     def loadRecordByIndex(self, idx):
+        self.checkopen()
         self.thisptr.getRecord(idx)
         if self.thisptr.fail() == 1:    # IndexError? @CTB
             self.thisptr.clear()
@@ -138,6 +143,7 @@ cdef class dbread:
         return self._buildRecord()
 
     def loadRecordByName(self, name):
+        self.checkopen()
         self.thisptr.getHashRecord(name)
         if self.thisptr.fail() == 1:
             self.thisptr.clear()
@@ -145,7 +151,12 @@ cdef class dbread:
 
         return self._buildRecord()
 
+    def close(self):
+        self.checkopen()
+        self.thisptr.close()
+
     def __getitem__(self, key):
+        self.checkopen()
         try:
             return self.loadRecordByName(key)
         except DbException:
@@ -155,35 +166,45 @@ cdef class dbread:
         """
         Return number of entries in database.
         """
+        self.checkopen()
         return self.thisptr.getSize()
 
     def clearErrorFlag(self):
+        self.checkopen()
         self.thisptr.clear()
 
     def keys(self):
+        self.checkopen()
         return list(self.iterkeys())
 
     def values(self):
+        self.checkopen()
         return list(self.itervalues())
 
     def items(self):
+        self.checkopen()
         return list(self.iteritems())
 
     def iterkeys(self):
+        self.checkopen()
         return _dbread_name_iter(self)
 
     def itervalues(self):
+        self.checkopen()
         return _dbread_record_iter(self)
 
     def iteritems(self):
+        self.checkopen()
         return _dbread_name_record_iter(self)
 
     def __contains__(self, name):
+        self.checkopen()
         if self.has_key(name):
             return True
         return False
 
     def has_key(self, key):
+        self.checkopen()
         try:
             if self.loadRecordByName(key):
                 return True
@@ -193,13 +214,19 @@ cdef class dbread:
         return False
 
     def get(self, key, default=None):
+        self.checkopen()
         try:
             return self.loadRecordByName(key)
         except DbException:
             return default
 
     def copy(self):
+        self.checkopen()
         return self
+
+    def checkopen(self):
+        if not self.thisptr.is_open():
+            raise DbException("Database Closed")
 
     # CTB: no clear(), setdefault(), , pop(), popitem(), copy(), and update();
     # this is a read-only dict interface.

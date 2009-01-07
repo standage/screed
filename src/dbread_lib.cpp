@@ -109,21 +109,30 @@ dbread::dbread(string dbname){
 
 /*--------------------------------------
  * Destructor
- * Deletes the Head node and all the
- * character arrays stored in the cache
+ * Calls close to do the closing of
+ * files and deleting of allocated
+ * memory
 --------------------------------------*/
 dbread::~dbread(){
-        if (Head == NULL ) {	// failure in opening or some such.
-                return;
-        }
+    close();
+}
 
-	unsigned i;
+/*------------------------------------------
+ * Closes the database files and deletes all
+ * memory allocated. Called by destructor
+------------------------------------------*/
+void dbread::close(){
+    if (Head == NULL ) {    // failure in opening or some such.
+        return;
+    }
+
 	dbFile.close();
 	hashFile.close();
+    open = false;
 
 	delete Head;		// @CTB do we need to delete linked list too?
 	delete [] index;
-	for(i=0;i<Typesize;i++){
+	for(unsigned i=0;i<Typesize;i++){
 		delete [] Types[i];
 		delete [] Typekeys[i];
 	}

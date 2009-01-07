@@ -30,6 +30,8 @@ class dbread{
 
 		~dbread();
 
+        void close();
+
         void getHashRecord(std::string);
 
 		void getRecord(long long=0);
