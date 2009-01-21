@@ -4,13 +4,16 @@
 #include <stdlib.h>
 #include <string>
 
+#define linsiz 1000
+
 using namespace std;
 
 int main(int argc, char *argv[]){
 	fstream theFile;
+    streampos pre, post;
 	char a;
-	string line, name, desc, dna;
-	long long filepos;
+    char line[linsiz];
+	string dna;
     int multiplier;
 
     multiplier = 2; // Determines how many big hash file will be to index file
@@ -31,29 +34,30 @@ int main(int argc, char *argv[]){
 
 		//Increment the file position one to skip the '>' in front of
 		//the name
-		filepos = theFile.tellg();
-		theFile.seekg(filepos+1);
-		theFile >> name >> ws; // Pull in the line and skip whitespace
+        theFile.ignore(1);
+        // Read and write the name
+        pre = theFile.tellg();
+		theFile >> line;
+        post = theFile.tellg();
+        int temp;
+        for(temp=0;line[temp]!= '\0';temp++){}
+        db.writeFirst(line, static_cast<unsigned>((post - pre)));
+        db.writeLine(line, static_cast<unsigned long long>((post - pre)));
+        theFile >> ws;
 
-		theFile >> desc;
-		theFile.get(a);
-		while(a != '\n'){ // Appends the rest of description
-			desc.push_back(a);
-			theFile.get(a);
+        // Read and write the description`
+        pre = theFile.tellg();
+        theFile.getline(line, linsiz);
+        post = theFile.tellg();
+        if(post - pre >= 1000){
+            cerr << "ERROR: Description line larger than buffer, closing db\n";
+            db.close();
+            exit(1);
+        }
+        db.writeLine(line,
+                static_cast<unsigned long long>((post - pre-1)));
 
-			//This makes sure that the file being read in is still
-			//valid
-			if(!theFile.good()){
-				cerr << "ERROR: The stream is corrupt. " <<
-					"Did you open the correct file?\n" <<
-					"Check to make sure the file isn't " <<
-					"empty or an invalid fasta file\n";
-				db.close();
-				exit(1);
-			}
-		}
-
-		dna.clear();
+        // Read and write the sequence
 		a = '0';
 		while((a != '>') && (!theFile.eof())){
 			// Another file-validity check
@@ -65,16 +69,17 @@ int main(int argc, char *argv[]){
 				db.close();
 				exit(1);
 			}
-			theFile >> line >> ws;
+            theFile.getline(line, linsiz);
 			dna.append(line);
-
 			a = theFile.peek();
 		}
+        char seq[dna.size()];
+        for(unsigned long long i=0;i<dna.size();i++){
+            seq[i] = dna[i];
+        }
 
-		db.writeFirst(name);
-		db.writeLine(name);
-		db.writeLine(desc);
-		db.writeLine(dna);
+		db.writeLine(seq, dna.size());
+        dna.clear();
 		if(db.fail() == true){
 			cerr << "ERROR: One of the database file streams is "<<
 				"corrupt. Do you have enough diskspace?\n";

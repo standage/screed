@@ -4,22 +4,32 @@
 #include <list>
 #include <fstream>
 #include <map>
+#include <new>
 
 const char newline = '\n';
+struct Node{
+    char* data;
+    unsigned len;
+    Node * Next;
+};
 
 class dbwrite{
 	private:
-        std::queue<std::string, std::list<std::string> > Names4Hash;
+//        std::queue<std::string, std::list<std::string> > Names4Hash;
 		std::ofstream dbFile, idxFile;
         std::fstream hashFile;
-        long long Recordlen; // The number of records read in
+        unsigned long long Recordlen; // The number of records read in
         int hashMultiplier; // Defaults to 2X
 
 		void writeTop(char);
 
 		bool open, failbit;
 
-        long long hashFunct(std::string, long long);
+        unsigned long long hashFunct(char*, unsigned, unsigned long long);
+
+        Node * Head;
+        Node * Prev;
+        Node * Curr;
 
 	public:
 		dbwrite(std::string, char, int = 2);
@@ -34,7 +44,7 @@ class dbwrite{
 
 		bool is_open() const {return open;}
 
-		bool writeFirst(std::string);
+		bool writeFirst(char*, unsigned);
 
-		bool writeLine(std::string);
+		bool writeLine(char *, unsigned long long);
 };

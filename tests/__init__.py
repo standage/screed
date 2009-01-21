@@ -217,7 +217,7 @@ class Test_pyx_FastQ:
 
         record = db.loadRecordByIndex(0)
 
-        assert record['accuracy'] == 'AA7AAA3+AAAAAA.AAA.;7;AA;;;;*;<1;<<<'
+        assert record['accuracy'] == 'AA7AAA3+AAAAAA.AAA.;7;AA;;;;*;<1;<<<', record['accuracy']
         assert record['name'] == 'HWI-EAS_4_PE-FC20GCB:2:1:492:573/2'
         assert record['sequence'] == 'ACAGCAAAATTGTGATTGAGGATGAAGAACTGCTGT'
 

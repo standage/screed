@@ -6,12 +6,12 @@ cdef extern from "dbread.h":
     ctypedef char * (*theError)()
     ctypedef char * (*getType)(char*)
     ctypedef char * (*getTypeByIndex)(unsigned)
-    ctypedef void (*getRecord)(long long)
+    ctypedef void (*getRecord)(unsigned long long)
     ctypedef void (*clear)()
-    ctypedef long long (*getSize)()
+    ctypedef unsigned long long (*getSize)()
     ctypedef unsigned (*getTypesize)()
     ctypedef char * (*getTypekey)(unsigned)
-    ctypedef void (*getHashRecord)(char*)
+    ctypedef void (*getHashRecord)(char*, unsigned)
     ctypedef void (*close)()
     ctypedef struct c_dbread "dbread":
         is_open is_open
@@ -73,10 +73,10 @@ cdef class _dbread_record_iter:
     def __next__(self):
         if self.i >= self.n:
             raise StopIteration
-        
+
         record = self.db.loadRecordByIndex(self.i)
         self.i = self.i + 1
-
+        self.db.checkopen()
         return record
 
 cdef class _dbread_name_iter(_dbread_record_iter):
@@ -116,7 +116,6 @@ cdef class dbread:
         self.fields = fields
 
     def __iter__(self):
-        self.checkopen()
         return _dbread_name_iter(self)
 
     def __dealloc__(self):
@@ -127,10 +126,11 @@ cdef class dbread:
         self.checkopen()
         x = []
         for i, name in enumerate(self.fields):
+            if self.thisptr.fail() == 1:
+                raise DbException(self.thisptr.theError())
             value = self.thisptr.getTypeByIndex(i)
             #print i, name, value
             x.append((name, value))
-
         return _dbread_record(x)
 
     def loadRecordByIndex(self, idx):
@@ -144,7 +144,7 @@ cdef class dbread:
 
     def loadRecordByName(self, name):
         self.checkopen()
-        self.thisptr.getHashRecord(name)
+        self.thisptr.getHashRecord(name, len(name))
         if self.thisptr.fail() == 1:
             self.thisptr.clear()
             raise DbException(self.thisptr.theError())
@@ -174,31 +174,24 @@ cdef class dbread:
         self.thisptr.clear()
 
     def keys(self):
-        self.checkopen()
         return list(self.iterkeys())
 
     def values(self):
-        self.checkopen()
         return list(self.itervalues())
 
     def items(self):
-        self.checkopen()
         return list(self.iteritems())
 
     def iterkeys(self):
-        self.checkopen()
         return _dbread_name_iter(self)
 
     def itervalues(self):
-        self.checkopen()
         return _dbread_record_iter(self)
 
     def iteritems(self):
-        self.checkopen()
         return _dbread_name_record_iter(self)
 
     def __contains__(self, name):
-        self.checkopen()
         if self.has_key(name):
             return True
         return False
@@ -221,7 +214,6 @@ cdef class dbread:
             return default
 
     def copy(self):
-        self.checkopen()
         return self
 
     def checkopen(self):

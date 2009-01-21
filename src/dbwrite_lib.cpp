@@ -28,6 +28,11 @@ dbwrite::dbwrite(string fname, char type, int multi){
     hashFile.open(hashName.c_str(), ios::out | ios::binary);
     hashMultiplier = multi;
 
+    Head = new(nothrow) Node;
+    Head->Next = NULL;
+    Prev = Head;
+    Curr = Head->Next;
+
 	if((!dbFile.is_open()) || (!idxFile.is_open()) || (!hashFile.is_open())){
         open = false;
 	}
@@ -39,9 +44,7 @@ dbwrite::dbwrite(string fname, char type, int multi){
  * Closes the database and index file handles
 -----------------------------------------------*/
 dbwrite::~dbwrite(){
-	dbFile.close();
-	idxFile.close();
-    hashFile.close();
+    close();
 }
 
 /*------------------------------------------
@@ -52,6 +55,17 @@ void dbwrite::close(){
 	dbFile.close();
 	idxFile.close();
     hashFile.close();
+
+    Node * Curr;
+    Node * Prev;
+    Prev = Head;
+    Curr = Head->Next;
+    while(Curr != NULL){
+        Prev = Curr;
+        Curr = Curr->Next;
+        delete [] Prev->data;
+        delete Prev;
+    }
 }
 
 /*-----------------------------------------
@@ -61,11 +75,23 @@ void dbwrite::close(){
  * Also push the name onto
  * a growing list of 2-entry list
 ----------------------------------------*/
-bool dbwrite::writeFirst(string name){
-    long long pLoc;
+bool dbwrite::writeFirst(char* name, unsigned len){
+    char * data = new(nothrow) char[len+1];
+    for(unsigned i=0;i<len;i++){
+        data[i] = name[i];
+    }
+    data[len] = '\0';
+    unsigned long long pLoc;
     pLoc = dbFile.tellp();
 	idxFile.write((char*)&(pLoc), sizeof(pLoc));
-    Names4Hash.push(name);
+
+    Curr = new(nothrow) Node;
+    Prev->Next = Curr;
+    Prev = Curr;
+    Curr->Next = NULL;
+
+    Prev->data = data;
+    Prev->len = len;
     Recordlen++;
 	if(!idxFile.good()){
 		failbit = true;
@@ -79,11 +105,9 @@ bool dbwrite::writeFirst(string name){
  * file. First write the size of the
  * line and then the line itself
 ---------------------------------------*/
-bool dbwrite::writeLine(string theLine){
-	long long lsize;
-	lsize = theLine.size();
+bool dbwrite::writeLine(char* theLine, unsigned long long lsize){
 	dbFile.write((char*)&(lsize), sizeof(lsize));
-	dbFile.write(theLine.c_str(), lsize);
+	dbFile.write(theLine, lsize);
 	if(!dbFile.good()){
 		failbit = true;
 	}
@@ -129,17 +153,19 @@ void dbwrite::writeTop(char a){
  * the hash function
 --------------------------------------------------*/
 bool dbwrite::hash2Disk(){
-    std::string RecordName;
     bool result;
-    long long hashdResult, collisions, totalCollisions;
+    unsigned long long hashdResult, collisions, totalCollisions;
     map<long long, long long> Nums4Hash;
     map<long long, long long>::iterator it;
     result = true;
     totalCollisions = 0;
+    Prev = Head;
+    Curr = Head->Next;
     // Build the in-memory hash
-    for(long long streamPos=1;streamPos<=Recordlen;streamPos++){
-        RecordName = Names4Hash.front();
-        hashdResult = hashFunct(RecordName, Recordlen*hashMultiplier);
+    for(unsigned long long streamPos=1;streamPos<=Recordlen;streamPos++){
+        Prev = Curr;
+        Curr = Curr->Next;
+        hashdResult =hashFunct(Prev->data, Prev->len, Recordlen*hashMultiplier);
         hashdResult = hashdResult * 8; // Go by blocks of 8 bytes
         collisions = 0;
         // Find an empty block to write to
@@ -153,7 +179,6 @@ bool dbwrite::hash2Disk(){
             hashdResult = hashdResult + 8*(pow(2, collisions)-1);
         }
         Nums4Hash[hashdResult] = streamPos;
-        Names4Hash.pop();
     }
     // Write the in-memory hash to disk
     for(it=Nums4Hash.begin(); it != Nums4Hash.end(); it++){
@@ -174,16 +199,17 @@ bool dbwrite::hash2Disk(){
 
 /*-----------------------------------------
  * hashFunct
- * Takes in a std::string type and a
+ * Takes in a char * type and a
  * long long type as arguments and computes
  * a long long hash value
 -----------------------------------------*/
-long long dbwrite::hashFunct(std::string toHash, long long hashSize){
+unsigned long long dbwrite::hashFunct(char* toHash, unsigned size,
+        unsigned long long hashSize){
     unsigned long long result, a, b;
     result = 0;
     a = 63689;
     b = 378551;
-    for(unsigned i=0;i<toHash.size();i++){
+    for(unsigned i=0;i<size;i++){
         result = result*a + int(toHash[i]);
         a = a * b;
     }

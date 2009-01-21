@@ -66,10 +66,10 @@ dbread::dbread(string dbname){
 		return;
 	}
 
-	index = new (nothrow) long long[size];
+	index = new (nothrow) unsigned long long[size];
 	Prev = Head;
 	Curr = Head->Next;
-	for(long long li=0;li<size;li++){
+	for(unsigned long long li=0;li<size;li++){
 		index[li] = Curr->data;
 		Prev = Curr;
 		Curr = Curr->Next;
@@ -130,7 +130,8 @@ void dbread::close(){
 	hashFile.close();
     open = false;
 
-	delete Head;		// @CTB do we need to delete linked list too?
+	delete Head;
+    Head = NULL;
 	delete [] index;
 	for(unsigned i=0;i<Typesize;i++){
 		delete [] Types[i];
@@ -142,10 +143,11 @@ void dbread::close(){
 
 /*-------------------------------------------------
  * getRecord
- * Loads the record indexed by the long long
- * variable 'index' into memory from the database
+ * Loads the record indexed by the unsigned long
+ * long variable 'index' into memory from the
+ * database
 -------------------------------------------------*/
-void dbread::getRecord(long long idx){
+void dbread::getRecord(unsigned long long idx){
 	if(open == false){
         errmsg = "Database files not open";
 		failbit = true;
@@ -162,7 +164,7 @@ void dbread::getRecord(long long idx){
 
 	char a;
 	unsigned i;
-	long long linelen;
+	unsigned long long linelen;
 
 	for(i=0;i<Typesize;i++){
 		delete [] Types[i];
@@ -249,6 +251,22 @@ void dbread::clear(){
     hashFile.clear();
 }
 
+/*---------------------------------------
+ * Compares two arrays to see if they
+ * are the same or not
+---------------------------------------*/
+bool dbread::cmpCstrs(char* f, unsigned fl, const char* s, unsigned sl){
+    if(fl != sl){
+        return false;
+    }
+    for(unsigned i=0;i<fl;i++){
+        if(f[i] != s[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
 /*------------------------------------------
  * getHashRecord
  * Takes in the name of the record as a
@@ -256,12 +274,12 @@ void dbread::clear(){
  * into an integer and then uses getRecord
  * to load the record into memory
 ------------------------------------------*/
-void dbread::getHashRecord(std::string RecordName){
-    long long hashdResult, rcrdIdx;
+void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
+    unsigned long long hashdResult, rcrdIdx;
     unsigned nameTypeint, collisions;
     nameTypeint = Typeassc["name"]-1;
     std::string test;
-    hashdResult = hashFunct(RecordName, size*hashMultiplier);
+    hashdResult = hashFunct(RecordName, RCRDsize, size*hashMultiplier);
     hashdResult = hashdResult * 8;
     collisions = 0;
 
@@ -282,9 +300,12 @@ void dbread::getHashRecord(std::string RecordName){
         rcrdIdx = rcrdIdx - 1;
         getRecord(rcrdIdx);
         test = Types[nameTypeint];
-        if(RecordName == test){ // Compare the retrieved name to the input one
+        if(cmpCstrs(RecordName, RCRDsize, test.c_str(), test.size()) == true){
             return;
         }
+//        if(RecordName == test){ // Compare the retrieved name to the input one
+//            return;
+//        }
         collisions++;
         hashdResult = hashdResult + 8*(pow(2, collisions)-1);
     }
@@ -293,16 +314,17 @@ void dbread::getHashRecord(std::string RecordName){
 
 /*-----------------------------------------
  * hashFunct
- * Takes in a std::string type and a
+ * Takes in a char * type and a
  * long long type as arguments and computes
  * a long long hash value
 -----------------------------------------*/
-long long dbread::hashFunct(std::string toHash, long long hashSize){
+unsigned long long dbread::hashFunct(char* toHash, unsigned size,
+        unsigned long long hashSize){
     unsigned long long result, a, b;
     result = 0;
     a = 63689;
     b = 378551;
-    for(unsigned i=0;i<toHash.size();i++){
+    for(unsigned i=0;i<size;i++){
         result = result*a + int(toHash[i]);
         a = a * b;
     }

@@ -6,7 +6,7 @@
 class dbread{
 	private:
 		struct Node{
-			long long data;
+			unsigned long long data;
 			Node * Next;
 		};
 		Node *Head;
@@ -16,25 +16,28 @@ class dbread{
 		typedef std::map<std::string, unsigned> maptype;
 		maptype Typeassc;
 		char empty;
-		long long size, lastquery, dnalines;
-		long long * index;
+		unsigned long long size, lastquery, dnalines;
+		unsigned long long * index;
 		unsigned Typesize;
         int hashMultiplier; // Defaults to 2
 		std::ifstream idxFile, dbFile, hashFile;
 		bool open, failbit;
         std::string errmsg;
+        
+        bool cmpCstrs(char*, unsigned, const char*, unsigned);
 
-        long long hashFunct(std::string, long long);
-	public:
+        unsigned long long hashFunct(char*, unsigned, unsigned long long);
+    public:
+
 		dbread(std::string);
 
 		~dbread();
 
         void close();
 
-        void getHashRecord(std::string);
+        void getHashRecord(char*, unsigned);
 
-		void getRecord(long long=0);
+		void getRecord(unsigned long long=0);
 
 		char* getType(char[]);
 		char* getTypeByIndex(unsigned);
@@ -45,7 +48,7 @@ class dbread{
 
 		void clear();
 
-		long long getSize() const{return size;}
+		unsigned long long getSize() const{return size;}
 
 		unsigned getTypesize() const{return Typesize;}
 

@@ -1,14 +1,17 @@
 #include "dbread.h"
 #include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 
+#define lsize 100
 
 using namespace std;
 
 int main(int argc, char *argv[]){
 	dbread db(argv[1]);
 	long long index, i;
-	char type[100], hi;
+    unsigned size;
+	char type[lsize], hi, line[lsize];
 	string result;
 
 	if(db.is_open() == false){
@@ -58,11 +61,9 @@ int main(int argc, char *argv[]){
 	}
     while(hi == 'h'){
         cout << "Enter a record name to retrieve: ";
-        cin >> type;
-        if(cin.eof()){
-            break;
-        }
-        db.getHashRecord(type);
+        cin >> line;
+        for(size=0;line[size]!=0;size++){}
+        db.getHashRecord(line, size);
         if(db.fail() == true){
             cerr << db.theError() << endl;
             db.clear();
@@ -73,8 +74,9 @@ int main(int argc, char *argv[]){
 			cout << db.getTypekey(i) << endl;
 		}
         cout << "Enter a type to retrieve: ";
-        cin >> type;
-        cout << db.getType(type) << endl;
+        cin.getline(line, lsize);
+        for(size=0;line[size]!=0;size++){}
+        cout << db.getType(line) << endl;
         if(db.fail() == true){
             cerr << db.theError() << endl;
             db.clear();

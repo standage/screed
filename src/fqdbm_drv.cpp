@@ -4,14 +4,17 @@
 #include <stdlib.h>
 #include <string>
 
+#define linsiz 1000
+
 using namespace std;
 
 int main(int argc, char *argv[]){
 	fstream theFile;
 	char endck;
-	string name, dna, accu;
-	long long filepos;
+    char line[linsiz], line2[linsiz];
     int multiplier;
+    unsigned long long dnalen;
+    streampos pre, post;
 
     multiplier = 2;
     if(argc == 3){
@@ -31,10 +34,7 @@ int main(int argc, char *argv[]){
 
 		//Read in the data line by line and store it in the relevant
 		//character array
-		filepos = theFile.tellg();
-		theFile.seekg(filepos+1);
-
-		theFile >> ws;
+        theFile.ignore(1);
 		// A file integrity checker
 		if(!theFile.good()){
 			cerr << "ERROR: There is something wrong with the " <<
@@ -42,17 +42,30 @@ int main(int argc, char *argv[]){
 			db.close();
 			exit(1);
 		}
+       
+        // Read and write the name
+        pre = theFile.tellg();
+        theFile.getline(line, linsiz);
+        post = theFile.tellg(); // Compensates for the newline char
+        db.writeFirst(line, static_cast<unsigned>(post-pre-1));
+        db.writeLine(line, static_cast<unsigned long long>(post-pre-1));
 
-		theFile >> name >> ws;
-		theFile >> dna >> ws;
+        // Read the sequence
+        pre = theFile.tellg();
+        theFile.getline(line, linsiz);
+        post = theFile.tellg();
+        dnalen = post - pre - 1;
+
+        // Read and write the description
 		theFile.ignore(2); // Ignores the +\n characters
-		theFile >> accu >> ws;
-
+        pre = theFile.tellg();
+        theFile.getline(line2, linsiz);
+        post = theFile.tellg();
+        db.writeLine(line2, static_cast<unsigned long long>(post-pre-1));
 		endck = theFile.peek();
-		db.writeFirst(name);
-		db.writeLine(name);
-		db.writeLine(accu);
-		db.writeLine(dna);
+
+        // Write the sequence
+        db.writeLine(line, dnalen);
 
 		// Make sure nothing went wrong when writing to the database
 		if(db.fail() == true){
