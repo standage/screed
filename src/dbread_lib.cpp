@@ -303,31 +303,8 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
         if(cmpCstrs(RecordName, RCRDsize, test.c_str(), test.size()) == true){
             return;
         }
-//        if(RecordName == test){ // Compare the retrieved name to the input one
-//            return;
-//        }
         collisions++;
         hashdResult = hashdResult + 8*(pow(2, collisions)-1);
     }
     return;
-}
-
-/*-----------------------------------------
- * hashFunct
- * Takes in a char * type and a
- * long long type as arguments and computes
- * a long long hash value
------------------------------------------*/
-unsigned long long dbread::hashFunct(char* toHash, unsigned size,
-        unsigned long long hashSize){
-    unsigned long long result, a, b;
-    result = 0;
-    a = 63689;
-    b = 378551;
-    for(unsigned i=0;i<size;i++){
-        result = result*a + int(toHash[i]);
-        a = a * b;
-    }
-    result = result % hashSize;
-    return result;
 }

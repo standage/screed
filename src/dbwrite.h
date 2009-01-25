@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <new>
+#include "hashlib.h"
 
 const char newline = '\n';
 struct Node{
@@ -24,8 +25,6 @@ class dbwrite{
 		void writeTop(char);
 
 		bool open, failbit;
-
-        unsigned long long hashFunct(char*, unsigned, unsigned long long);
 
         Node * Head;
         Node * Prev;

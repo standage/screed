@@ -2,6 +2,7 @@
 #include <fstream>
 #include <map>
 #include <exception>
+#include "hashlib.h"
 
 class dbread{
 	private:
@@ -26,7 +27,6 @@ class dbread{
         
         bool cmpCstrs(char*, unsigned, const char*, unsigned);
 
-        unsigned long long hashFunct(char*, unsigned, unsigned long long);
     public:
 
 		dbread(std::string);
