@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <string>
+#include <new>
 
 #define linsiz 1000
 
@@ -10,7 +11,7 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 	fstream theFile;
-    streampos pre, post;
+    streampos pre, post, len;
 	char a;
     char line[linsiz];
 	string dna;
@@ -39,23 +40,27 @@ int main(int argc, char *argv[]){
         pre = theFile.tellg();
 		theFile >> line;
         post = theFile.tellg();
-        int temp;
-        for(temp=0;line[temp]!= '\0';temp++){}
-        db.writeFirst(line, static_cast<unsigned>((post - pre)));
-        db.writeLine(line, static_cast<unsigned long long>((post - pre)));
-        theFile >> ws;
+        len = post - pre;
+        db.writeFirst(line, static_cast<unsigned>((len)));
+        db.writeLine(line, static_cast<unsigned long long>((len)));
+//        theFile >> ws;
 
-        // Read and write the description`
-        pre = theFile.tellg();
-        theFile.getline(line, linsiz);
-        post = theFile.tellg();
-        if(post - pre >= 1000){
-            cerr << "ERROR: Description line larger than buffer, closing db\n";
-            db.close();
-            exit(1);
+        if(theFile.peek() == '\n'){ // No description
+            theFile >> ws;
+            line[0] = ' ';
+            line[1] = '\0';
+            len = streampos(1);
+        }
+        else{
+            // Read and write the description
+            theFile >> ws;
+            pre = theFile.tellg();
+            theFile.getline(line, linsiz);
+            post = theFile.tellg();
+            len = post - pre - static_cast<streampos>(1);
         }
         db.writeLine(line,
-                static_cast<unsigned long long>((post - pre-1)));
+                static_cast<unsigned long long>((len)));
 
         // Read and write the sequence
 		a = '0';
@@ -73,12 +78,13 @@ int main(int argc, char *argv[]){
 			dna.append(line);
 			a = theFile.peek();
 		}
-        char seq[dna.size()];
+        char * seq = new(nothrow) char[dna.size()];
         for(unsigned long long i=0;i<dna.size();i++){
             seq[i] = dna[i];
         }
 
 		db.writeLine(seq, dna.size());
+        delete [] seq;
         dna.clear();
 		if(db.fail() == true){
 			cerr << "ERROR: One of the database file streams is "<<

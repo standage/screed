@@ -1,0 +1,7 @@
+/u/nolleyal/genomes/fasta/Pongo_pygmaeus.PPYG2.50.cdna.abinitio.fa
+/u/nolleyal/genomes/fasta/Xenopus_tropicalis.JG14.1.50.dna.toplevel.fa
+/u/nolleyal/genomes/fasta/triCas2.fa
+/u/nolleyal/genomes/fasta/Mus_musculus.NCBIM37.50.dna_rm.chromosome9.fa
+/u/nolleyal/genomes/fastq/s_2_2_sequence.fastq
+/u/nolleyal/genomes/fastq/s_3_1_sequence.fastq
+/u/nolleyal/genomes/fastq/s_4_2_sequence.fastq
