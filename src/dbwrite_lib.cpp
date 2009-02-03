@@ -154,9 +154,17 @@ void dbwrite::writeTop(char a){
 --------------------------------------------------*/
 bool dbwrite::hash2Disk(){
     bool result;
-    unsigned long long hashdResult, collisions, totalCollisions;
-    map<long long, long long> Nums4Hash;
-    map<long long, long long>::iterator it;
+    unsigned long long hashFilelen;
+    hashFilelen = Recordlen * hashMultiplier;
+    unsigned long long hashdResult, collisions, totalCollisions, i;
+    unsigned long long* hashArray;
+
+    // Declare and zero out the array
+    hashArray = new(nothrow) unsigned long long[hashFilelen];
+    for(i=0;i<hashFilelen;i++){
+        hashArray[i] = 0;
+    }
+
     result = true;
     totalCollisions = 0;
     Prev = Head;
@@ -165,29 +173,37 @@ bool dbwrite::hash2Disk(){
     for(unsigned long long streamPos=1;streamPos<=Recordlen;streamPos++){
         Prev = Curr;
         Curr = Curr->Next;
-        hashdResult =hashFunct(Prev->data, Prev->len, Recordlen*hashMultiplier);
-        hashdResult = hashdResult * 8; // Go by blocks of 8 bytes
+        hashdResult = hashFunct(Prev->data, Prev->len, hashFilelen);
         collisions = 0;
         // Find an empty block to write to
         while(1){
-            if(Nums4Hash[hashdResult] == 0){
+            if(hashArray[hashdResult] == 0){
                 break;
             }
             collisions++;
             totalCollisions++;
             // Block was occupied. Do a quadratic probe for next area
-            hashdResult = hashdResult + 8*(pow(2, collisions)-1);
-        }
-        Nums4Hash[hashdResult] = streamPos;
+            hashdResult = hashdResult + pow(2, collisions)-1;
+	    if(hashdResult >= hashFilelen){ // Makes the data wrap around
+		hashdResult = hashdResult - hashFilelen;
+            }
+	}
+	hashArray[hashdResult] = streamPos;
     }
-    // Write the in-memory hash to disk
-    for(it=Nums4Hash.begin(); it != Nums4Hash.end(); it++){
-        hashFile.seekp((*it).first);
-        hashFile.write((char*)&((*it).second), 8);
+    // Write the in-memory array to disk
+    for(i=0; i < hashFilelen; i++){
+    	if(hashArray[hashdResult] == 0){
+	    continue;
+	}
+	hashFile.seekp(i*8);
+	hashFile.write((char*)&(hashArray[i]), 8);
     }
     // Write extra data to end so eof isn't encountered when reading last entry
     hashFile.seekp(0, ios_base::end);
     hashFile.write((char*)&(collisions), 8);
+    
+    // Delete the array
+    delete [] hashArray;
 
     //!!!DEBUGGING CODE!!!
     cout << totalCollisions << " collisions with average = " <<
