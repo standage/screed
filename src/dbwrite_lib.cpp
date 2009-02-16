@@ -1,3 +1,5 @@
+// Copyright 2008-2009 Michigan State University. All rights reserved.
+
 #include "dbwrite.h"
 #include <string>
 #include <fstream>

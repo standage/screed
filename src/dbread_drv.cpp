@@ -1,3 +1,5 @@
+// Copyright 2008-2009 Michigan State University. All rights reserved.
+
 #include "dbread.h"
 #include <iostream>
 #include <stdlib.h>
@@ -8,6 +10,10 @@
 using namespace std;
 
 int main(int argc, char *argv[]){
+    if(argc != 2){
+        cerr << "ERROR: USAGE IS: " << argv[0] << " <dbfilename>\n";
+        exit(1);
+    }
 	dbread db(argv[1]);
 	long long index, i;
     unsigned size;

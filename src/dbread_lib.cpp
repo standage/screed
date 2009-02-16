@@ -1,9 +1,13 @@
+// Copyright 2008-2009 Michigan State University. All rights reserved.
+
 #include "dbread.h"
 #include <fstream>
 #include <new>
 #include <string>
 #include <iostream>
 #include <math.h>
+
+#define fieldsize 100
 
 using namespace std;
 
@@ -18,7 +22,7 @@ dbread::dbread(string dbname){
 	dbread::Node *Prev;
 	string idxname, hashname;
 	unsigned i, j;
-	unsigned fieldsize = 100;
+//	unsigned fieldsize = 100;
 	char fieldname[fieldsize];
 	char a;
 
