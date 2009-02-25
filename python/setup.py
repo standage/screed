@@ -14,13 +14,13 @@ rlib_path = os.path.join("..", "CMakeFiles", "DBREAD.dir", "src")
 hlib_path = os.path.join("..", "CMakeFiles", "HASH.dir", "src")
 if os.path.exists(os.path.join(rlib_path, "dbread_lib.o")):
   rlib_path = os.path.join(rlib_path, "dbread_lib.o")
-elif os.path.exists(os.path.join(rlib_path, "dbread_lib.cpp.obj")):
-  rlib_path = os.path.join(rlib_path, "dbread_lib.cpp.obj")
+elif os.path.exists(os.path.join(rlib_path, "dbread_lib.obj")):
+  rlib_path = os.path.join(rlib_path, "dbread_lib.obj")
 
 if os.path.exists(os.path.join(hlib_path, "hashlib.o")):
   hlib_path = os.path.join(hlib_path, "hashlib.o")
-elif os.path.exists(os.path.join(hlib_path, "hashlib.cpp.obj")):
-  hlib_path = os.path.join(hlib_path, "hashlib.cpp.obj")
+elif os.path.exists(os.path.join(hlib_path, "hashlib.obj")):
+  hlib_path = os.path.join(hlib_path, "hashlib.obj")
 setup(
 	name = "seqdb2",
         py_modules = ['seqdb2'],

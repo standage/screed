@@ -18,6 +18,10 @@ int main(int argc, char *argv[]){
     unsigned long long dnalen;
     streampos pre, post;
 
+    if((argc < 2) || (argc > 3)){
+        cerr << "ERROR: USAGE IS: " << argv[0] << " <dbfilename>\n";
+        exit(1);
+    }
     multiplier = 2;
     if(argc == 3){
         multiplier = atol(argv[2]);

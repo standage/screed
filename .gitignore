@@ -15,4 +15,3 @@ libDBWRITE.a
 *_seqdb2*
 python/build/
 python/seqdb2.cpp
-doc/*.html

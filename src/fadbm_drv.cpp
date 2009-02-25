@@ -19,7 +19,11 @@ int main(int argc, char *argv[]){
 	string dna;
     int multiplier;
 
-    multiplier = 2; // Determines how many big hash file will be to index file
+    if((argc < 2) || (argc > 3)){
+        cerr << "ERROR: USAGE IS: " << argv[0] << " <dbfilename>\n";
+        exit(1);
+    }
+    multiplier = 2; // Determines how big hash file will be to index file
     if(argc == 3){
         multiplier = atol(argv[2]);
         if(multiplier <= 0){

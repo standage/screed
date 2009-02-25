@@ -23,9 +23,8 @@ IF(PYTHONINTERP_FOUND)
 	ENDIF(NOT EXISTS bin )
 
 	# Setup the CPP flags
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g -fPIC")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-	ENABLE_TESTING() # Allows testing of the binary files later
 	set(SEQDB2_SRC_DIR ./src) # Set the source, binary, and python directories
 	set(SEQDB2_BIN_DIR ./bin)
     set(SEQDB2_PY_DIR ./python)
@@ -80,11 +79,17 @@ IF(PYTHONINTERP_FOUND)
         ${SEQDB2_PY_DIR}/seqdb2.cpp
         ${SEQDB2_PY_DIR}/seqdb2.o
         ${SEQDB2_PY_DIR}/seqdb2.so
+        ${SEQDB2_PY_DIR}/seqdb2.pyd
         ${SEQDB2_PY_DIR}/seqdb2.pyc
+        ${SEQDB2_PY_DIR}/setup.pyc
         ${SEQDB2_BIN_DIR}/fqdbm
         ${SEQDB2_BIN_DIR}/fadbm
         ${SEQDB2_BIN_DIR}/shelltest
-        ${SEQDB2_BIN_DIR}/dbread)
+        ${SEQDB2_BIN_DIR}/dbread
+        ${SEQDB2_BIN_DIR}/fqdbm.exe
+        ${SEQDB2_BIN_DIR}/fadbm.exe
+        ${SEQDB2_BIN_DIR}/shelltest.exe
+        ${SEQDB2_BIN_DIR}/dbread.exe)
 	SET_DIRECTORY_PROPERTIES(${CMAKE_SOURCE_DIR} ADDITIONAL_MAKE_CLEAN_FILES
         "${temps}")
 ENDIF(PYTHONINTERP_FOUND)

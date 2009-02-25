@@ -2,15 +2,20 @@ import sys, os, gc
 import subprocess
 
 thisdir = os.path.dirname(__file__)
-libdir = os.path.abspath(thisdir + '/../python')
+libdir = os.path.abspath(os.path.join(thisdir, '..', 'python'))
 sys.path.insert(0, libdir)
 import seqdb2
 
+fadbm = os.path.join(thisdir, '..', 'bin', 'fadbm')
+fqdbm = os.path.join(thisdir, '..', 'bin', 'fqdbm')
+testfa = os.path.join(thisdir, 'test.fa')
+testfq = os.path.join(thisdir, 'test.fastq')
+
 def setup():
     # index databases
-    subprocess.check_call(thisdir + '/../bin/fadbm tests/test.fa',
+    subprocess.check_call(fadbm + ' ' + testfa,
                           shell=True, stdout=subprocess.PIPE)
-    subprocess.check_call(thisdir + '/../bin/fqdbm tests/test.fastq',
+    subprocess.check_call(fqdbm + ' ' + testfq,
                           shell=True, stdout=subprocess.PIPE)
 
 class Test_dict_methods:
@@ -19,7 +24,7 @@ class Test_dict_methods:
     queries.
     """
     def setup(self):
-        self.db = seqdb2.dbread('tests/test.fa_seqdb2')
+        self.db = seqdb2.dbread(testfa + '_seqdb2')
 
     def test_iter_stuff(self):
         db = self.db
@@ -106,7 +111,7 @@ class Test_dict_methods:
 
 class Test_pyx_err:
     def setup(self):
-        self.db = seqdb2.dbread('tests/test.fa_seqdb2')
+        self.db = seqdb2.dbread(testfa + '_seqdb2')
 
     def teardown(self):
         self.db.clearErrorFlag()
@@ -152,12 +157,12 @@ class Test_pyx_err:
 
 class Test_pyx_Fasta:
     def setup(self):
-        self.db = seqdb2.dbread(thisdir + '/test.fa_seqdb2')
+        self.db = seqdb2.dbread(testfa + '_seqdb2')
 
     def test_delete(self):
         gc.collect()
         
-        db = seqdb2.dbread(thisdir + '/test.fa_seqdb2')
+        db = seqdb2.dbread(testfa + '_seqdb2')
         del db
 
         gc.collect()
@@ -204,7 +209,7 @@ class Test_pyx_Fasta:
 
 class Test_pyx_FastQ:
     def setup(self):
-        self.db = seqdb2.dbread(thisdir + '/test.fastq_seqdb2')
+        self.db = seqdb2.dbread(testfq + '_seqdb2')
 
     def test_simple(self):
         db = self.db
@@ -244,29 +249,31 @@ class Test_pyx_FastQ:
             
 if 0:
     class Test_Hashing_nondefault_1:
-        # @CTB what is this testing?
+        """
+        Sets up and tests databases with a hashfile size to # of names in db
+        ratio of 1. Note that the default is 2 (hashfile is half full) and this
+        low of a ratio is not meant to be used
+        """
         def setup(self):
             # Setup non-default database with length=1
-            subprocess.check_call(thisdir + '/../bin/fqdbm tests/test.fastq 1',
+            subprocess.check_call(fqdbm + ' ' + testfq + ' 1',
                     shell=True, stdout=subprocess.PIPE)
-            subprocess.check_call(thisdir + '/../bin/fadbm tests/test.fa 1',
+            subprocess.check_call(fadbm + ' ' + testfa + ' 1',
                     shell=True, stdout=subprocess.PIPE)
-            self.fqdb = seqdb2.SeqDB2(thisdir + '/test.fastq_seqdb2')
-            self.fadb = seqdb2.SeqDB2(thisdir + '/test.fa_seqdb2')
-
+            self.fqdb = seqdb2.dbread(testfq + '_seqdb2')
+            self.fadb = seqdb2.dbread(testfa + '_seqdb2')
+    
         def tearDown(self):
              # remake the normal database
-            subprocess.check_call(thisdir + '/../bin/fadbm tests/test.fa',
-                    shell=True, stdout=subprocess.PIPE)
-            subprocess.check_call(thisdir + '/../bin/fqdbm tests/test.fastq',
-                    shell=True, stdout=subprocess.PIPE)
-
+             subprocess.check_call(fadbm + ' ' + testfa,
+                          shell=True, stdout=subprocess.PIPE)
+             subprocess.check_call(fqdbm + ' ' + testfq,
+                          shell=True, stdout=subprocess.PIPE)
+    
         def test_fastq_simple(self):
-            pass
-    #        for record in self.fqdb:
-    #            assert record.name == self.fqdb[record.name].name
-
+            for record in self.fqdb:
+                assert record.name == self.fqdb[record.name].name
+    
         def test_fasta_simple(self):
-            pass
-    #        for record in self.fadb:
-    #            assert record.name == self.fadb[record.name].name
+            for record in self.fadb:
+                assert record.name == self.fadb[record.name].name
