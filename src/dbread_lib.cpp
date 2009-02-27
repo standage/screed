@@ -280,7 +280,8 @@ bool dbread::cmpCstrs(char* f, unsigned fl, const char* s, unsigned sl){
 ------------------------------------------*/
 void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     unsigned long long hashdResult, rcrdIdx;
-    unsigned nameTypeint, collisions;
+    unsigned nameTypeint;
+    int collisions;
     unsigned long long hashFilelen = size*hashMultiplier;
     nameTypeint = Typeassc["name"]-1;
     std::string test;
@@ -309,7 +310,8 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
             return;
         }
         collisions++;
-        hashdResult = hashdResult + 8*(pow(2, collisions)-1);
+        hashdResult = hashdResult + 8*(static_cast<unsigned>(
+            pow(static_cast<float>(2), collisions))-1);
 	if(hashdResult >= hashFilelen*8){
 	    hashdResult = hashdResult - hashFilelen*8;
 	}

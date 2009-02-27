@@ -6,7 +6,7 @@
 #include <list>
 #include <fstream>
 #include <new>
-#include "hashlib.h"
+#include "tools.h"
 
 const char newline = '\n';
 struct Node{

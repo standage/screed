@@ -4,7 +4,7 @@
 #include <fstream>
 #include <map>
 #include <exception>
-#include "hashlib.h"
+#include "tools.h"
 
 class dbread{
 	private:

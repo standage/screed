@@ -23,7 +23,7 @@ IF(PYTHONINTERP_FOUND)
 	ENDIF(NOT EXISTS bin )
 
 	# Setup the CPP flags
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g -fPIC")
 
 	set(SEQDB2_SRC_DIR ./src) # Set the source, binary, and python directories
 	set(SEQDB2_BIN_DIR ./bin)
@@ -35,8 +35,8 @@ IF(PYTHONINTERP_FOUND)
         ${SEQDB2_SRC_DIR}/dbwrite_lib.cpp)
 	ADD_LIBRARY(DBREAD ${SEQDB2_SRC_DIR}/dbread.h
         ${SEQDB2_SRC_DIR}/dbread_lib.cpp)
-	ADD_LIBRARY(HASH ${SEQDB2_SRC_DIR}/hashlib.h
-        ${SEQDB2_SRC_DIR}/hashlib.cpp)
+	ADD_LIBRARY(TOOLS ${SEQDB2_SRC_DIR}/tools.h
+        ${SEQDB2_SRC_DIR}/tools.cpp)
 
 	# Setup the binary files to build
 	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/fadbm ${SEQDB2_SRC_DIR}/fadbm_drv.cpp)
@@ -45,8 +45,8 @@ IF(PYTHONINTERP_FOUND)
 	ADD_EXECUTABLE(${SEQDB2_BIN_DIR}/shelltest ${SEQDB2_SRC_DIR}/shelltest.cpp)
 
 	# Link the binary files to their needed library files
-    TARGET_LINK_LIBRARIES (DBWRITE HASH)
-	TARGET_LINK_LIBRARIES (DBREAD HASH)
+    TARGET_LINK_LIBRARIES (DBWRITE TOOLS)
+	TARGET_LINK_LIBRARIES (DBREAD TOOLS)
 	TARGET_LINK_LIBRARIES (${SEQDB2_BIN_DIR}/fadbm DBWRITE)
 	TARGET_LINK_LIBRARIES (${SEQDB2_BIN_DIR}/fqdbm DBWRITE)
 	TARGET_LINK_LIBRARIES (${SEQDB2_BIN_DIR}/dbread DBREAD)
@@ -60,14 +60,13 @@ IF(PYTHONINTERP_FOUND)
 
 	# Add files to be removed by the 'make clean' command
 	LIST(APPEND temps ${CMAKE_SOURCE_DIR}/CMakeCache.txt
-        ${CMAKE_SOURCE_DIR}/DartTestfile.txt
         ${CMAKE_SOURCE_DIR}/cmake_install.cmake
         ${CMAKE_SOURCE_DIR}/Makefile
         ${CMAKE_SOURCE_DIR}/Testing/
         ${CMAKE_SOURCE_DIR}/CMakeFiles/
         ${CMAKE_SOURCE_DIR}/libDBWRITE.a
         ${CMAKE_SOURCE_DIR}/libDBREAD.a
-        ${CMAKE_SOURCE_DIR}/libHASH.a
+        ${CMAKE_SOURCE_DIR}/libTOOLS.a
         ${CMAKE_SOURCE_DIR}/CTestTestfile.cmake
         ${SEQDB2_TST_DIR}/test.fa_seqdb2
         ${SEQDB2_TST_DIR}/test.fa_seqdb2_idx

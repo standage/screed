@@ -10,12 +10,14 @@
 
 using namespace std;
 
+//unsigned long long gline(fstream&, char*, unsigned);
+
 int main(int argc, char *argv[]){
-	fstream theFile;
-	char endck;
+    fstream theFile;
+    char endck;
     char line[linsiz], line2[linsiz];
     int multiplier;
-    unsigned long long dnalen;
+    unsigned long long rlinelen, dnalen;
     streampos pre, post;
 
     if((argc < 2) || (argc > 3)){
@@ -31,55 +33,48 @@ int main(int argc, char *argv[]){
         }
     }
     dbwrite db(argv[1], 'q', multiplier);
-	if(!db.is_open()){
-		cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
-		exit(1);
-	}
-	theFile.open(argv[1], fstream::in);
-	while(!theFile.eof()){
+    if(!db.is_open()){
+        cerr << "ERROR: DATABASE FILES ARE NOT OPEN\n";
+        exit(1);
+    }
+    theFile.open(argv[1], fstream::in);
+    while(!theFile.eof()){
 
-		//Read in the data line by line and store it in the relevant
-		//character array
+        // Read in the data line by line and store it in the relevant
+        // character array
         theFile.ignore(1);
-		// A file integrity checker
-		if(!theFile.good()){
-			cerr << "ERROR: There is something wrong with the " <<
-				"source file stream\n";
-			db.close();
-			exit(1);
-		}
+        // A file integrity checker
+        if(!theFile.good()){
+        cerr << "ERROR: There is something wrong with the " <<
+            "source file stream\n";
+        db.close();
+        exit(1);
+        }
        
         // Read and write the name
-        pre = theFile.tellg();
-        theFile.getline(line, linsiz);
-        post = theFile.tellg(); // Compensates for the newline char
-        db.writeFirst(line, static_cast<unsigned>(post-pre-1));
-        db.writeLine(line, static_cast<unsigned long long>(post-pre-1));
+        rlinelen = gline(theFile, line, linsiz);
+        db.writeFirst(line, rlinelen);
+        db.writeLine(line, rlinelen);
 
         // Read the sequence
-        pre = theFile.tellg();
-        theFile.getline(line, linsiz);
-        post = theFile.tellg();
-        dnalen = post - pre - 1;
+		dnalen = gline(theFile, line, linsiz);
 
         // Read and write the description
 		theFile.ignore(2); // Ignores the +\n characters
-        pre = theFile.tellg();
-        theFile.getline(line2, linsiz);
-        post = theFile.tellg();
-        db.writeLine(line2, static_cast<unsigned long long>(post-pre-1));
+		rlinelen = gline(theFile, line2, linsiz);
+        db.writeLine(line2, rlinelen);
 		endck = theFile.peek();
 
         // Write the sequence
         db.writeLine(line, dnalen);
 
-		// Make sure nothing went wrong when writing to the database
+        // Make sure nothing went wrong when writing to the database
 		if(db.fail() == true){
-			cerr << "ERROR: Something went wrong while writing the "
-				<< "database.\nHave you run out of space?\n";
-			db.close();
-			exit(1);
-		}
+            cerr << "ERROR: Something went wrong while writing the "
+                << "database.\nHave you run out of space?\n";
+            db.close();
+            exit(1);
+        }
 	}
 	theFile.close();
     db.hash2Disk();
@@ -89,3 +84,16 @@ int main(int argc, char *argv[]){
 
 	return 0;
 }
+
+
+/*unsigned long long gline(fstream& F, char* ary, unsigned maxlen){
+	unsigned long long i;
+	for(i=0;i<maxlen-1;++i){
+		F.get(ary[i]);
+		if(ary[i] == '\n'){
+			break;
+		}
+	}
+	ary[i] = '\0';
+	return i;
+}*/

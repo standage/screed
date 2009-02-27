@@ -110,6 +110,7 @@ bool dbwrite::writeFirst(char* name, unsigned len){
 bool dbwrite::writeLine(char* theLine, unsigned long long lsize){
 	dbFile.write((char*)&(lsize), sizeof(lsize));
 	dbFile.write(theLine, lsize);
+	//cout << "LSIZE: " << lsize << endl;
 	if(!dbFile.good()){
 		failbit = true;
 	}
@@ -158,7 +159,8 @@ bool dbwrite::hash2Disk(){
     bool result;
     unsigned long long hashFilelen;
     hashFilelen = Recordlen * hashMultiplier;
-    unsigned long long hashdResult, collisions, totalCollisions, i;
+    unsigned long long hashdResult, totalCollisions, i;
+    int collisions;
     unsigned long long* hashArray;
 
     // Declare and zero out the array
@@ -185,7 +187,8 @@ bool dbwrite::hash2Disk(){
             collisions++;
             totalCollisions++;
             // Block was occupied. Do a quadratic probe for next area
-            hashdResult = hashdResult + pow(2, collisions)-1;
+            hashdResult = hashdResult + static_cast<unsigned>(
+                pow(static_cast<float>(2), collisions))-1;
 	    if(hashdResult >= hashFilelen){ // Makes the data wrap around
 		hashdResult = hashdResult - hashFilelen;
             }
