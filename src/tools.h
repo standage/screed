@@ -2,12 +2,18 @@
 
 #ifndef TOOLS_
 #define TOOLS_
+
+#ifndef INDEX_TYPE_
+#define INDEX_TYPE_
+typedef unsigned long long index_type;
+#endif
+
 #include <fstream>
 
 using namespace std;
 
-unsigned long long hashFunct(char *, unsigned, unsigned long long);
-unsigned long long gline(fstream&, char*, unsigned);
-unsigned long long pullthrough(fstream&, char*, unsigned);
+index_type hashFunct(char *, unsigned, index_type);
+index_type gline(fstream&, char*, unsigned);
+index_type pullthrough(fstream&, char*, unsigned);
 
 #endif // TOOLS_

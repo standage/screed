@@ -70,10 +70,10 @@ dbread::dbread(string dbname){
 		return;
 	}
 
-	index = new (nothrow) unsigned long long[size];
+	index = new (nothrow) index_type[size];
 	Prev = Head;
 	Curr = Head->Next;
-	for(unsigned long long li=0;li<size;li++){
+	for(index_type li=0;li<size;li++){
 		index[li] = Curr->data;
 		Prev = Curr;
 		Curr = Curr->Next;
@@ -151,7 +151,7 @@ void dbread::close(){
  * long variable 'index' into memory from the
  * database
 -------------------------------------------------*/
-void dbread::getRecord(unsigned long long idx){
+void dbread::getRecord(index_type idx){
 	if(open == false){
         errmsg = "Database files not open";
 		failbit = true;
@@ -168,7 +168,7 @@ void dbread::getRecord(unsigned long long idx){
 
 	char a;
 	unsigned i;
-	unsigned long long linelen;
+	index_type linelen;
 
 	for(i=0;i<Typesize;i++){
 		delete [] Types[i];
@@ -279,19 +279,19 @@ bool dbread::cmpCstrs(char* f, unsigned fl, const char* s, unsigned sl){
  * to load the record into memory
 ------------------------------------------*/
 void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
-    unsigned long long hashdResult, rcrdIdx;
+    index_type hashdResult, rcrdIdx;
     unsigned nameTypeint;
     int collisions;
-    unsigned long long hashFilelen = size*hashMultiplier;
+    index_type hashFilelen = size*hashMultiplier;
     nameTypeint = Typeassc["name"]-1;
     std::string test;
     hashdResult = hashFunct(RecordName, RCRDsize, hashFilelen);
-    hashdResult = hashdResult * 8;
+    hashdResult = hashdResult * sizeof(index_type);
     collisions = 0;
 
     while(1){
         hashFile.seekg(hashdResult); // Go to the possible stream location
-        hashFile.read((char*)&(rcrdIdx), 8);
+        hashFile.read((char*)&(rcrdIdx), sizeof(index_type));
         if(hashFile.eof()){
             failbit = true;
             errmsg = "No named record in database";
@@ -310,11 +310,11 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
             return;
         }
         collisions++;
-        hashdResult = hashdResult + 8*(static_cast<unsigned>(
+        hashdResult = hashdResult + sizeof(index_type)*(static_cast<unsigned>(
             pow(static_cast<float>(2), collisions))-1);
-	if(hashdResult >= hashFilelen*8){
-	    hashdResult = hashdResult - hashFilelen*8;
-	}
+        if(hashdResult >= hashFilelen*sizeof(index_type)){
+            hashdResult = hashdResult - hashFilelen*sizeof(index_type);
+        }
     }
     return;
 }

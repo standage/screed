@@ -4,16 +4,16 @@
 
 using namespace std;
 
-unsigned long long hashFunct(char* toHash, unsigned size,
-        unsigned long long hashSize){
-    unsigned long long result;
+index_type hashFunct(char* toHash, unsigned size,
+        index_type hashSize){
+    index_type result;
     unsigned a, b;
     a = 3412;
     result = a;
     b = 5;
     for(unsigned i=0;i<size;i++){
         result = ((result << b) + result) ^
-            static_cast<unsigned long long>(toHash[i]);
+            static_cast<index_type>(toHash[i]);
     }
     result = result % hashSize;
     return result;
@@ -23,8 +23,8 @@ unsigned long long hashFunct(char* toHash, unsigned size,
  * Reads a line from the file stream, storing the
  * characters in ary and returning the length
 ------------------------------------------------*/
-unsigned long long gline(fstream& F, char* ary, unsigned maxlen){
-	unsigned long long i;
+index_type gline(fstream& F, char* ary, unsigned maxlen){
+	index_type i;
 	for(i=0;i<maxlen-1;++i){
 		F.get(ary[i]);
 		if(ary[i] == '\n'){
@@ -40,9 +40,9 @@ unsigned long long gline(fstream& F, char* ary, unsigned maxlen){
  * patch of whitespace is found, returning the length of the
  * data read in
 -------------------------------------------------------------*/
-unsigned long long pullthrough(fstream& F, char* ary, unsigned maxlen){
+index_type pullthrough(fstream& F, char* ary, unsigned maxlen){
     char temp;
-    unsigned long long i = 0;
+    index_type i = 0;
     bool first = false;
     while(i<maxlen-1){
         F.get(temp);

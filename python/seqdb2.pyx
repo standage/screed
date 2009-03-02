@@ -10,7 +10,7 @@ cdef extern from "dbread.h":
     ctypedef char * (*getTypeByIndex)(unsigned)
     ctypedef void (*getRecord)(unsigned long long)
     ctypedef void (*clear)()
-    ctypedef unsigned long long (*getSize)()
+    ctypedef unsigned long long(*getSize)()
     ctypedef unsigned (*getTypesize)()
     ctypedef char * (*getTypekey)(unsigned)
     ctypedef void (*getHashRecord)(char*, unsigned)

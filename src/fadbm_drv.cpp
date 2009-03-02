@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
     char line[linsiz];
     string dna;
     int multiplier;
-    unsigned long long rlinelen;
+    index_type rlinelen;
 
     if((argc < 2) || (argc > 3)){
         cerr << "ERROR: USAGE IS: " << argv[0] << " <dbfilename>\n";
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]){
             a = theFile.peek();
 		}
         char * seq = new(nothrow) char[dna.size()];
-        for(unsigned long long i=0;i<dna.size();i++){
+        for(index_type i=0;i<dna.size();i++){
             seq[i] = dna[i];
         }
 

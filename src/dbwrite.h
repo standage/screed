@@ -1,5 +1,8 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
+#ifndef DBWRITE_
+#define DBWRITE_
+
 #include <fstream>
 #include <string>
 #include <queue>
@@ -20,7 +23,7 @@ class dbwrite{
 //        std::queue<std::string, std::list<std::string> > Names4Hash;
 		std::ofstream dbFile, idxFile;
         std::fstream hashFile;
-        unsigned long long Recordlen; // The number of records read in
+        index_type Recordlen; // The number of records read in
         int hashMultiplier; // Defaults to 2X
 
 		void writeTop(char);
@@ -46,5 +49,7 @@ class dbwrite{
 
 		bool writeFirst(char*, unsigned);
 
-		bool writeLine(char *, unsigned long long);
+		bool writeLine(char *, index_type);
 };
+
+#endif // DBWRITE_

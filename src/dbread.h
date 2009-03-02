@@ -1,5 +1,8 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
+#ifndef DBREAD_
+#define DBREAD_
+
 #include <string>
 #include <fstream>
 #include <map>
@@ -9,7 +12,7 @@
 class dbread{
 	private:
 		struct Node{
-			unsigned long long data;
+			index_type data;
 			Node * Next;
 		};
 		Node *Head;
@@ -19,8 +22,8 @@ class dbread{
 		typedef std::map<std::string, unsigned> maptype;
 		maptype Typeassc;
 		char empty;
-		unsigned long long size, lastquery, dnalines;
-		unsigned long long * index;
+		index_type size, lastquery, dnalines;
+		index_type * index;
 		unsigned Typesize;
         int hashMultiplier; // Defaults to 2
 		std::ifstream idxFile, dbFile, hashFile;
@@ -39,7 +42,7 @@ class dbread{
 
         void getHashRecord(char*, unsigned);
 
-		void getRecord(unsigned long long=0);
+		void getRecord(index_type=0);
 
 		char* getType(char[]);
 		char* getTypeByIndex(unsigned);
@@ -50,7 +53,7 @@ class dbread{
 
 		void clear();
 
-		unsigned long long getSize() const{return size;}
+		index_type getSize() const{return size;}
 
 		unsigned getTypesize() const{return Typesize;}
 
@@ -58,3 +61,5 @@ class dbread{
 
         const char * theError() const {return errmsg.c_str();}
 };
+
+#endif // DBREAD_

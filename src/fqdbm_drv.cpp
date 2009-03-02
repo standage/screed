@@ -10,14 +10,12 @@
 
 using namespace std;
 
-//unsigned long long gline(fstream&, char*, unsigned);
-
 int main(int argc, char *argv[]){
     fstream theFile;
     char endck;
     char line[linsiz], line2[linsiz];
     int multiplier;
-    unsigned long long rlinelen, dnalen;
+    index_type rlinelen, dnalen;
     streampos pre, post;
 
     if((argc < 2) || (argc > 3)){
@@ -84,16 +82,3 @@ int main(int argc, char *argv[]){
 
 	return 0;
 }
-
-
-/*unsigned long long gline(fstream& F, char* ary, unsigned maxlen){
-	unsigned long long i;
-	for(i=0;i<maxlen-1;++i){
-		F.get(ary[i]);
-		if(ary[i] == '\n'){
-			break;
-		}
-	}
-	ary[i] = '\0';
-	return i;
-}*/

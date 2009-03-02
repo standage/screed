@@ -83,7 +83,7 @@ bool dbwrite::writeFirst(char* name, unsigned len){
         data[i] = name[i];
     }
     data[len] = '\0';
-    unsigned long long pLoc;
+    index_type pLoc;
     pLoc = dbFile.tellp();
 	idxFile.write((char*)&(pLoc), sizeof(pLoc));
 
@@ -107,7 +107,7 @@ bool dbwrite::writeFirst(char* name, unsigned len){
  * file. First write the size of the
  * line and then the line itself
 ---------------------------------------*/
-bool dbwrite::writeLine(char* theLine, unsigned long long lsize){
+bool dbwrite::writeLine(char* theLine, index_type lsize){
 	dbFile.write((char*)&(lsize), sizeof(lsize));
 	dbFile.write(theLine, lsize);
 	//cout << "LSIZE: " << lsize << endl;
@@ -157,14 +157,14 @@ void dbwrite::writeTop(char a){
 --------------------------------------------------*/
 bool dbwrite::hash2Disk(){
     bool result;
-    unsigned long long hashFilelen;
+    index_type hashFilelen;
     hashFilelen = Recordlen * hashMultiplier;
-    unsigned long long hashdResult, totalCollisions, i;
+    index_type hashdResult, totalCollisions, i;
     int collisions;
-    unsigned long long* hashArray;
+    index_type* hashArray;
 
     // Declare and zero out the array
-    hashArray = new(nothrow) unsigned long long[hashFilelen];
+    hashArray = new(nothrow) index_type[hashFilelen];
     for(i=0;i<hashFilelen;i++){
         hashArray[i] = 0;
     }
@@ -174,7 +174,7 @@ bool dbwrite::hash2Disk(){
     Prev = Head;
     Curr = Head->Next;
     // Build the in-memory hash
-    for(unsigned long long streamPos=1;streamPos<=Recordlen;streamPos++){
+    for(index_type streamPos=1;streamPos<=Recordlen;streamPos++){
         Prev = Curr;
         Curr = Curr->Next;
         hashdResult = hashFunct(Prev->data, Prev->len, hashFilelen);
@@ -200,12 +200,12 @@ bool dbwrite::hash2Disk(){
     	if(hashArray[hashdResult] == 0){
 	    continue;
 	}
-	hashFile.seekp(i*8);
-	hashFile.write((char*)&(hashArray[i]), 8);
+	hashFile.seekp(i*sizeof(index_type));
+	hashFile.write((char*)&(hashArray[i]), sizeof(index_type));
     }
     // Write extra data to end so eof isn't encountered when reading last entry
     hashFile.seekp(0, ios_base::end);
-    hashFile.write((char*)&(collisions), 8);
+    hashFile.write((char*)&(collisions), sizeof(index_type));
     
     // Delete the array
     delete [] hashArray;

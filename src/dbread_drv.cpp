@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 	dbread db(argv[1]);
-	long long index, i;
+	index_type index, i;
     unsigned size;
 	char type[lsize], hi, line[lsize];
 	string result;
