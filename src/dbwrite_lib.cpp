@@ -189,19 +189,29 @@ bool dbwrite::hash2Disk(){
             // Block was occupied. Do a quadratic probe for next area
             hashdResult = hashdResult + static_cast<unsigned>(
                 pow(static_cast<float>(2), collisions))-1;
-	    if(hashdResult >= hashFilelen){ // Makes the data wrap around
-		hashdResult = hashdResult - hashFilelen;
-            }
-	}
-	hashArray[hashdResult] = streamPos;
+            hashdResult = hashdResult % hashFilelen;
+/*            if(hashdResult >= hashFilelen){ // Makes the data wrap around
+                hashdResult = hashdResult - hashFilelen;
+            }*/
+	    }
+        /*
+        for(int u=0;u<Prev->len;++u){
+            cout << Prev->data[u];
+        }
+        cout << endl << "Streampos: " << streamPos << endl << "hashdResult: "<<
+            hashdResult << endl;
+            */
+    	hashArray[hashdResult] = streamPos;
     }
     // Write the in-memory array to disk
     for(i=0; i < hashFilelen; i++){
-    	if(hashArray[hashdResult] == 0){
-	    continue;
-	}
-	hashFile.seekp(i*sizeof(index_type));
-	hashFile.write((char*)&(hashArray[i]), sizeof(index_type));
+    	if(hashArray[i] == 0){
+    	    continue;
+	    }
+        hashFile.seekp(i*sizeof(index_type));
+        hashFile.write((char*)&(hashArray[i]), sizeof(index_type));
+//        cout << "streampos: " << hashArray[i] << endl << "pos: " <<
+//            i*sizeof(index_type) << endl;
     }
     // Write extra data to end so eof isn't encountered when reading last entry
     hashFile.seekp(0, ios_base::end);

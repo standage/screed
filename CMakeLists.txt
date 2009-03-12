@@ -29,6 +29,7 @@ IF(PYTHONINTERP_FOUND)
 	set(SEQDB2_BIN_DIR ./bin)
     set(SEQDB2_PY_DIR ./python)
     set(SEQDB2_TST_DIR ./tests)
+    set(SEQDB2_BIGTST_DIR ./bigtests)
 
 	# Declare c++ libraries
 	ADD_LIBRARY(DBWRITE ${SEQDB2_SRC_DIR}/dbwrite.h
@@ -75,6 +76,28 @@ IF(PYTHONINTERP_FOUND)
         ${SEQDB2_TST_DIR}/test.fastq_seqdb2_hash
         ${SEQDB2_TST_DIR}/test.fa_seqdb2_hash
         ${SEQDB2_TST_DIR}/__init__.pyc
+        ${SEQDB2_BIGTST_DIR}/__init__.pyc
+        ${SEQDB2_BIGTST_DIR}/Mus_musculus.NCBIM37.50.dna_rm.chromosome.9.fa_seqdb2
+        ${SEQDB2_BIGTST_DIR}/Mus_musculus.NCBIM37.50.dna_rm.chromosome.9.fa_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/Mus_musculus.NCBIM37.50.dna_rm.chromosome.9.fa_seqdb2_idx
+        ${SEQDB2_BIGTST_DIR}/Pongo_pygmaeus.PPYG2.50.cdna.abinitio.fa_seqdb2
+        ${SEQDB2_BIGTST_DIR}/Pongo_pygmaeus.PPYG2.50.cdna.abinitio.fa_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/Pongo_pygmaeus.PPYG2.50.cdna.abinitio.fa_seqdb2_idx
+        ${SEQDB2_BIGTST_DIR}/s_2_2_sequence.fastq_seqdb2
+        ${SEQDB2_BIGTST_DIR}/s_2_2_sequence.fastq_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/s_2_2_sequence.fastq_seqdb2_idx
+        ${SEQDB2_BIGTST_DIR}/s_3_1_sequence.fastq_seqdb2
+        ${SEQDB2_BIGTST_DIR}/s_3_1_sequence.fastq_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/s_3_1_sequence.fastq_seqdb2_idx
+        ${SEQDB2_BIGTST_DIR}/s_4_2_sequence.fastq_seqdb2
+        ${SEQDB2_BIGTST_DIR}/s_4_2_sequence.fastq_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/s_4_2_sequence.fastq_seqdb2_idx
+        ${SEQDB2_BIGTST_DIR}/triCas2.fa_seqdb2
+        ${SEQDB2_BIGTST_DIR}/triCas2.fa_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/triCas2.fa_seqdb2_idx
+        ${SEQDB2_BIGTST_DIR}/Xenopus_tropicalis.JGI4.1.50.dna.toplevel.fa_seqdb2
+        ${SEQDB2_BIGTST_DIR}/Xenopus_tropicalis.JGI4.1.50.dna.toplevel.fa_seqdb2_hash
+        ${SEQDB2_BIGTST_DIR}/Xenopus_tropicalis.JGI4.1.50.dna.toplevel.fa_seqdb2_idx
         ${SEQDB2_PY_DIR}/seqdb2.cpp
         ${SEQDB2_PY_DIR}/seqdb2.o
         ${SEQDB2_PY_DIR}/seqdb2.so

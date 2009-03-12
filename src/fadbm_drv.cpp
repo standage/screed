@@ -50,8 +50,7 @@ int main(int argc, char *argv[]){
 
         if(theFile.peek() == '\n'){ // No description
             theFile >> ws;
-            line[0] = ' ';
-            line[1] = '\0';
+            line[0] = '\0';
             rlinelen = streampos(1);
         }
         else{

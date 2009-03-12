@@ -292,7 +292,7 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     while(1){
         hashFile.seekg(hashdResult); // Go to the possible stream location
         hashFile.read((char*)&(rcrdIdx), sizeof(index_type));
-        if(hashFile.eof()){
+        if(rcrdIdx == 0){ // May be able to replace the above if
             failbit = true;
             errmsg = "No named record in database";
             return;
@@ -312,9 +312,12 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
         collisions++;
         hashdResult = hashdResult + sizeof(index_type)*(static_cast<unsigned>(
             pow(static_cast<float>(2), collisions))-1);
-        if(hashdResult >= hashFilelen*sizeof(index_type)){
+//        cout << "before: " << hashdResult << endl;
+        hashdResult = hashdResult % (hashFilelen*sizeof(index_type));
+//        cout << "after: " << hashdResult << endl;
+/*        if(hashdResult >= hashFilelen*sizeof(index_type)){
             hashdResult = hashdResult - hashFilelen*sizeof(index_type);
-        }
+        }*/
     }
     return;
 }
