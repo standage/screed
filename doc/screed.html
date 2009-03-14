@@ -4,9 +4,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.4.1: http://docutils.sourceforge.net/" />
-<title>screed Documentation</title>
-<meta name="author" content="Alex Nolley" />
-<meta name="date" content="February 9, 2009" />
+<title>screed - short read sequence database</title>
+<meta name="copyright" content="2008-2009 Michigan State University" />
+<meta name="authors" content="Alex Nolley  Charles Titus Brown" />
 <style type="text/css">
 
 /*
@@ -292,16 +292,21 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="screed-documentation">
-<h1 class="title">screed Documentation</h1>
+<div class="document" id="screed-short-read-sequence-database">
+<h1 class="title">screed - short read sequence database</h1>
 <table class="docinfo" frame="void" rules="none">
 <col class="docinfo-name" />
 <col class="docinfo-content" />
 <tbody valign="top">
-<tr><th class="docinfo-name">Author:</th>
-<td>Alex Nolley</td></tr>
-<tr><th class="docinfo-name">Date:</th>
-<td>February 9, 2009</td></tr>
+<tr><th class="docinfo-name">Copyright:</th>
+<td>2008-2009 Michigan State University</td></tr>
+<tr><th class="docinfo-name">Authors:</th>
+<td>Alex Nolley
+<br />Charles Titus Brown</td></tr>
+<tr><th class="docinfo-name">Contact:</th>
+<td><a class="first reference" href="mailto:badmit&#64;gmail.com">badmit&#64;gmail.com</a>, <a class="last reference" href="mailto:titus&#64;idyll.org">titus&#64;idyll.org</a></td></tr>
+<tr class="field"><th class="docinfo-name">License:</th><td class="field-body">BSD</td>
+</tr>
 </tbody>
 </table>
 <!-- contents: -->
@@ -381,8 +386,8 @@ from the Pyrex module</p>
 subdirectory and load some databases:</p>
 <pre class="literal-block">
 &gt;&gt;&gt; import screed
-&gt;&gt;&gt; fadb = screed.dbread('../tests/test.fa_screed')
-&gt;&gt;&gt; fqdb = screed.dbread('../tests/test.fastq_screed')
+&gt;&gt;&gt; fadb = screed.dbread('../tests/test.fa')
+&gt;&gt;&gt; fqdb = screed.dbread('../tests/test.fastq')
 </pre>
 <p>The databases act like read-only dictionary objects:</p>
 <pre class="literal-block">
