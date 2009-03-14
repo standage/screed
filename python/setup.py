@@ -22,10 +22,10 @@ if os.path.exists(os.path.join(tlib_path, "tools.o")):
 elif os.path.exists(os.path.join(tlib_path, "tools.obj")):
   tlib_path = os.path.join(tlib_path, "tools.obj")
 setup(
-	name = "seqdb2",
-        py_modules = ['seqdb2'],
+	name = "screed",
+        py_modules = ['screed'],
 	ext_modules=[
-		Extension("seqdb2", ["seqdb2.pyx"], extra_objects=[rlib_path, tlib_path], pyrex_cplus=True, include_dirs=[c_header_path])
+		Extension("screed", ["screed.pyx"], extra_objects=[rlib_path, tlib_path], pyrex_cplus=True, include_dirs=[c_header_path])
 ],
 	cmdclass = {'build_ext': build_ext}
 )

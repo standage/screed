@@ -11,7 +11,7 @@ using namespace std;
 
 /*-------------------------------------------------
  * Constructor
- * Opens .seqdb2 and .seqdb2.idx files in the same
+ * Opens .screed and .screed.idx files in the same
  * directory as the filename passed in using the
  * dbFile and idxFile file handles
 -------------------------------------------------*/
@@ -21,7 +21,7 @@ dbwrite::dbwrite(string fname, char type, int multi){
     Recordlen = 0;
     string dbName, hashName;
     dbName = fname;
-	dbName.append("_seqdb2");
+	dbName.append("_screed");
 	dbFile.open(dbName.c_str(), ios::out | ios::binary);
     hashName = dbName;
 	dbName.append("_idx");

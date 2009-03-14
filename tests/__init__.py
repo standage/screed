@@ -4,7 +4,7 @@ import subprocess
 thisdir = os.path.dirname(__file__)
 libdir = os.path.abspath(os.path.join(thisdir, '..', 'python'))
 sys.path.insert(0, libdir)
-import seqdb2
+import screed
 
 fadbm = os.path.join(thisdir, '..', 'bin', 'fadbm')
 fqdbm = os.path.join(thisdir, '..', 'bin', 'fqdbm')
@@ -20,11 +20,11 @@ def setup():
 
 class Test_dict_methods:
     """
-    Make sure that seqdb2 returns sensible results for standard dictionary
+    Make sure that screed returns sensible results for standard dictionary
     queries.
     """
     def setup(self):
-        self.db = seqdb2.dbread(testfa + '_seqdb2')
+        self.db = screed.dbread(testfa + '_screed')
 
     def test_iter_stuff(self):
         db = self.db
@@ -111,33 +111,33 @@ class Test_dict_methods:
 
 class Test_pyx_err:
     def setup(self):
-        self.db = seqdb2.dbread(testfa + '_seqdb2')
+        self.db = screed.dbread(testfa + '_screed')
 
     def teardown(self):
         self.db.clearErrorFlag()
 
     def test_open(self):
         try:
-            foo = seqdb2.dbread('foobar')
-        except seqdb2.DbException, e:
+            foo = screed.dbread('foobar')
+        except screed.DbException, e:
             assert e.value == 'Invalid database filename'
 
     def test_loadrecord(self): 
         try:
             self.db.loadRecordByIndex(-1)
-        except seqdb2.DbException, e:
+        except screed.DbException, e:
             assert e.value == 'Invalid query'
 
     def test_clear(self):
         try:
             self.db.loadRecordByIndex(-1) # makes sure the error is raised
             assert 1 == 0, "Not raising an exception with loading bad record"
-        except seqdb2.DbException:
+        except screed.DbException:
             pass
 
 #        try: # doesn't clear the last error so should raise another exception
 #            self.db.getFieldValue('name')
-#        except seqdb2.DbException, e:
+#        except screed.DbException, e:
 #            assert e.value == 'Invalid query'
 # @CTB
 
@@ -145,24 +145,24 @@ class Test_pyx_err:
         if 0:                           # @@CTB
             try:
                 print self.db.getFieldValue('FOOBAR')
-            except seqdb2.DbException, e:
+            except screed.DbException, e:
                 assert e.value == 'Invalid typename query'
 
     def test_typekey(self):
         if 0:                           # @@CTB
             try:
                 self.db.getFieldName(10)
-            except seqdb2.DbException, e:
+            except screed.DbException, e:
                 assert e.value == 'Bad typekey request'
 
 class Test_pyx_Fasta:
     def setup(self):
-        self.db = seqdb2.dbread(testfa + '_seqdb2')
+        self.db = screed.dbread(testfa + '_screed')
 
     def test_delete(self):
         gc.collect()
         
-        db = seqdb2.dbread(testfa + '_seqdb2')
+        db = screed.dbread(testfa + '_screed')
         del db
 
         gc.collect()
@@ -209,7 +209,7 @@ class Test_pyx_Fasta:
 
 class Test_pyx_FastQ:
     def setup(self):
-        self.db = seqdb2.dbread(testfq + '_seqdb2')
+        self.db = screed.dbread(testfq + '_screed')
 
     def test_simple(self):
         db = self.db
@@ -260,8 +260,8 @@ if 0:
                     shell=True, stdout=subprocess.PIPE)
             subprocess.check_call(fadbm + ' ' + testfa + ' 1',
                     shell=True, stdout=subprocess.PIPE)
-            self.fqdb = seqdb2.dbread(testfq + '_seqdb2')
-            self.fadb = seqdb2.dbread(testfa + '_seqdb2')
+            self.fqdb = screed.dbread(testfq + '_screed')
+            self.fadb = screed.dbread(testfa + '_screed')
     
         def tearDown(self):
              # remake the normal database

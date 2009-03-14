@@ -76,9 +76,9 @@ int main(int argc, char *argv[]){
 	}
 	theFile.close();
     db.hash2Disk();
-	cout << "Database saved in " << argv[1] << "_seqdb2\n";
-	cout << "Index saved in " << argv[1] << "_seqdb2_idx\n";
-	cout << "Hash saved in " << argv[1] << "_seqdb2_hash\n";
+	cout << "Database saved in " << argv[1] << "_screed\n";
+	cout << "Index saved in " << argv[1] << "_screed_idx\n";
+	cout << "Hash saved in " << argv[1] << "_screed_hash\n";
 
 	return 0;
 }

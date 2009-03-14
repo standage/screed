@@ -5,7 +5,7 @@ import urllib, tarfile
 thisdir = os.path.dirname(__file__)
 libdir = os.path.abspath(os.path.join(thisdir, '..', 'python'))
 sys.path.insert(0, libdir)
-import seqdb2
+import screed
 
 fadbm = os.path.join(thisdir, '..', 'bin', 'fadbm')
 fqdbm = os.path.join(thisdir, '..', 'bin', 'fqdbm')
@@ -44,7 +44,7 @@ def getfile(f):
 
 def setup():
     # Create databases
-    endings = ['_seqdb2', '_seqdb2_idx', '_seqdb2_hash']
+    endings = ['_screed', '_screed_idx', '_screed_hash']
     filenames = [(tests22, 'fastq'), (tests31, 'fastq'), (tests42, 'fastq'),
             (pongo, 'fasta'), (tri, 'fasta'), (mus, 'fasta'), (xeno, 'fasta')]
     for f in filenames:
@@ -65,10 +65,10 @@ def setup():
 
 class Test_s22_fastq:
     """
-    Test seqdb2 methods on the s22 fastq file
+    Test screed methods on the s22 fastq file
     """
     def setup(self):
-        self.db = seqdb2.dbread(tests22 + '_seqdb2')
+        self.db = screed.dbread(tests22 + '_screed')
 
     def tearDown(self):
         del self.db
@@ -197,10 +197,10 @@ class Test_s22_fastq:
             
 class Test_s31_fastq:
     """
-    Test seqdb2 methods on the s31 fastq file
+    Test screed methods on the s31 fastq file
     """
     def setup(self):
-        self.db = seqdb2.dbread(tests31 + '_seqdb2')
+        self.db = screed.dbread(tests31 + '_screed')
 
     def tearDown(self):
         del self.db
@@ -329,10 +329,10 @@ class Test_s31_fastq:
 
 class Test_s42_fastq:
     """
-    Test seqdb2 methods on the s42 fastq file
+    Test screed methods on the s42 fastq file
     """
     def setup(self):
-        self.db = seqdb2.dbread(tests42 + '_seqdb2')
+        self.db = screed.dbread(tests42 + '_screed')
 
     def tearDown(self):
         del self.db
@@ -461,10 +461,10 @@ class Test_s42_fastq:
             
 class Test_po_fasta:
     """
-    Test seqdb2 methods on the pongo fasta file
+    Test screed methods on the pongo fasta file
     """
     def setup(self):
-        self.db = seqdb2.dbread(pongo + '_seqdb2')
+        self.db = screed.dbread(pongo + '_screed')
 
     def tearDown(self):
         del self.db
@@ -594,10 +594,10 @@ class Test_po_fasta:
 
 class Test_mus_fasta:
     """
-    Test seqdb2 methods on the mus_musculus fasta file
+    Test screed methods on the mus_musculus fasta file
     """
     def setup(self):
-        self.db = seqdb2.dbread(mus + '_seqdb2')
+        self.db = screed.dbread(mus + '_screed')
 
     def tearDown(self):
         del self.db
@@ -712,10 +712,10 @@ class Test_mus_fasta:
             
 class Test_tri_fasta:
     """
-    Test seqdb2 methods on the tri fasta file
+    Test screed methods on the tri fasta file
     """
     def setup(self):
-        self.db = seqdb2.dbread(tri + '_seqdb2')
+        self.db = screed.dbread(tri + '_screed')
 
     def tearDown(self):
         del self.db
@@ -846,10 +846,10 @@ class Test_tri_fasta:
 
 class Test_xeno_fasta:
     """
-    Test seqdb2 methods on the xeno fasta file
+    Test screed methods on the xeno fasta file
     """
     def setup(self):
-        self.db = seqdb2.dbread(xeno + '_seqdb2')
+        self.db = screed.dbread(xeno + '_screed')
 
     def tearDown(self):
         del self.db

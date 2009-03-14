@@ -14,7 +14,7 @@ using namespace std;
 /*----------------------------------------
  * Constructor
  * Takes a string file name and opens
- * the correct _seqdb2 and _idx files.
+ * the correct _screed and _idx files.
  * Also reads the first record into cache
 ----------------------------------------*/
 dbread::dbread(string dbname){
