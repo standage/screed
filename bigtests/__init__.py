@@ -1,5 +1,6 @@
 import sys, os, gc
 import subprocess
+import urllib, tarfile
 
 thisdir = os.path.dirname(__file__)
 libdir = os.path.abspath(os.path.join(thisdir, '..', 'python'))
@@ -16,14 +17,45 @@ tri = os.path.join(thisdir, 'triCas2.fa')
 mus = os.path.join(thisdir, 'Mus_musculus.NCBIM37.50.dna_rm.chromosome.9.fa')
 xeno = os.path.join(thisdir, 'Xenopus_tropicalis.JGI4.1.50.dna.toplevel.fa')
 
+def getfile(f):
+    """
+    Downloads and extracts the given file
+    """
+    filetype = f[1]
+    filename = "%s.tar.gz" % f[0]
+    urlname = os.path.split(filename)[1]
+    base_url = 'http://lyorn.idyll.org/~nolleyal/genomes/%s/%s' % \
+        (filetype, urlname)
+
+    fp = open(filename, 'wb')
+    try:
+        up = urllib.urlopen(base_url)
+    except IOError:
+        raise IOError, "Error downloading testfiles, are you connected to\
+ the internet?"
+    fp.write(up.read())
+    fp.close()
+
+    tar = tarfile.open(filename)
+    tar.extractall(path=thisdir)
+    tar.close()
+    os.unlink(filename)
+    return
+
 def setup():
     # Create databases
     endings = ['_seqdb2', '_seqdb2_idx', '_seqdb2_hash']
-    filenames = [(tests22, fqdbm), (tests31, fqdbm), (tests42, fqdbm), (pongo, fadbm),
-        (tri, fadbm), (mus, fadbm), (xeno, fadbm)]
+    filenames = [(tests22, 'fastq'), (tests31, 'fastq'), (tests42, 'fastq'),
+            (pongo, 'fasta'), (tri, 'fasta'), (mus, 'fasta'), (xeno, 'fasta')]
     for f in filenames:
         fname = f[0]
-        parser = f[1]
+        if not os.path.isfile(fname): # Download files if necessary
+            getfile(f)
+        parser = None
+        if f[1] == 'fasta':
+            parser = fadbm
+        elif f[1] == 'fastq':
+            parser = fqdbm
         created = True
         for end in endings:
             if not os.path.isfile(fname + end):

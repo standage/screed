@@ -22,7 +22,6 @@ dbread::dbread(string dbname){
 	dbread::Node *Prev;
 	string idxname, hashname;
 	unsigned i, j;
-//	unsigned fieldsize = 100;
 	char fieldname[fieldsize];
 	char a;
 
@@ -58,17 +57,10 @@ dbread::dbread(string dbname){
 		Curr->Next = NULL;
 		Prev = Curr;
 		idxFile.read((char*)&(Curr->data), sizeof(Curr->data));
+        endian_swap(&(Curr->data));
 		idxFile.peek();
 	}
 	idxFile.close();
-
-	dbFile.open(dbname.c_str(), ios::in | ios::binary);
-	if(!dbFile.is_open()){
-	        // @CTB remember to dealloc linked list.
-	          
-		open = false;
-		return;
-	}
 
 	index = new (nothrow) index_type[size];
 	Prev = Head;
@@ -80,8 +72,16 @@ dbread::dbread(string dbname){
 		delete Prev;
 	}// End copying of index file
 
+	dbFile.open(dbname.c_str(), ios::in | ios::binary);
+	if(!dbFile.is_open()){
+        delete [] index;
+		open = false;
+		return;
+	}
+
 	// Gets the hashMultiplier
 	dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
+    endian_swap(&hashMultiplier);
 	//Determine the amount and names of individual types per record
 	for(a='0';a!='\n';Typesize++){
 		dbFile.getline(fieldname, fieldsize);
@@ -186,6 +186,7 @@ void dbread::getRecord(index_type idx){
 	for(i=0;i<Typesize;i++){
 		//Read the linelength integer in
 		dbFile.read((char*)&linelen, sizeof(linelen));
+        endian_swap(&linelen);
 		Types[i] = new (nothrow) char[linelen+1];
 		dbFile.read(Types[i], linelen); // Read in the line data
 		Types[i][linelen] = '\0'; // Set the NULL character at end
@@ -199,11 +200,10 @@ void dbread::getRecord(index_type idx){
 
 /*-----------------------------------------------------
  * getType
- * Returns integer representation of data in the map
- * object Typeassc. Typeassc is set in the constructor
- * and provides the types which are accessable in the
- * database
- * @CTB this description seems incorrect...?
+ * Returns a certain c-string from the Types array.
+ * The c-string to be returned is reference by the
+ * 'wanted' c-string passed in and the association is
+ * made with the Typeassc map
 -----------------------------------------------------*/
 char* dbread::getType(char wanted[]){
 	unsigned i;
@@ -255,22 +255,6 @@ void dbread::clear(){
     hashFile.clear();
 }
 
-/*---------------------------------------
- * Compares two arrays to see if they
- * are the same or not
----------------------------------------*/
-bool dbread::cmpCstrs(char* f, unsigned fl, const char* s, unsigned sl){
-    if(fl != sl){
-        return false;
-    }
-    for(unsigned i=0;i<fl;i++){
-        if(f[i] != s[i]){
-            return false;
-        }
-    }
-    return true;
-}
-
 /*------------------------------------------
  * getHashRecord
  * Takes in the name of the record as a
@@ -284,7 +268,6 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     int collisions;
     index_type hashFilelen = size*hashMultiplier;
     nameTypeint = Typeassc["name"]-1;
-    std::string test;
     hashdResult = hashFunct(RecordName, RCRDsize, hashFilelen);
     hashdResult = hashdResult * sizeof(index_type);
     collisions = 0;
@@ -292,7 +275,8 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     while(1){
         hashFile.seekg(hashdResult); // Go to the possible stream location
         hashFile.read((char*)&(rcrdIdx), sizeof(index_type));
-        if(rcrdIdx == 0){ // May be able to replace the above if
+        endian_swap(&rcrdIdx);
+        if(rcrdIdx == 0){
             failbit = true;
             errmsg = "No named record in database";
             return;
@@ -302,22 +286,18 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
             errmsg = "Corrupted hash file";
             return;
         }
-        // Re-Correction for db writer necessary offset
-        rcrdIdx = rcrdIdx - 1;
+
+        rcrdIdx = rcrdIdx - 1; // Re-Correction for db writer necessary offset
         getRecord(rcrdIdx);
-        test = Types[nameTypeint];
-        if(cmpCstrs(RecordName, RCRDsize, test.c_str(), test.size()) == true){
+        // Compare retrieved record name to name passed in
+        if(string(Types[nameTypeint]) == string(RecordName)){
             return;
         }
+        // Record was incorrect (a collision), continue searching
         collisions++;
         hashdResult = hashdResult + sizeof(index_type)*(static_cast<unsigned>(
             pow(static_cast<float>(2), collisions))-1);
-//        cout << "before: " << hashdResult << endl;
         hashdResult = hashdResult % (hashFilelen*sizeof(index_type));
-//        cout << "after: " << hashdResult << endl;
-/*        if(hashdResult >= hashFilelen*sizeof(index_type)){
-            hashdResult = hashdResult - hashFilelen*sizeof(index_type);
-        }*/
     }
     return;
 }

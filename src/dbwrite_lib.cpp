@@ -85,6 +85,7 @@ bool dbwrite::writeFirst(char* name, unsigned len){
     data[len] = '\0';
     index_type pLoc;
     pLoc = dbFile.tellp();
+    endian_swap(&pLoc);
 	idxFile.write((char*)&(pLoc), sizeof(pLoc));
 
     Curr = new(nothrow) Node;
@@ -108,9 +109,10 @@ bool dbwrite::writeFirst(char* name, unsigned len){
  * line and then the line itself
 ---------------------------------------*/
 bool dbwrite::writeLine(char* theLine, index_type lsize){
+    index_type temp = lsize;
+    endian_swap(&lsize);
 	dbFile.write((char*)&(lsize), sizeof(lsize));
-	dbFile.write(theLine, lsize);
-	//cout << "LSIZE: " << lsize << endl;
+	dbFile.write(theLine, temp);
 	if(!dbFile.good()){
 		failbit = true;
 	}
@@ -134,8 +136,10 @@ void dbwrite::writeTop(char a){
 	else if(a == 'q'){ // sequence is a fastq file
 		middle = "accuracy";
 	}
-    
-    dbFile.write((char*)&(hashMultiplier), sizeof(hashMultiplier));
+   
+    index_type temp = hashMultiplier;
+    endian_swap(&temp);
+    dbFile.write((char*)&(temp), sizeof(hashMultiplier));
 	dbFile.write(name.c_str(), name.size());
 	dbFile.write(&newline, 1);
 	dbFile.write(middle.c_str(), middle.size());
@@ -190,17 +194,7 @@ bool dbwrite::hash2Disk(){
             hashdResult = hashdResult + static_cast<unsigned>(
                 pow(static_cast<float>(2), collisions))-1;
             hashdResult = hashdResult % hashFilelen;
-/*            if(hashdResult >= hashFilelen){ // Makes the data wrap around
-                hashdResult = hashdResult - hashFilelen;
-            }*/
 	    }
-        /*
-        for(int u=0;u<Prev->len;++u){
-            cout << Prev->data[u];
-        }
-        cout << endl << "Streampos: " << streamPos << endl << "hashdResult: "<<
-            hashdResult << endl;
-            */
     	hashArray[hashdResult] = streamPos;
     }
     // Write the in-memory array to disk
@@ -209,9 +203,8 @@ bool dbwrite::hash2Disk(){
     	    continue;
 	    }
         hashFile.seekp(i*sizeof(index_type));
+        endian_swap(&hashArray[i]);
         hashFile.write((char*)&(hashArray[i]), sizeof(index_type));
-//        cout << "streampos: " << hashArray[i] << endl << "pos: " <<
-//            i*sizeof(index_type) << endl;
     }
     // Write extra data to end so eof isn't encountered when reading last entry
     hashFile.seekp(0, ios_base::end);

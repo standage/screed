@@ -25,13 +25,11 @@ class dbread{
 		index_type size, lastquery, dnalines;
 		index_type * index;
 		unsigned Typesize;
-        int hashMultiplier; // Defaults to 2
+        index_type hashMultiplier; // Defaults to 2
 		std::ifstream idxFile, dbFile, hashFile;
 		bool open, failbit;
         std::string errmsg;
         
-        bool cmpCstrs(char*, unsigned, const char*, unsigned);
-
     public:
 
 		dbread(std::string);

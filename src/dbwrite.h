@@ -20,11 +20,10 @@ struct Node{
 
 class dbwrite{
 	private:
-//        std::queue<std::string, std::list<std::string> > Names4Hash;
 		std::ofstream dbFile, idxFile;
         std::fstream hashFile;
         index_type Recordlen; // The number of records read in
-        int hashMultiplier; // Defaults to 2X
+        index_type hashMultiplier; // Defaults to 2X
 
 		void writeTop(char);
 
