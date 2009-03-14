@@ -1,6 +1,6 @@
 # Copyright 2008-2009 Michigan State University. All rights reserved.
 
-import UserDict
+import UserDict, os
 
 cdef extern from "dbread.h":
     ctypedef int (*fail)()
@@ -103,6 +103,9 @@ cdef class dbread:
 
     def __cinit__(self, filename):
         cdef int n_fields
+        if not filename.endswith("_screed"):
+            if os.path.isfile("%s_screed" % filename):
+                filename = "%s_screed" % filename
         self.thisptr = new_dbread(filename)
         if self.thisptr.is_open() == 0:
             raise DbException(self.thisptr.theError())

@@ -3,7 +3,7 @@ screed Documentation
 ====================
 
 :Author: Alex Nolley
-:Date: February 9, 2009
+:Date: March 14, 2009
 
 .. contents:
 
@@ -89,8 +89,8 @@ In the python interpreter, import the screed module from the python
 subdirectory and load some databases::
 
     >>> import screed
-    >>> fadb = screed.dbread('../tests/test.fa_screed')
-    >>> fqdb = screed.dbread('../tests/test.fastq_screed')
+    >>> fadb = screed.dbread('../tests/test.fa')
+    >>> fqdb = screed.dbread('../tests/test.fastq')
 
 The databases act like read-only dictionary objects::
 
