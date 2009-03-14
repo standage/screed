@@ -9,7 +9,12 @@ typedef unsigned long long index_type;
 #endif
 
 #include <fstream>
+
+#ifdef __APPLE__
+#include <machine/endian.h>
+#else
 #include <endian.h>
+#endif
 
 using namespace std;
 
