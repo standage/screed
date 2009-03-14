@@ -1,9 +1,11 @@
-====================
-screed Documentation
-====================
+=====================================
+screed - short read sequence database
+=====================================
 
-:Author: Alex Nolley
-:Date: March 14, 2009
+:Copyright: 2008-2009 Michigan State University
+:Authors: Alex Nolley, Charles Titus Brown
+:Contact: badmit@gmail.com, titus@idyll.org
+:License: BSD
 
 .. contents:
 
