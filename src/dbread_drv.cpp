@@ -41,8 +41,8 @@ int main(int argc, char *argv[]){
 			continue;
 		}
 		cout << "Possible types are:\n";
-		for(i=0;i<db.getTypesize();i++){
-			cout << db.getTypekey(i) << endl;
+		for(i=0;i<db.getNumberOfAttributes();i++){
+			cout << db.getAttributeByName(i) << endl;
 		}
 		cout << "Enter one to retrieve: ";
 		cin >> type;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
 			cout << endl;
 			break;
 		}
-		cout << db.getType(type) << endl;
+		cout << db.getAttributeValue(type) << endl;
 		if(db.fail() == true){
 			cerr << "ERROR: BAD TYPE\n";
 			db.clear();
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 		}
         cout << "Enter a typekey index to retrieve: ";
         cin >> i;
-        cout << db.getTypekey(i) << endl;
+        cout << db.getAttributeByName(i) << endl;
         if(db.fail() == true){
             cout << db.theError() << endl;
             db.clear();
@@ -76,13 +76,13 @@ int main(int argc, char *argv[]){
             continue;
         }
 		cout << "Possible types are:\n";
-		for(i=0;i<db.getTypesize();i++){
-			cout << db.getTypekey(i) << endl;
+		for(i=0;i<db.getNumberOfAttributes();i++){
+			cout << db.getAttributeByName(i) << endl;
 		}
         cout << "Enter a type to retrieve: ";
         cin.getline(line, lsize);
         for(size=0;line[size]!=0;size++){}
-        cout << db.getType(line) << endl;
+        cout << db.getAttributeValue(line) << endl;
         if(db.fail() == true){
             cerr << db.theError() << endl;
             db.clear();

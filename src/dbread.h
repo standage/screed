@@ -16,15 +16,15 @@ class dbread{
 			Node * Next;
 		};
 		Node *Head;
-		char **Typekeys;
-		char **Types;
+		char **LoadedAttributes;
+		char **RecordAttributes;
 
 		typedef std::map<std::string, unsigned> maptype;
-		maptype Typeassc;
+		maptype AttributeMap;
 		char empty;
 		index_type size, lastquery, dnalines;
 		index_type * index;
-		unsigned Typesize;
+		unsigned NumberOfAttributes;
         index_type hashMultiplier; // Defaults to 2
 		std::ifstream idxFile, dbFile, hashFile;
 		bool open, failbit;
@@ -38,12 +38,12 @@ class dbread{
 
         void close();
 
-        void getHashRecord(char*, unsigned);
+        index_type getHashRecord(char*, unsigned);
 
 		void getRecord(index_type=0);
 
-		char* getType(char[]);
-		char* getTypeByIndex(unsigned);
+		char* getAttributeValue(char[]);
+		char* getAttributeByNumber(unsigned);
 
 		bool is_open() const{return open;}
 
@@ -53,9 +53,9 @@ class dbread{
 
 		index_type getSize() const{return size;}
 
-		unsigned getTypesize() const{return Typesize;}
+		unsigned getNumberOfAttributes() const{return NumberOfAttributes;}
 
-		char * getTypekey(unsigned);
+		char * getAttributeByName(unsigned);
 
         const char * theError() const {return errmsg.c_str();}
 };
