@@ -55,7 +55,7 @@ class dbread{
 
 		unsigned getNumberOfAttributes() const{return NumberOfAttributes;}
 
-		char * getAttributeByName(unsigned);
+		char * getAttributeName(unsigned);
 
         const char * theError() const {return errmsg.c_str();}
 };

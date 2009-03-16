@@ -200,13 +200,13 @@ void dbread::getRecord(index_type idx){
     return;
 }
 
-/*-----------------------------------------------------
+/*------------------------------------------------------------
  * getAttributeValue
  * Returns a certain c-string from the LoadedAttributes array.
- * The c-string to be returned is reference by the
+ * The c-string to be returned is referenced by the
  * 'wanted' c-string passed in and the association is
  * made with the AttributeMap map
------------------------------------------------------*/
+------------------------------------------------------------*/
 char* dbread::getAttributeValue(char wanted[]){
 	unsigned i;
 	i = AttributeMap[string(wanted)];
@@ -224,11 +224,11 @@ char* dbread::getAttributeValue(char wanted[]){
  * by name as in getAttributeValue.
 -----------------------------------------------------*/
 char* dbread::getAttributeByNumber(unsigned idx){
-        return getAttributeValue(getAttributeByName(idx));
+        return getAttributeValue(getAttributeName(idx));
 }
 
 /*---------------------------------------------
- * getAttributeByName
+ * getAttributeName
  * Returns the c-string stored the in the
  * double-pointer variable RecordAttributes. First
  * though, it checks to make sure that the 
@@ -236,7 +236,7 @@ char* dbread::getAttributeByNumber(unsigned idx){
  * function can be thought of as the inverse
  * of getAttributeValue
 ---------------------------------------------*/
-char * dbread::getAttributeByName(unsigned idx){
+char * dbread::getAttributeName(unsigned idx){
     if((idx >= NumberOfAttributes) || (idx < 0)){
         failbit = true;
         errmsg = "Bad typekey request";

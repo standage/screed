@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 		}
 		cout << "Possible types are:\n";
 		for(i=0;i<db.getNumberOfAttributes();i++){
-			cout << db.getAttributeByName(i) << endl;
+			cout << db.getAttributeName(i) << endl;
 		}
 		cout << "Enter one to retrieve: ";
 		cin >> type;
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 		}
         cout << "Enter a typekey index to retrieve: ";
         cin >> i;
-        cout << db.getAttributeByName(i) << endl;
+        cout << db.getAttributeName(i) << endl;
         if(db.fail() == true){
             cout << db.theError() << endl;
             db.clear();
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
         }
 		cout << "Possible types are:\n";
 		for(i=0;i<db.getNumberOfAttributes();i++){
-			cout << db.getAttributeByName(i) << endl;
+			cout << db.getAttributeName(i) << endl;
 		}
         cout << "Enter a type to retrieve: ";
         cin.getline(line, lsize);

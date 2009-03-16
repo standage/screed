@@ -12,7 +12,7 @@ cdef extern from "dbread.h":
     ctypedef void (*clear)()
     ctypedef unsigned long long(*getSize)()
     ctypedef unsigned (*getNumberOfAttributes)()
-    ctypedef char * (*getAttributeByName)(unsigned)
+    ctypedef char * (*getAttributeName)(unsigned)
     ctypedef unsigned long long (*getHashRecord)(char*, unsigned)
     ctypedef void (*close)()
     ctypedef struct c_dbread "dbread":
@@ -25,7 +25,7 @@ cdef extern from "dbread.h":
         clear clear
         getSize getSize
         getNumberOfAttributes getNumberOfAttributes
-        getAttributeByName getAttributeByName
+        getAttributeName getAttributeName
         getHashRecord getHashRecord
         close close
 
@@ -116,7 +116,7 @@ cdef class dbread:
         self.thisptr.getRecord(0)
         
         for i in range(n_fields):
-            name = self.thisptr.getAttributeByName(i)
+            name = self.thisptr.getAttributeName(i)
             fields.append(name)
         self.fields = fields
 
