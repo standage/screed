@@ -15,14 +15,15 @@ much faster for databases with many, many sequences.
 Unlike the normal seqdb, screed will load the entire sequence record
 into memory on request, so it's not good for large sequences.
 
-All screed records are guaranteed to have a name and a sequence; anything
-else is specific to the database writer you use.  The raw screed record
-is available under seq.record.
+All screed records are guaranteed to have an 'index', a 'name', and a
+'sequence' attribute; anything else is specific to the database writer
+you use.  The raw screed record (which contains any other information)
+is available under seqObj.record.
 
 Note: the underlying screed database must already have been built with
 fadbm or fqdbm.
 
-CTB 3/15/09
+CTB 3/20/09
 """
 
 import UserDict
@@ -35,12 +36,17 @@ from pygr.sequtil import DNA_SEQTYPE
 
 ###
 
-class _ScreedSequence(SequenceBase):
-    """Sequence implementation based on screed; stores screed record info."""
-    def _init_subclass(cls, db, **kwargs):
-        cls.db = db
-    _init_subclass = classmethod(_init_subclass)
+class ScreedSequence(SequenceBase):
+    """Sequence implementation based on screed; stores screed record info.
 
+    Attributes:
+      - 'id' and 'db' are the standard pygr-ish name/database attrs.
+      - 'record' is the screed 'record' object, containing name, etc.
+      - 'name' is the record name, which can be the same as 'id' but
+        can also be different (see ScreedSequenceDB_ByIndex).
+      - 'seq' is the sequence.
+
+    """
     def __init__(self, db, id):
         self.id = id
         SequenceBase.__init__(self)
@@ -48,28 +54,28 @@ class _ScreedSequence(SequenceBase):
         
         self.record = info.record
         self.name = info.record.name
-        self.seq = info.seq
+        self.seq = info.record.sequence
 
 class ScreedSequenceDB(SequenceDB):
     """SequenceDB implementation based on screed; retrieve seqs by name."""
-    itemClass = _ScreedSequence
+    itemClass = ScreedSequence
     
     def __init__(self, filename):
-        SequenceDB.__init__(self)
         self.seqInfoDict = _ScreedSeqInfoDict_ByName(filename)
+        SequenceDB.__init__(self)
         
-    def set_seqtype(self):
+    def _set_seqtype(self):
         self._seqtype = DNA_SEQTYPE
 
 class ScreedSequenceDB_ByIndex(SequenceDB):
     """SequenceDB implementation based on screed; retrieve seqs by index."""
-    itemClass = _ScreedSequence
+    itemClass = ScreedSequence
     
     def __init__(self, filename):
-        SequenceDB.__init__(self)
         self.seqInfoDict = _ScreedSeqInfoDict_ByIndex(filename)
+        SequenceDB.__init__(self)
         
-    def set_seqtype(self):
+    def _set_seqtype(self):
         self._seqtype = DNA_SEQTYPE
 
 class _ScreedSequenceInfo(object):
@@ -77,8 +83,7 @@ class _ScreedSequenceInfo(object):
     def __init__(self, id, record):
         self.id = id
         self.record = record
-        self.seq = record.sequence
-        self.length = len(self.seq)
+        self.length = len(record.sequence)
 
 class _ScreedSeqInfoDict_ByName(object, UserDict.DictMixin):
     """seqInfoDict implementation that uses names to retrieve records."""
@@ -91,6 +96,19 @@ class _ScreedSeqInfoDict_ByName(object, UserDict.DictMixin):
 
     def keys(self):
         return self.sdb.keys()
+
+    def itervalues(self):
+        i = 0
+        max_index = len(self.sdb)
+        while i < max_index:
+            v = self.sdb.loadRecordByIndex(i)
+            yield _ScreedSequenceInfo(v.name, v)
+            i += 1
+
+    def iteritems(self):
+        for v in self.itervalues():
+            yield v.name, v
+        
 
 class _ScreedSeqInfoDict_ByIndex(object, UserDict.DictMixin):
     """seqInfoDict implementation that uses indices to retrieve records."""
