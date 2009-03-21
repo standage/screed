@@ -6,26 +6,26 @@ cdef extern from "dbread.h":
     ctypedef int (*fail)()
     ctypedef int (*is_open)()
     ctypedef char * (*theError)()
-    ctypedef char * (*getType)(char*)
-    ctypedef char * (*getTypeByIndex)(unsigned)
+    ctypedef char * (*getAttributeValue)(char*)
+    ctypedef char * (*getAttributeByNumber)(unsigned)
     ctypedef void (*getRecord)(unsigned long long)
     ctypedef void (*clear)()
     ctypedef unsigned long long(*getSize)()
-    ctypedef unsigned (*getTypesize)()
-    ctypedef char * (*getTypekey)(unsigned)
-    ctypedef void (*getHashRecord)(char*, unsigned)
+    ctypedef unsigned (*getNumberOfAttributes)()
+    ctypedef char * (*getAttributeName)(unsigned)
+    ctypedef unsigned long long (*getHashRecord)(char*, unsigned)
     ctypedef void (*close)()
     ctypedef struct c_dbread "dbread":
         is_open is_open
         fail fail
         theError theError
-        getType getType
-        getTypeByIndex getTypeByIndex
+        getAttributeValue getAttributeValue
+        getAttributeByNumber getAttributeByNumber
         getRecord getRecord
         clear clear
         getSize getSize
-        getTypesize getTypesize
-        getTypekey getTypekey
+        getNumberOfAttributes getNumberOfAttributes
+        getAttributeName getAttributeName
         getHashRecord getHashRecord
         close close
 
@@ -110,13 +110,13 @@ cdef class dbread:
         if self.thisptr.is_open() == 0:
             raise DbException(self.thisptr.theError())
 
-        n_fields = self.thisptr.getTypesize()
+        n_fields = self.thisptr.getNumberOfAttributes()
         fields = list()
 
         self.thisptr.getRecord(0)
         
         for i in range(n_fields):
-            name = self.thisptr.getTypekey(i)
+            name = self.thisptr.getAttributeName(i)
             fields.append(name)
         self.fields = fields
 
@@ -127,15 +127,16 @@ cdef class dbread:
         del_dbread(self.thisptr)
         self.thisptr = NULL
 
-    def _buildRecord(self):
+    def _buildRecord(self, idx):
         self.checkopen()
         x = []
         for i, name in enumerate(self.fields):
             if self.thisptr.fail() == 1:
                 raise DbException(self.thisptr.theError())
-            value = self.thisptr.getTypeByIndex(i)
+            value = self.thisptr.getAttributeByNumber(i)
             #print i, name, value
             x.append((name, value))
+        x.append(("index", idx))
         return _dbread_record(x)
 
     def loadRecordByIndex(self, idx):
@@ -145,16 +146,16 @@ cdef class dbread:
             self.thisptr.clear()
             raise DbException(self.thisptr.theError())
 
-        return self._buildRecord()
+        return self._buildRecord(idx)
 
     def loadRecordByName(self, name):
         self.checkopen()
-        self.thisptr.getHashRecord(name, len(name))
+        idx = self.thisptr.getHashRecord(name, len(name))
         if self.thisptr.fail() == 1:
             self.thisptr.clear()
             raise DbException(self.thisptr.theError())
 
-        return self._buildRecord()
+        return self._buildRecord(idx)
 
     def close(self):
         self.checkopen()

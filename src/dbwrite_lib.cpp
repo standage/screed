@@ -9,13 +9,13 @@
 
 using namespace std;
 
-/*-------------------------------------------------
+/*----------------------------------------------------
  * Constructor
- * Opens .screed and .screed.idx files in the same
- * directory as the filename passed in using the
- * dbFile and idxFile file handles
--------------------------------------------------*/
-dbwrite::dbwrite(string fname, char type, int multi){
+ * Opens .screed, .screed_idx, and .screed_hash
+ * files in the same directory as the filename
+ * passed in using the dbFile and idxFile file handles
+----------------------------------------------------*/
+dbwrite::dbwrite(string fname, char FileType, int multi){
 	open = true;
 	failbit = false;
     Recordlen = 0;
@@ -38,7 +38,7 @@ dbwrite::dbwrite(string fname, char type, int multi){
 	if((!dbFile.is_open()) || (!idxFile.is_open()) || (!hashFile.is_open())){
         open = false;
 	}
-    writeTop(type);
+    writeTop(FileType);
 }
 
 /*-----------------------------------------------
@@ -119,13 +119,13 @@ bool dbwrite::writeLine(char* theLine, index_type lsize){
 	return !(dbFile.fail());
 }
 
-/*---------------------------------------
+/*----------------------------------------
  * writeTop
  * Writes the multiplier used on the hash
- * file. Also writes the types of fields
+ * file. Also writes the Record Attributes
  * in a small section at the top of the
  * db file.
----------------------------------------*/
+----------------------------------------*/
 void dbwrite::writeTop(char a){
 	string name, sequence, middle;
 	name = "name";

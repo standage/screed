@@ -33,7 +33,7 @@ dbread::dbread(string dbname){
 	hashname = dbname + "_hash";
 	lastquery = -19;
 	empty = ' ';
-	Typesize = 1;
+	NumberOfAttributes = 1;
 	errmsg = "";
 
 	idxFile.open(idxname.c_str(), ios::in | ios::binary);
@@ -83,31 +83,31 @@ dbread::dbread(string dbname){
 	dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
     endian_swap(&hashMultiplier);
 	//Determine the amount and names of individual types per record
-	for(a='0';a!='\n';Typesize++){
+	for(a='0';a!='\n';NumberOfAttributes++){
 		dbFile.getline(fieldname, fieldsize);
-		Typeassc[string(fieldname)] = Typesize;
+		AttributeMap[string(fieldname)] = NumberOfAttributes;
 		a = dbFile.peek();
 	}
 	dbFile.ignore(1); // Ignore the \n char seperating the sections
-	Typesize--;
+	NumberOfAttributes--;
 
-	//Create the publically-accessable Typekeys object for the user to
+	//Create the publically-accessable RecordAttributes object for the user to
 	//view the keys of the map with
-	Typekeys = new (nothrow) char*[Typesize];
+	RecordAttributes = new (nothrow) char*[NumberOfAttributes];
 	i = 0;
-	for(maptype::iterator it=Typeassc.begin();it!=Typeassc.end();it++){
-		Typekeys[i] = new (nothrow) char[(it->first).size()+1];
+	for(maptype::iterator it=AttributeMap.begin();it!=AttributeMap.end();it++){
+		RecordAttributes[i] = new (nothrow) char[(it->first).size()+1];
 		for(j=0;j<(it->first).size();j++){
-			Typekeys[i][j] = (it->first).at(j);
+			RecordAttributes[i][j] = (it->first).at(j);
 		}
-		Typekeys[i][j] = '\0';
+		RecordAttributes[i][j] = '\0';
 		i++;
 	}
 
-	//Create the Types object
-	Types = new (nothrow) char *[Typesize];
-	for(i=0;i<Typesize;i++){
-		Types[i] = new (nothrow) char[2];
+	//Create the LoadedAttributes object
+	LoadedAttributes = new (nothrow) char *[NumberOfAttributes];
+	for(i=0;i<NumberOfAttributes;i++){
+		LoadedAttributes[i] = new (nothrow) char[2];
 	}
 }
 
@@ -137,19 +137,19 @@ void dbread::close(){
 	delete Head;
     Head = NULL;
 	delete [] index;
-	for(unsigned i=0;i<Typesize;i++){
-		delete [] Types[i];
-		delete [] Typekeys[i];
+	for(unsigned i=0;i<NumberOfAttributes;i++){
+		delete [] LoadedAttributes[i];
+		delete [] RecordAttributes[i];
 	}
-	delete [] Typekeys;
-	delete [] Types;
+	delete [] RecordAttributes;
+	delete [] LoadedAttributes;
 }
 
 /*-------------------------------------------------
  * getRecord
  * Loads the record indexed by the unsigned long
  * long variable 'index' into memory from the
- * database
+ * database.
 -------------------------------------------------*/
 void dbread::getRecord(index_type idx){
 	if(open == false){
@@ -170,8 +170,8 @@ void dbread::getRecord(index_type idx){
 	unsigned i;
 	index_type linelen;
 
-	for(i=0;i<Typesize;i++){
-		delete [] Types[i];
+	for(i=0;i<NumberOfAttributes;i++){
+		delete [] LoadedAttributes[i];
 	}
 
 	dbFile.seekg(index[idx]);
@@ -181,66 +181,68 @@ void dbread::getRecord(index_type idx){
         failbit = true;
         return;
     }
-	// Read new records into the Types array
+	// Read new records into the LoadedAttributes array
 	a = '0';
-	for(i=0;i<Typesize;i++){
+	for(i=0;i<NumberOfAttributes;i++){
 		//Read the linelength integer in
 		dbFile.read((char*)&linelen, sizeof(linelen));
         endian_swap(&linelen);
-		Types[i] = new (nothrow) char[linelen+1];
-		dbFile.read(Types[i], linelen); // Read in the line data
-		Types[i][linelen] = '\0'; // Set the NULL character at end
+		LoadedAttributes[i] = new (nothrow) char[linelen+1];
+		dbFile.read(LoadedAttributes[i], linelen); // Read in the line data
+		LoadedAttributes[i][linelen] = '\0'; // Set the NULL character at end
 	}
-	if(i != Typesize){ // i must equal Typesize when the loop exits
+    // i must equal NumberOfAttributes when the loop exits
+	if(i != NumberOfAttributes){
         errmsg = "Database files corrupted";
 		failbit = true;
 	}
 	lastquery = idx;
+    return;
 }
 
-/*-----------------------------------------------------
- * getType
- * Returns a certain c-string from the Types array.
- * The c-string to be returned is reference by the
+/*------------------------------------------------------------
+ * getAttributeValue
+ * Returns a certain c-string from the LoadedAttributes array.
+ * The c-string to be returned is referenced by the
  * 'wanted' c-string passed in and the association is
- * made with the Typeassc map
------------------------------------------------------*/
-char* dbread::getType(char wanted[]){
+ * made with the AttributeMap map
+------------------------------------------------------------*/
+char* dbread::getAttributeValue(char wanted[]){
 	unsigned i;
-	i = Typeassc[string(wanted)];
+	i = AttributeMap[string(wanted)];
 	if(i == 0){
         errmsg = "Invalid typename query";
 		failbit = true;
 		return &(empty);
 	}
-	return Types[i-1];
+	return LoadedAttributes[i-1];
 }
 
 /*-----------------------------------------------------
- * getTypeByIndex
- * Returns data from Types by direct indexing rather
- * by name as in getType.
+ * getAttributeByNumber
+ * Returns data from LoadedAttributes by direct indexing rather
+ * by name as in getAttributeValue.
 -----------------------------------------------------*/
-char* dbread::getTypeByIndex(unsigned idx){
-        return getType(getTypekey(idx));
+char* dbread::getAttributeByNumber(unsigned idx){
+        return getAttributeValue(getAttributeName(idx));
 }
 
 /*---------------------------------------------
- * getTypekey
+ * getAttributeName
  * Returns the c-string stored the in the
- * double-pointer variable Typekeys. First
+ * double-pointer variable RecordAttributes. First
  * though, it checks to make sure that the 
  * referenced index is a valid one. This
  * function can be thought of as the inverse
- * of getType
+ * of getAttributeValue
 ---------------------------------------------*/
-char * dbread::getTypekey(unsigned idx){
-    if((idx >= Typesize) || (idx < 0)){
+char * dbread::getAttributeName(unsigned idx){
+    if((idx >= NumberOfAttributes) || (idx < 0)){
         failbit = true;
         errmsg = "Bad typekey request";
         return &(empty);
     }
-    return Typekeys[idx];
+    return RecordAttributes[idx];
 }
 
 /*------------------------------------
@@ -262,14 +264,14 @@ void dbread::clear(){
  * into an integer and then uses getRecord
  * to load the record into memory
 ------------------------------------------*/
-void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
+index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     index_type hashdResult, rcrdIdx;
     unsigned nameTypeint;
     int collisions;
     index_type hashFilelen = size*hashMultiplier;
-    nameTypeint = Typeassc["name"]-1;
+    nameTypeint = AttributeMap["name"]-1;
     hashdResult = hashFunct(RecordName, RCRDsize, hashFilelen);
-    hashdResult = hashdResult * sizeof(index_type);
+    hashdResult *= sizeof(index_type);
     collisions = 0;
 
     while(1){
@@ -279,19 +281,19 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
         if(rcrdIdx == 0){
             failbit = true;
             errmsg = "No named record in database";
-            return;
+            break;
         }
         else if(hashFile.fail()){
             failbit = true;
             errmsg = "Corrupted hash file";
-            return;
+            break;
         }
 
         rcrdIdx = rcrdIdx - 1; // Re-Correction for db writer necessary offset
         getRecord(rcrdIdx);
         // Compare retrieved record name to name passed in
-        if(string(Types[nameTypeint]) == string(RecordName)){
-            return;
+        if(string(LoadedAttributes[nameTypeint]) == string(RecordName)){
+            return rcrdIdx;
         }
         // Record was incorrect (a collision), continue searching
         collisions++;
@@ -299,5 +301,5 @@ void dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
             pow(static_cast<float>(2), collisions))-1);
         hashdResult = hashdResult % (hashFilelen*sizeof(index_type));
     }
-    return;
+    return rcrdIdx; // Only executed if an error occurred above
 }

@@ -44,6 +44,7 @@ IF(PYTHONINTERP_FOUND)
 	ADD_EXECUTABLE(${screed_BIN_DIR}/fqdbm ${screed_SRC_DIR}/fqdbm_drv.cpp)
 	ADD_EXECUTABLE(${screed_BIN_DIR}/dbread ${screed_SRC_DIR}/dbread_drv.cpp)
 	ADD_EXECUTABLE(${screed_BIN_DIR}/shelltest ${screed_SRC_DIR}/shelltest.cpp)
+	ADD_EXECUTABLE(${screed_BIN_DIR}/timing ${screed_SRC_DIR}/timing.cpp)
 
 	# Link the binary files to their needed library files
     TARGET_LINK_LIBRARIES (DBWRITE TOOLS)
@@ -52,6 +53,7 @@ IF(PYTHONINTERP_FOUND)
 	TARGET_LINK_LIBRARIES (${screed_BIN_DIR}/fqdbm DBWRITE)
 	TARGET_LINK_LIBRARIES (${screed_BIN_DIR}/dbread DBREAD)
 	TARGET_LINK_LIBRARIES (${screed_BIN_DIR}/shelltest DBREAD)
+	TARGET_LINK_LIBRARIES (${screed_BIN_DIR}/timing DBREAD)
 
 	# Compile the pyrex module
 	ADD_CUSTOM_TARGET(pymodule ALL
@@ -108,10 +110,12 @@ IF(PYTHONINTERP_FOUND)
         ${screed_BIN_DIR}/fadbm
         ${screed_BIN_DIR}/shelltest
         ${screed_BIN_DIR}/dbread
+        ${screed_BIN_DIR}/timing
         ${screed_BIN_DIR}/fqdbm.exe
         ${screed_BIN_DIR}/fadbm.exe
         ${screed_BIN_DIR}/shelltest.exe
-        ${screed_BIN_DIR}/dbread.exe)
+        ${screed_BIN_DIR}/dbread.exe
+        ${screed_BIN_DIR}/timing.exe)
 	SET_DIRECTORY_PROPERTIES(${CMAKE_SOURCE_DIR} ADDITIONAL_MAKE_CLEAN_FILES
         "${temps}")
 ENDIF(PYTHONINTERP_FOUND)
