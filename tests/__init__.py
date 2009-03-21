@@ -24,7 +24,7 @@ class Test_dict_methods:
     queries.
     """
     def setup(self):
-        self.db = screed.dbread(testfa + '_screed')
+        self.db = screed.dbread(testfa)
 
     def test_iter_stuff(self):
         db = self.db
@@ -111,7 +111,7 @@ class Test_dict_methods:
 
 class Test_pyx_err:
     def setup(self):
-        self.db = screed.dbread(testfa + '_screed')
+        self.db = screed.dbread(testfa)
 
     def teardown(self):
         self.db.clearErrorFlag()
@@ -157,12 +157,12 @@ class Test_pyx_err:
 
 class Test_pyx_Fasta:
     def setup(self):
-        self.db = screed.dbread(testfa + '_screed')
+        self.db = screed.dbread(testfa)
 
     def test_delete(self):
         gc.collect()
         
-        db = screed.dbread(testfa + '_screed')
+        db = screed.dbread(testfa)
         del db
 
         gc.collect()
@@ -209,7 +209,7 @@ class Test_pyx_Fasta:
 
 class Test_pyx_FastQ:
     def setup(self):
-        self.db = screed.dbread(testfq + '_screed')
+        self.db = screed.dbread(testfq)
 
     def test_simple(self):
         db = self.db
@@ -260,8 +260,8 @@ if 0:
                     shell=True, stdout=subprocess.PIPE)
             subprocess.check_call(fadbm + ' ' + testfa + ' 1',
                     shell=True, stdout=subprocess.PIPE)
-            self.fqdb = screed.dbread(testfq + '_screed')
-            self.fadb = screed.dbread(testfa + '_screed')
+            self.fqdb = screed.dbread(testfq)
+            self.fadb = screed.dbread(testfa)
     
         def tearDown(self):
              # remake the normal database
