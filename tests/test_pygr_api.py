@@ -36,3 +36,23 @@ def test_name_index_equality():
     v1 = sorted([ (v.name, v.seq) for v in db1.itervalues() ])
     v2 = sorted([ (v.name, v.seq) for v in db2.itervalues() ])
     assert v1 == v2, (v1, v2)
+
+def test_seqinfodict_by_name():
+    db1 = ScreedSequenceDB(tests.testfa)
+    sd = db1.seqInfoDict
+
+    m = sorted([ y.id for (x, y) in sd.iteritems() ])
+    n = sorted([ x.id for x in sd.itervalues() ])
+
+    assert m == n, (m, n)
+    
+def test_seqinfodict_by_index():
+    db1 = ScreedSequenceDB_ByIndex(tests.testfa)
+    sd = db1.seqInfoDict
+
+    m = sorted([ x for (x, y) in sd.iteritems() ])
+    n = sorted([ x for x in sd.iterkeys() ])
+
+    assert m == n, (m, n)
+    
+

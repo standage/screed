@@ -107,7 +107,7 @@ class _ScreedSeqInfoDict_ByName(object, UserDict.DictMixin):
 
     def iteritems(self):
         for v in self.itervalues():
-            yield v.name, v
+            yield v.record.name, v
         
 
 class _ScreedSeqInfoDict_ByIndex(object, UserDict.DictMixin):
