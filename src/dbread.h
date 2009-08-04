@@ -11,11 +11,7 @@
 
 class dbread{
 	private:
-		struct Node{
-			index_type data;
-			Node * Next;
-		};
-		Node *Head;
+                char * Head;
 		char **LoadedAttributes;
 		char **RecordAttributes;
 

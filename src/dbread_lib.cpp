@@ -1,6 +1,6 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
-#define PRELOAD_INDEX 1
+#define PRELOAD_INDEX 0
 
 #include "dbread.h"
 #include <fstream>
@@ -20,15 +20,12 @@ using namespace std;
  * Also reads the first record into cache
 ----------------------------------------*/
 dbread::dbread(string dbname){
-	dbread::Node *Curr;
-	dbread::Node *Prev;
 	string idxname, hashname;
 	unsigned i, j;
 	char fieldname[fieldsize];
 	char a;
 
 	Head = NULL;
-
 	open = true;
 	failbit = false;
 	idxname = dbname + "_idx";
@@ -47,8 +44,6 @@ dbread::dbread(string dbname){
 		return;
 	}
 
-	Head = new (nothrow) Node;
-
 	idxFile.close();
 
 	//
@@ -57,41 +52,28 @@ dbread::dbread(string dbname){
 
 	idxFile.seekg(0, ios_base::end);
 	size = idxFile.tellg();
-	//	std::cout << "END AT: " << size << "\n";
 	size = size / sizeof(index_type);
-	//	std::cout << "SIZE: " << size << "\n";
 
 	idxFile.seekg(0);
 	index = new (nothrow) index_type[size];
+#if PRELOAD_INDEX
 	idxFile.read((char *)index, (streamsize) (sizeof(index_type) * size));
 	idxFile.close();
 
-	
-	idxFile.open(idxname.c_str(), ios::in | ios::binary);
 	for(index_type li=0; li < size; li++) {
 	  endian_swap(&index[li]);
-	  //	  std::cout << "POS " << li << " VAL " << index[li] << "\n";
-
-#if PRELOAD_INDEX
-	  index_type i;
-	  idxFile.seekg(li * sizeof(index_type));
-	  idxFile.read((char *) &i, (streamsize) sizeof(index_type));
-	  endian_swap(&i);
-
-	  std::cout << "ATPOS: " << li << " VALA " << index[li] << " VALB " << i << "\n";
-	  assert(i == index[li]);
+	}
 #endif
 
-	}
 	
-	//
-
 	dbFile.open(dbname.c_str(), ios::in | ios::binary);
 	if(!dbFile.is_open()){
         delete [] index;
 		open = false;
 		return;
 	}
+
+	Head = (char *)1;
 
 	// Gets the hashMultiplier
 	dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
@@ -148,8 +130,6 @@ void dbread::close(){
 	hashFile.close();
     open = false;
 
-	delete Head;
-    Head = NULL;
 	delete [] index;
 	for(unsigned i=0;i<NumberOfAttributes;i++){
 		delete [] LoadedAttributes[i];
@@ -190,14 +170,15 @@ void dbread::getRecord(index_type idx){
 
 	index_type offset; // = index[idx];
 
-#if 0
+#if PRELOAD_INDEX
+	 offset = index[idx];
+#else
 	idxFile.seekg(idx * sizeof(index_type), ios_base::beg);
 	idxFile.read((char *) &offset, (streamsize) sizeof(index_type));
 	endian_swap(&offset);
 #endif
 
 	//	std::cout << "PREOFF: " << offset;
-	  offset = index[idx];
 	  // std::cout << " POSTOFF: " << offset << "\n";
 
 	dbFile.seekg(offset);
