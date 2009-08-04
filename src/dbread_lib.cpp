@@ -1,6 +1,7 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
 #define CTB_WORK 0
+#define CTB_WORK2 0
 
 #include "dbread.h"
 #include <fstream>
@@ -49,6 +50,7 @@ dbread::dbread(string dbname){
 
 	Head = new (nothrow) Node;
 
+#if CTB_WORK2
 #if CTB_WORK
 	Head->Next = NULL;
 	Prev = Head;
@@ -74,21 +76,36 @@ dbread::dbread(string dbname){
 	//
 
 	idxFile.open(idxname.c_str(), ios::in | ios::binary);
+#endif // CTB_WORK2
+
 	idxFile.seekg(0, ios_base::end);
 	size = idxFile.tellg();
 	//	std::cout << "END AT: " << size << "\n";
 	size = size / sizeof(index_type);
 	//	std::cout << "SIZE: " << size << "\n";
 
+#if CTB_WORK2
 	idxFile.seekg(0);
 	index = new (nothrow) index_type[size];
 	idxFile.read((char *)index, (streamsize) (sizeof(index_type) * size));
+	idxFile.close();
+
+	
+	idxFile.open(idxname.c_str(), ios::in | ios::binary);
 	for(index_type li=0; li < size; li++) {
 	  endian_swap(&index[li]);
 	  //	  std::cout << "POS " << li << " VAL " << index[li] << "\n";
-	}
 
-	idxFile.close();
+	  index_type i;
+	  idxFile.seekg(li * sizeof(index_type));
+	  idxFile.read((char *) &i, (streamsize) sizeof(index_type));
+	  endian_swap(&i);
+
+	  std::cout << "ATPOS: " << li << " VALA " << index[li] << " VALB " << i << "\n";
+
+	  assert(i == index[li]);
+	}
+#endif // CTB_WORK2
 	
 	//
 
@@ -167,7 +184,9 @@ void dbread::close(){
 
 	delete Head;
     Head = NULL;
+#if CTB_WORK2
 	delete [] index;
+#endif
 	for(unsigned i=0;i<NumberOfAttributes;i++){
 		delete [] LoadedAttributes[i];
 		delete [] RecordAttributes[i];
@@ -205,10 +224,25 @@ void dbread::getRecord(index_type idx){
 		delete [] LoadedAttributes[i];
 	}
 
-	dbFile.seekg(index[idx]);
+	index_type offset; // = index[idx];
+
+#if 1
+	idxFile.seekg(idx * sizeof(index_type), ios_base::beg);
+	idxFile.read((char *) &offset, (streamsize) sizeof(index_type));
+	endian_swap(&offset);
+#endif
+
+#if CTB_WORK2
+	std::cout << "PREOFF: " << offset;
+	  offset = index[idx];
+	  std::cout << " POSTOFF: " << offset << "\n";
+#endif
+
+	dbFile.seekg(offset);
+
     if(dbFile.fail()){
         errmsg = "database does not extend to stream position " +
-            string((char*)&(index[idx]));
+            string((char*)&(offset));
         failbit = true;
         return;
     }
