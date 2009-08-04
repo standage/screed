@@ -65,9 +65,6 @@ class ScreedSequenceDB(SequenceDB):
         self.seqInfoDict = _ScreedSeqInfoDict_ByName(filepath)
         SequenceDB.__init__(self)
 
-        print self.__getstate__
-        print self.__setstate__
-
     def _set_seqtype(self):
         self._seqtype = DNA_SEQTYPE
 
