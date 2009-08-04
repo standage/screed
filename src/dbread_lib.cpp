@@ -1,7 +1,7 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
 #define CTB_WORK 0
-#define CTB_WORK2 0
+#define CTB_WORK2 1
 
 #include "dbread.h"
 #include <fstream>
@@ -96,14 +96,16 @@ dbread::dbread(string dbname){
 	  endian_swap(&index[li]);
 	  //	  std::cout << "POS " << li << " VAL " << index[li] << "\n";
 
+#if 0
 	  index_type i;
 	  idxFile.seekg(li * sizeof(index_type));
 	  idxFile.read((char *) &i, (streamsize) sizeof(index_type));
 	  endian_swap(&i);
 
 	  std::cout << "ATPOS: " << li << " VALA " << index[li] << " VALB " << i << "\n";
-
 	  assert(i == index[li]);
+#endif
+
 	}
 #endif // CTB_WORK2
 	
@@ -226,16 +228,16 @@ void dbread::getRecord(index_type idx){
 
 	index_type offset; // = index[idx];
 
-#if 1
+#if 0
 	idxFile.seekg(idx * sizeof(index_type), ios_base::beg);
 	idxFile.read((char *) &offset, (streamsize) sizeof(index_type));
 	endian_swap(&offset);
 #endif
 
 #if CTB_WORK2
-	std::cout << "PREOFF: " << offset;
+	//	std::cout << "PREOFF: " << offset;
 	  offset = index[idx];
-	  std::cout << " POSTOFF: " << offset << "\n";
+	  // std::cout << " POSTOFF: " << offset << "\n";
 #endif
 
 	dbFile.seekg(offset);
