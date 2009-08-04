@@ -59,25 +59,44 @@ class ScreedSequence(SequenceBase):
 class ScreedSequenceDB(SequenceDB):
     """SequenceDB implementation based on screed; retrieve seqs by name."""
     itemClass = ScreedSequence
-    
-    def __init__(self, filename):
-        self.seqInfoDict = _ScreedSeqInfoDict_ByName(filename)
+
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.seqInfoDict = _ScreedSeqInfoDict_ByName(filepath)
         SequenceDB.__init__(self)
-        
+
+        print self.__getstate__
+        print self.__setstate__
+
     def _set_seqtype(self):
         self._seqtype = DNA_SEQTYPE
 
+    def __repr__(self):
+        return "<%s '%s'>" % (self.__class__.__name__, self.filepath)
+
+    # override inherited __reduce__/__getstate__/__setstate__ from SequenceDB.
+    def __reduce__(self):
+        return (ScreedSequenceDB, (self.filepath,))
+    
 class ScreedSequenceDB_ByIndex(SequenceDB):
     """SequenceDB implementation based on screed; retrieve seqs by index."""
     itemClass = ScreedSequence
     
-    def __init__(self, filename):
-        self.seqInfoDict = _ScreedSeqInfoDict_ByIndex(filename)
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.seqInfoDict = _ScreedSeqInfoDict_ByIndex(filepath)
         SequenceDB.__init__(self)
         
     def _set_seqtype(self):
         self._seqtype = DNA_SEQTYPE
 
+    def __repr__(self):
+        return "<%s '%s'>" % (self.__class__.__name__, self.filepath)
+
+    # override inherited __reduce__/__getstate__/__setstate__ from SequenceDB.
+    def __reduce__(self):
+        return (ScreedSequenceDB_ByIndex, (self.filepath,))
+    
 class _ScreedSequenceInfo(object):
     """Objects to put in seqInfoDict values, for holding screed record info."""
     def __init__(self, id, record):
@@ -87,8 +106,8 @@ class _ScreedSequenceInfo(object):
 
 class _ScreedSeqInfoDict_ByName(object, UserDict.DictMixin):
     """seqInfoDict implementation that uses names to retrieve records."""
-    def __init__(self, filename):
-        self.sdb = screed.dbread(filename)
+    def __init__(self, filepath):
+        self.sdb = screed.dbread(filepath)
 
     def __getitem__(self, k):
         v = self.sdb[k]
@@ -112,8 +131,8 @@ class _ScreedSeqInfoDict_ByName(object, UserDict.DictMixin):
 
 class _ScreedSeqInfoDict_ByIndex(object, UserDict.DictMixin):
     """seqInfoDict implementation that uses indices to retrieve records."""
-    def __init__(self, filename):
-        self.sdb = screed.dbread(filename)
+    def __init__(self, filepath):
+        self.sdb = screed.dbread(filepath)
 
     def __getitem__(self, k):
         n = int(k)

@@ -3,6 +3,8 @@ Test the pygr API.
 """
 
 from screed_pygr_api import ScreedSequenceDB, ScreedSequenceDB_ByIndex
+from pickle import dump, load
+from cStringIO import StringIO
 
 import tests
 
@@ -54,5 +56,23 @@ def test_seqinfodict_by_index():
     n = sorted([ x for x in sd.iterkeys() ])
 
     assert m == n, (m, n)
-    
 
+def test_pickle_ByName():
+    db = ScreedSequenceDB(tests.testfa)
+    ofp = StringIO()
+
+    dump(db, ofp)
+
+    ifp = StringIO(ofp.getvalue())
+    db2 = load(ifp)
+    assert db.filepath == db2.filepath
+    
+def test_pickle_ByIndex():
+    db = ScreedSequenceDB_ByIndex(tests.testfa)
+    ofp = StringIO()
+
+    dump(db, ofp)
+
+    ifp = StringIO(ofp.getvalue())
+    db2 = load(ifp)
+    assert db.filepath == db2.filepath
