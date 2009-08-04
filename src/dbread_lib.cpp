@@ -1,5 +1,7 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
+#define CTB_WORK 0
+
 #include "dbread.h"
 #include <fstream>
 #include <new>
@@ -46,6 +48,8 @@ dbread::dbread(string dbname){
 	}
 
 	Head = new (nothrow) Node;
+
+#if CTB_WORK
 	Head->Next = NULL;
 	Prev = Head;
 
@@ -56,13 +60,39 @@ dbread::dbread(string dbname){
 		Prev->Next = Curr;
 		Curr->Next = NULL;
 		Prev = Curr;
-		idxFile.read((char*)&(Curr->data), sizeof(Curr->data));
+		idxFile.read((char*)&(Curr->data), sizeof(index_type));
+		//		std::cout << "sizeof: " << sizeof(Curr->data) << "\n";
         endian_swap(&(Curr->data));
 		idxFile.peek();
+		//		std::cout << "0POS " << size << " VAL " << Curr->data << "\n";
 	}
+	//	std::cout << "SIZE: " << size * sizeof(index_type) << "\n";
+
+#endif
 	idxFile.close();
 
+	//
+
+	idxFile.open(idxname.c_str(), ios::in | ios::binary);
+	idxFile.seekg(0, ios_base::end);
+	size = idxFile.tellg();
+	//	std::cout << "END AT: " << size << "\n";
+	size = size / sizeof(index_type);
+	//	std::cout << "SIZE: " << size << "\n";
+
+	idxFile.seekg(0);
 	index = new (nothrow) index_type[size];
+	idxFile.read((char *)index, (streamsize) (sizeof(index_type) * size));
+	for(index_type li=0; li < size; li++) {
+	  endian_swap(&index[li]);
+	  //	  std::cout << "POS " << li << " VAL " << index[li] << "\n";
+	}
+
+	idxFile.close();
+	
+	//
+
+#if CTB_WORK
 	Prev = Head;
 	Curr = Head->Next;
 	for(index_type li=0;li<size;li++){
@@ -71,6 +101,7 @@ dbread::dbread(string dbname){
 		Curr = Curr->Next;
 		delete Prev;
 	}// End copying of index file
+#endif
 
 	dbFile.open(dbname.c_str(), ios::in | ios::binary);
 	if(!dbFile.is_open()){
