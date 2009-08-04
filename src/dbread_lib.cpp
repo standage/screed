@@ -50,75 +50,11 @@ dbread::dbread(string dbname){
 
 	Head = new (nothrow) Node;
 
-#if CTB_WORK2
-#if CTB_WORK
-	Head->Next = NULL;
-	Prev = Head;
-
-	//Copy the index file completly into memory so results can be retrieved
-	//faster
-	for(size=0;!idxFile.eof();size++){
-		Curr = new (nothrow) Node;
-		Prev->Next = Curr;
-		Curr->Next = NULL;
-		Prev = Curr;
-		idxFile.read((char*)&(Curr->data), sizeof(index_type));
-		//		std::cout << "sizeof: " << sizeof(Curr->data) << "\n";
-        endian_swap(&(Curr->data));
-		idxFile.peek();
-		//		std::cout << "0POS " << size << " VAL " << Curr->data << "\n";
-	}
-	//	std::cout << "SIZE: " << size * sizeof(index_type) << "\n";
-
-#endif
-	idxFile.close();
-
-	//
-
-	idxFile.open(idxname.c_str(), ios::in | ios::binary);
-#endif // CTB_WORK2
-
 	idxFile.seekg(0, ios_base::end);
 	size = idxFile.tellg();
 	//	std::cout << "END AT: " << size << "\n";
 	size = size / sizeof(index_type);
 	//	std::cout << "SIZE: " << size << "\n";
-
-#if CTB_WORK2
-	idxFile.seekg(0);
-	index = new (nothrow) index_type[size];
-	idxFile.read((char *)index, (streamsize) (sizeof(index_type) * size));
-	idxFile.close();
-
-	
-	idxFile.open(idxname.c_str(), ios::in | ios::binary);
-	for(index_type li=0; li < size; li++) {
-	  endian_swap(&index[li]);
-	  //	  std::cout << "POS " << li << " VAL " << index[li] << "\n";
-
-	  index_type i;
-	  idxFile.seekg(li * sizeof(index_type));
-	  idxFile.read((char *) &i, (streamsize) sizeof(index_type));
-	  endian_swap(&i);
-
-	  std::cout << "ATPOS: " << li << " VALA " << index[li] << " VALB " << i << "\n";
-
-	  assert(i == index[li]);
-	}
-#endif // CTB_WORK2
-	
-	//
-
-#if CTB_WORK
-	Prev = Head;
-	Curr = Head->Next;
-	for(index_type li=0;li<size;li++){
-		index[li] = Curr->data;
-		Prev = Curr;
-		Curr = Curr->Next;
-		delete Prev;
-	}// End copying of index file
-#endif
 
 	dbFile.open(dbname.c_str(), ios::in | ios::binary);
 	if(!dbFile.is_open()){
@@ -184,9 +120,6 @@ void dbread::close(){
 
 	delete Head;
     Head = NULL;
-#if CTB_WORK2
-	delete [] index;
-#endif
 	for(unsigned i=0;i<NumberOfAttributes;i++){
 		delete [] LoadedAttributes[i];
 		delete [] RecordAttributes[i];
@@ -230,12 +163,6 @@ void dbread::getRecord(index_type idx){
 	idxFile.seekg(idx * sizeof(index_type), ios_base::beg);
 	idxFile.read((char *) &offset, (streamsize) sizeof(index_type));
 	endian_swap(&offset);
-#endif
-
-#if CTB_WORK2
-	std::cout << "PREOFF: " << offset;
-	  offset = index[idx];
-	  std::cout << " POSTOFF: " << offset << "\n";
 #endif
 
 	dbFile.seekg(offset);
