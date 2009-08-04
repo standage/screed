@@ -1,7 +1,6 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
-#define CTB_WORK2 1
-#define PRELOAD_INDEX 0
+#define PRELOAD_INDEX 1
 
 #include "dbread.h"
 #include <fstream>
@@ -50,13 +49,11 @@ dbread::dbread(string dbname){
 
 	Head = new (nothrow) Node;
 
-#if CTB_WORK2
 	idxFile.close();
 
 	//
 
 	idxFile.open(idxname.c_str(), ios::in | ios::binary);
-#endif // CTB_WORK2
 
 	idxFile.seekg(0, ios_base::end);
 	size = idxFile.tellg();
@@ -64,7 +61,6 @@ dbread::dbread(string dbname){
 	size = size / sizeof(index_type);
 	//	std::cout << "SIZE: " << size << "\n";
 
-#if CTB_WORK2
 	idxFile.seekg(0);
 	index = new (nothrow) index_type[size];
 	idxFile.read((char *)index, (streamsize) (sizeof(index_type) * size));
@@ -87,7 +83,6 @@ dbread::dbread(string dbname){
 #endif
 
 	}
-#endif // CTB_WORK2
 	
 	//
 
@@ -155,9 +150,7 @@ void dbread::close(){
 
 	delete Head;
     Head = NULL;
-#if CTB_WORK2
 	delete [] index;
-#endif
 	for(unsigned i=0;i<NumberOfAttributes;i++){
 		delete [] LoadedAttributes[i];
 		delete [] RecordAttributes[i];
@@ -203,11 +196,9 @@ void dbread::getRecord(index_type idx){
 	endian_swap(&offset);
 #endif
 
-#if CTB_WORK2
 	//	std::cout << "PREOFF: " << offset;
 	  offset = index[idx];
 	  // std::cout << " POSTOFF: " << offset << "\n";
-#endif
 
 	dbFile.seekg(offset);
 
