@@ -1,6 +1,6 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
-#define PRELOAD_INDEX 0
+#define PRELOAD_INDEX 1
 
 #include "dbread.h"
 #include <fstream>
@@ -19,7 +19,7 @@ using namespace std;
  * the correct _screed and _idx files.
  * Also reads the first record into cache
 ----------------------------------------*/
-dbread::dbread(string dbname){
+dbread::dbread(string dbname) {
   NumberOfAttributes = 0;
 
   index = NULL;
@@ -37,7 +37,7 @@ dbread::dbread(string dbname){
   idxFile.open(idxname.c_str(), ios::in | ios::binary);
   hashFile.open(hashname.c_str(), ios::in | ios::binary);
 
-  if (!idxFile.is_open() || !hashFile.is_open()){
+  if (!idxFile.is_open() || !hashFile.is_open()) {
     open = false;
     errmsg = "Invalid database filename";
     return;
@@ -66,7 +66,7 @@ dbread::dbread(string dbname){
 #endif
 
   dbFile.open(dbname.c_str(), ios::in | ios::binary);
-  if (!dbFile.is_open()){
+  if (!dbFile.is_open()) {
     delete [] index;
     open = false;
     return;
@@ -78,7 +78,7 @@ dbread::dbread(string dbname){
 
   //Determine the amount and names of individual types per record
   char fieldname[fieldsize];
-  for (char a='0';a!='\n';NumberOfAttributes++){
+  for (char a='0'; a != '\n'; NumberOfAttributes++) {
     dbFile.getline(fieldname, fieldsize);
     AttributeMap[string(fieldname)] = NumberOfAttributes + 1;
     a = dbFile.peek();
@@ -91,9 +91,10 @@ dbread::dbread(string dbname){
   unsigned int i = 0;
   unsigned int j = 0;
 
-  for (maptype::iterator it=AttributeMap.begin();it!=AttributeMap.end();it++){
+  for (maptype::iterator it=AttributeMap.begin(); it != AttributeMap.end();
+       it++) {
     RecordAttributes[i] = new (nothrow) char[(it->first).size()+1];
-    for (j=0;j<(it->first).size();j++){
+    for (j=0; j < (it->first).size(); j++) {
       RecordAttributes[i][j] = (it->first).at(j);
     }
     RecordAttributes[i][j] = '\0';
@@ -102,7 +103,7 @@ dbread::dbread(string dbname){
 
   //Create the LoadedAttributes object
   LoadedAttributes = new (nothrow) char *[NumberOfAttributes];
-  for (j=0;j<NumberOfAttributes;j++){
+  for (j=0; j<NumberOfAttributes; j++) {
     LoadedAttributes[j] = new (nothrow) char[2];
   }
 }
@@ -113,7 +114,7 @@ dbread::dbread(string dbname){
  * files and deleting of allocated
  * memory
 --------------------------------------*/
-dbread::~dbread(){
+dbread::~dbread() {
   close();
 }
 
@@ -121,7 +122,7 @@ dbread::~dbread(){
  * Closes the database files and deletes all
  * memory allocated. Called by destructor
 ------------------------------------------*/
-void dbread::close(){
+void dbread::close() {
   if (dbFile.is_open()) {
     dbFile.close();
   }
@@ -136,7 +137,7 @@ void dbread::close(){
   }
 
   if (LoadedAttributes) {
-    for (unsigned i=0;i<NumberOfAttributes;i++){
+    for (unsigned i=0; i<NumberOfAttributes; i++) {
       delete [] LoadedAttributes[i];
       delete [] RecordAttributes[i];
     }
@@ -151,7 +152,7 @@ void dbread::close(){
  * long variable 'index' into memory from the
  * database.
 -------------------------------------------------*/
-void dbread::getRecord(index_type idx){
+void dbread::getRecord(index_type idx) {
   if (open == false) {
     errmsg = "Database files not open";
     failbit = true;
@@ -170,7 +171,7 @@ void dbread::getRecord(index_type idx){
   unsigned i;
   index_type linelen;
 
-  for (i=0;i<NumberOfAttributes;i++) {
+  for (i=0; i<NumberOfAttributes; i++) {
     delete [] LoadedAttributes[i];
   }
 
@@ -195,7 +196,7 @@ void dbread::getRecord(index_type idx){
 
   // Read new records into the LoadedAttributes array
   a = '0';
-  for (i=0;i<NumberOfAttributes;i++){
+  for (i=0; i<NumberOfAttributes; i++) {
     // Read the linelength integer in
     dbFile.read((char*)&linelen, sizeof(linelen));
     endian_swap(&linelen);
@@ -204,7 +205,7 @@ void dbread::getRecord(index_type idx){
     LoadedAttributes[i][linelen] = '\0'; // Set the NULL character at end
   }
   // i must equal NumberOfAttributes when the loop exits
-  if (i != NumberOfAttributes){
+  if (i != NumberOfAttributes) {
     errmsg = "Database files corrupted";
     failbit = true;
   }
@@ -218,10 +219,10 @@ void dbread::getRecord(index_type idx){
  * 'wanted' c-string passed in and the association is
  * made with the AttributeMap map
 ------------------------------------------------------------*/
-char* dbread::getAttributeValue(char wanted[]){
+char* dbread::getAttributeValue(char wanted[]) {
   unsigned i;
   i = AttributeMap[string(wanted)];
-  if (i == 0){
+  if (i == 0) {
     errmsg = "Invalid typename query";
     failbit = true;
     return &(empty);
@@ -234,7 +235,7 @@ char* dbread::getAttributeValue(char wanted[]){
  * Returns data from LoadedAttributes by direct indexing rather
  * by name as in getAttributeValue.
 -----------------------------------------------------*/
-char* dbread::getAttributeByNumber(unsigned idx){
+char* dbread::getAttributeByNumber(unsigned idx) {
   return getAttributeValue(getAttributeName(idx));
 }
 
@@ -247,8 +248,8 @@ char* dbread::getAttributeByNumber(unsigned idx){
  * function can be thought of as the inverse
  * of getAttributeValue
 ---------------------------------------------*/
-char * dbread::getAttributeName(unsigned idx){
-  if ((idx >= NumberOfAttributes) || (idx < 0)){
+char * dbread::getAttributeName(unsigned idx) {
+  if ((idx >= NumberOfAttributes) || (idx < 0)) {
     failbit = true;
     errmsg = "Bad typekey request";
     return &(empty);
@@ -261,7 +262,7 @@ char * dbread::getAttributeName(unsigned idx){
  * Clears the database error flag and
  * the database file error flags
 ------------------------------------*/
-void dbread::clear(){
+void dbread::clear() {
   failbit = false;
   idxFile.clear();
   dbFile.clear();
@@ -275,7 +276,7 @@ void dbread::clear(){
  * into an integer and then uses getRecord
  * to load the record into memory
 ------------------------------------------*/
-index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
+index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize) {
   index_type hashdResult, rcrdIdx;
   unsigned nameTypeint;
   int collisions;
@@ -285,16 +286,16 @@ index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
   hashdResult *= sizeof(index_type);
   collisions = 0;
 
-  while(1){
+  while(1) {
     hashFile.seekg(hashdResult); // Go to the possible stream location
     hashFile.read((char*)&(rcrdIdx), sizeof(index_type));
     endian_swap(&rcrdIdx);
-    if (rcrdIdx == 0){
+    if (rcrdIdx == 0) {
       failbit = true;
       errmsg = "No named record in database";
       break;
     }
-    else if (hashFile.fail()){
+    else if (hashFile.fail()) {
       failbit = true;
       errmsg = "Corrupted hash file";
       break;
@@ -303,7 +304,7 @@ index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     rcrdIdx = rcrdIdx - 1; // Re-Correction for db writer necessary offset
     getRecord(rcrdIdx);
     // Compare retrieved record name to name passed in
-    if (string(LoadedAttributes[nameTypeint]) == string(RecordName)){
+    if (string(LoadedAttributes[nameTypeint]) == string(RecordName)) {
       return rcrdIdx;
     }
     // Record was incorrect (a collision), continue searching
