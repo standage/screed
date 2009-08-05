@@ -11,7 +11,6 @@
 
 class dbread{
  private:
-  char * Head;
   char **LoadedAttributes;
   char **RecordAttributes;
 

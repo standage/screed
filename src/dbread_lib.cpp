@@ -1,6 +1,6 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
-#define PRELOAD_INDEX 0
+#define PRELOAD_INDEX 1
 
 #include "dbread.h"
 #include <fstream>
@@ -25,7 +25,9 @@ dbread::dbread(string dbname){
   char fieldname[fieldsize];
   char a;
 
-  Head = NULL;
+  index = NULL;
+  LoadedAttributes = RecordAttributes = NULL;
+
   open = true;
   failbit = false;
   idxname = dbname + "_idx";
@@ -72,8 +74,6 @@ dbread::dbread(string dbname){
     open = false;
     return;
   }
-
-  Head = (char *)1;
 
   // Gets the hashMultiplier
   dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
@@ -123,21 +123,27 @@ dbread::~dbread(){
  * memory allocated. Called by destructor
 ------------------------------------------*/
 void dbread::close(){
-  if (Head == NULL ) {    // failure in opening or some such.
-    return;
+  if (dbFile.is_open()) {
+    dbFile.close();
+  }
+  if (hashFile.is_open()) {
+    hashFile.close();
   }
 
-  dbFile.close();
-  hashFile.close();
   open = false;
 
-  delete [] index;
-  for(unsigned i=0;i<NumberOfAttributes;i++){
-    delete [] LoadedAttributes[i];
-    delete [] RecordAttributes[i];
+  if (index) {
+    delete [] index;
   }
-  delete [] RecordAttributes;
-  delete [] LoadedAttributes;
+
+  if (LoadedAttributes) {
+    for(unsigned i=0;i<NumberOfAttributes;i++){
+      delete [] LoadedAttributes[i];
+      delete [] RecordAttributes[i];
+    }
+    delete [] RecordAttributes;
+    delete [] LoadedAttributes;
+  }
 }
 
 /*-------------------------------------------------
