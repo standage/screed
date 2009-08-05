@@ -20,22 +20,22 @@ using namespace std;
  * Also reads the first record into cache
 ----------------------------------------*/
 dbread::dbread(string dbname){
-  string idxname, hashname;
-  unsigned i, j;
   char fieldname[fieldsize];
   char a;
+
+  NumberOfAttributes = 0;
 
   index = NULL;
   LoadedAttributes = RecordAttributes = NULL;
 
   open = true;
   failbit = false;
-  idxname = dbname + "_idx";
-  hashname = dbname + "_hash";
   lastquery = -19;
   empty = ' ';
-  NumberOfAttributes = 1;
   errmsg = "";
+
+  string idxname = dbname + "_idx";
+  string hashname = dbname + "_hash";
 
   idxFile.open(idxname.c_str(), ios::in | ios::binary);
   hashFile.open(hashname.c_str(), ios::in | ios::binary);
@@ -82,16 +82,17 @@ dbread::dbread(string dbname){
   //Determine the amount and names of individual types per record
   for(a='0';a!='\n';NumberOfAttributes++){
     dbFile.getline(fieldname, fieldsize);
-    AttributeMap[string(fieldname)] = NumberOfAttributes;
+    AttributeMap[string(fieldname)] = NumberOfAttributes + 1;
     a = dbFile.peek();
   }
   dbFile.ignore(1); // Ignore the \n char seperating the sections
-  NumberOfAttributes--;
 
   //Create the publically-accessable RecordAttributes object for the user to
   //view the keys of the map with
   RecordAttributes = new (nothrow) char*[NumberOfAttributes];
-  i = 0;
+  unsigned int i = 0;
+  unsigned int j = 0;
+
   for(maptype::iterator it=AttributeMap.begin();it!=AttributeMap.end();it++){
     RecordAttributes[i] = new (nothrow) char[(it->first).size()+1];
     for(j=0;j<(it->first).size();j++){
@@ -103,8 +104,8 @@ dbread::dbread(string dbname){
 
   //Create the LoadedAttributes object
   LoadedAttributes = new (nothrow) char *[NumberOfAttributes];
-  for(i=0;i<NumberOfAttributes;i++){
-    LoadedAttributes[i] = new (nothrow) char[2];
+  for(j=0;j<NumberOfAttributes;j++){
+    LoadedAttributes[j] = new (nothrow) char[2];
   }
 }
 
