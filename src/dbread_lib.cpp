@@ -1,6 +1,6 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
-#define PRELOAD_INDEX 1
+#define PRELOAD_INDEX 0
 
 #include "dbread.h"
 #include <fstream>
@@ -20,9 +20,6 @@ using namespace std;
  * Also reads the first record into cache
 ----------------------------------------*/
 dbread::dbread(string dbname){
-  char fieldname[fieldsize];
-  char a;
-
   NumberOfAttributes = 0;
 
   index = NULL;
@@ -30,7 +27,7 @@ dbread::dbread(string dbname){
 
   open = true;
   failbit = false;
-  lastquery = -19;
+  lastquery = -1;
   empty = ' ';
   errmsg = "";
 
@@ -40,7 +37,7 @@ dbread::dbread(string dbname){
   idxFile.open(idxname.c_str(), ios::in | ios::binary);
   hashFile.open(hashname.c_str(), ios::in | ios::binary);
 
-  if(!idxFile.is_open() || !hashFile.is_open()){
+  if (!idxFile.is_open() || !hashFile.is_open()){
     open = false;
     errmsg = "Invalid database filename";
     return;
@@ -63,13 +60,13 @@ dbread::dbread(string dbname){
   idxFile.read((char *)index, (streamsize) (sizeof(index_type) * size));
   idxFile.close();
 
-  for(index_type li=0; li < size; li++) {
+  for (index_type li=0; li < size; li++) {
     endian_swap(&index[li]);
   }
 #endif
 
   dbFile.open(dbname.c_str(), ios::in | ios::binary);
-  if(!dbFile.is_open()){
+  if (!dbFile.is_open()){
     delete [] index;
     open = false;
     return;
@@ -80,7 +77,8 @@ dbread::dbread(string dbname){
   endian_swap(&hashMultiplier);
 
   //Determine the amount and names of individual types per record
-  for(a='0';a!='\n';NumberOfAttributes++){
+  char fieldname[fieldsize];
+  for (char a='0';a!='\n';NumberOfAttributes++){
     dbFile.getline(fieldname, fieldsize);
     AttributeMap[string(fieldname)] = NumberOfAttributes + 1;
     a = dbFile.peek();
@@ -93,9 +91,9 @@ dbread::dbread(string dbname){
   unsigned int i = 0;
   unsigned int j = 0;
 
-  for(maptype::iterator it=AttributeMap.begin();it!=AttributeMap.end();it++){
+  for (maptype::iterator it=AttributeMap.begin();it!=AttributeMap.end();it++){
     RecordAttributes[i] = new (nothrow) char[(it->first).size()+1];
-    for(j=0;j<(it->first).size();j++){
+    for (j=0;j<(it->first).size();j++){
       RecordAttributes[i][j] = (it->first).at(j);
     }
     RecordAttributes[i][j] = '\0';
@@ -104,7 +102,7 @@ dbread::dbread(string dbname){
 
   //Create the LoadedAttributes object
   LoadedAttributes = new (nothrow) char *[NumberOfAttributes];
-  for(j=0;j<NumberOfAttributes;j++){
+  for (j=0;j<NumberOfAttributes;j++){
     LoadedAttributes[j] = new (nothrow) char[2];
   }
 }
@@ -138,7 +136,7 @@ void dbread::close(){
   }
 
   if (LoadedAttributes) {
-    for(unsigned i=0;i<NumberOfAttributes;i++){
+    for (unsigned i=0;i<NumberOfAttributes;i++){
       delete [] LoadedAttributes[i];
       delete [] RecordAttributes[i];
     }
@@ -154,17 +152,17 @@ void dbread::close(){
  * database.
 -------------------------------------------------*/
 void dbread::getRecord(index_type idx){
-  if(open == false){
+  if (open == false) {
     errmsg = "Database files not open";
     failbit = true;
     return;
   }
-  if((idx >= size) || (idx < 0)){
+  if ((idx >= size) || (idx < 0)) { // invalid record #.
     errmsg = "Invalid query";
     failbit = true;
     return;
   }
-  else if(idx == lastquery){
+  else if (idx == lastquery) {	// no need to reload; same as last query.
     return;
   }
 
@@ -172,11 +170,11 @@ void dbread::getRecord(index_type idx){
   unsigned i;
   index_type linelen;
 
-  for(i=0;i<NumberOfAttributes;i++){
+  for (i=0;i<NumberOfAttributes;i++) {
     delete [] LoadedAttributes[i];
   }
 
-  index_type offset; // = index[idx];
+  index_type offset;
 
 #if PRELOAD_INDEX
   offset = index[idx];
@@ -188,16 +186,17 @@ void dbread::getRecord(index_type idx){
 
   dbFile.seekg(offset);
 
-  if(dbFile.fail()){
+  if (dbFile.fail()) {
     errmsg = "database does not extend to stream position " +
       string((char*)&(offset));
     failbit = true;
     return;
   }
+
   // Read new records into the LoadedAttributes array
   a = '0';
-  for(i=0;i<NumberOfAttributes;i++){
-    //Read the linelength integer in
+  for (i=0;i<NumberOfAttributes;i++){
+    // Read the linelength integer in
     dbFile.read((char*)&linelen, sizeof(linelen));
     endian_swap(&linelen);
     LoadedAttributes[i] = new (nothrow) char[linelen+1];
@@ -205,12 +204,11 @@ void dbread::getRecord(index_type idx){
     LoadedAttributes[i][linelen] = '\0'; // Set the NULL character at end
   }
   // i must equal NumberOfAttributes when the loop exits
-  if(i != NumberOfAttributes){
+  if (i != NumberOfAttributes){
     errmsg = "Database files corrupted";
     failbit = true;
   }
   lastquery = idx;
-  return;
 }
 
 /*------------------------------------------------------------
@@ -223,7 +221,7 @@ void dbread::getRecord(index_type idx){
 char* dbread::getAttributeValue(char wanted[]){
   unsigned i;
   i = AttributeMap[string(wanted)];
-  if(i == 0){
+  if (i == 0){
     errmsg = "Invalid typename query";
     failbit = true;
     return &(empty);
@@ -250,7 +248,7 @@ char* dbread::getAttributeByNumber(unsigned idx){
  * of getAttributeValue
 ---------------------------------------------*/
 char * dbread::getAttributeName(unsigned idx){
-  if((idx >= NumberOfAttributes) || (idx < 0)){
+  if ((idx >= NumberOfAttributes) || (idx < 0)){
     failbit = true;
     errmsg = "Bad typekey request";
     return &(empty);
@@ -291,12 +289,12 @@ index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     hashFile.seekg(hashdResult); // Go to the possible stream location
     hashFile.read((char*)&(rcrdIdx), sizeof(index_type));
     endian_swap(&rcrdIdx);
-    if(rcrdIdx == 0){
+    if (rcrdIdx == 0){
       failbit = true;
       errmsg = "No named record in database";
       break;
     }
-    else if(hashFile.fail()){
+    else if (hashFile.fail()){
       failbit = true;
       errmsg = "Corrupted hash file";
       break;
@@ -305,7 +303,7 @@ index_type dbread::getHashRecord(char* RecordName, unsigned RCRDsize){
     rcrdIdx = rcrdIdx - 1; // Re-Correction for db writer necessary offset
     getRecord(rcrdIdx);
     // Compare retrieved record name to name passed in
-    if(string(LoadedAttributes[nameTypeint]) == string(RecordName)){
+    if (string(LoadedAttributes[nameTypeint]) == string(RecordName)){
       return rcrdIdx;
     }
     // Record was incorrect (a collision), continue searching
