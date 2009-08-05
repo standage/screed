@@ -76,7 +76,7 @@ dbread::dbread(string dbname) {
   dbFile.read((char*)&hashMultiplier, sizeof(hashMultiplier));
   endian_swap(&hashMultiplier);
 
-  //Determine the amount and names of individual types per record
+  // Determine the amount and names of individual types per record
   char fieldname[fieldsize];
   for (char a='0'; a != '\n'; NumberOfAttributes++) {
     dbFile.getline(fieldname, fieldsize);
@@ -85,8 +85,8 @@ dbread::dbread(string dbname) {
   }
   dbFile.ignore(1); // Ignore the \n char seperating the sections
 
-  //Create the publically-accessable RecordAttributes object for the user to
-  //view the keys of the map with
+  // Create the publically-accessable RecordAttributes object for the user to
+  // view the keys of the map with
   RecordAttributes = new (nothrow) char*[NumberOfAttributes];
   unsigned int i = 0;
   unsigned int j = 0;
@@ -101,7 +101,7 @@ dbread::dbread(string dbname) {
     i++;
   }
 
-  //Create the LoadedAttributes object
+  // Create the LoadedAttributes object
   LoadedAttributes = new (nothrow) char *[NumberOfAttributes];
   for (j=0; j<NumberOfAttributes; j++) {
     LoadedAttributes[j] = new (nothrow) char[2];
