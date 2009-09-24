@@ -2,7 +2,7 @@ import sys, os, gc
 import subprocess
 
 thisdir = os.path.dirname(__file__)
-libdir = os.path.abspath(os.path.join(thisdir, '..', 'python'))
+libdir = os.path.abspath(os.path.join(thisdir, '..'))
 sys.path.insert(0, libdir)
 import screed
 

@@ -1,6 +1,6 @@
 // Copyright 2008-2009 Michigan State University. All rights reserved.
 
-#define PRELOAD_INDEX 1
+#define PRELOAD_INDEX 0
 
 #include "dbread.h"
 #include <fstream>
