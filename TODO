@@ -1,0 +1,88 @@
+Add a setup.py (!?)
+
+--
+
+Flesh out the README and rename it to README.txt.
+
+--
+
+Reformat all files (py code, text docs) to be < 80 characters/line
+(Esc-q in emacs).
+
+--
+
+Why not have the dict-like database object take a dictionary, e.g.
+
+   db[nameval] = dict(name=nameval, bar=barvalue, baz=bazvalue)
+
+?
+
+--
+
+Why have __getitem__ and loadRecordbyName both, especially since lrbn is
+one line?  You could just do __getitem__ = loadRecordByName.
+
+---
+
+docstrings should start with a single, concise line explaining the purpose
+of the class/function.
+
+---
+
+dbEntries.py looks pretty useless; it's only imported in one place.
+Is this supposed to be reused?  If not, XXX.
+
+Same for screedExtension.
+
+---
+
+Generally it's polite to put a docstring in __init__ so people know what
+to do.  I would also suggest two functions,
+
+   create_fasta_db(filename)
+   create_fastq_db(filename)
+
+---
+
+write keys in terms of iterkeys, not vice versa!
+
+---
+
+Note that assert statements will get removed by optimization, so you
+should think about which ones are for developers/testing and which ones
+are for "real problems", e.g. loadRecordByIndex.
+
+---
+
+Most (all?) screed dbs will be read-only.  What about removing __setitem__ and
+calculating __len__ once, on open?
+
+---
+
+You can write 'has_key', __contains__, as 'key in self'
+
+---
+
+can't you rewrite the last bit of _toQmarks as
+
+   return "?, " * (len(result) - 1)
+
+?
+
+---
+
+how about providing a db-creation interface that works like this:
+
+   db = ...create_db...(filepath, fields, iterator_function)
+
+?  Then you could change your read_..._ functions to know nothing about
+the database; they're just iterator functions that return a certain
+set of records.
+
+---
+
+why are you raising DbException?  Why not just stick with the IOError?
+
+---
+
+Write up some examples of toFasta and toFastq -- great way to convert!
